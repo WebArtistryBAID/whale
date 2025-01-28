@@ -6,10 +6,10 @@ export default async function OrderBase() {
     const categories = await getCoreItems()
     return <>
         <div className="hidden lg:block">
-            <OrderDesktop categories={categories}/>
+            <OrderDesktop categories={categories} uploadPrefix={`/${process.env.UPLOAD_SERVE_PATH}/`}/>
         </div>
         <div className="lg:hidden">
-            <OrderMobile categories={categories}/>
+            <OrderMobile categories={categories} uploadPrefix={`/${process.env.UPLOAD_SERVE_PATH}/`}/>
         </div>
     </>
 }

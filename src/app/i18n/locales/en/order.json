@@ -13,5 +13,6 @@
     "point2": "Whale Cafe now comes with a better, more user-friendly experience.",
     "point3": "We now support Weixin Pay! You no longer have to wait for your payment to be confirmed.",
     "point4": "You can still pay with cash, coupons, or Pay Later."
-  }
+  },
+  "addItem": "Add"
 }

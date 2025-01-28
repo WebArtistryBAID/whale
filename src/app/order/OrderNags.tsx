@@ -5,6 +5,7 @@ import {useEffect, useState} from 'react'
 import {useCookies} from 'react-cookie'
 import {useTranslationClient} from '@/app/i18n/client'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function OrderNags() {
     const {t} = useTranslationClient('order')
@@ -35,7 +36,10 @@ export default function OrderNags() {
         <Modal show={loginModal} onClose={() => setLoginModal(false)}>
             <ModalHeader>{t('loginCta.title')}</ModalHeader>
             <ModalBody>
-                <p>{t('loginCta.message')}</p>
+                <p className="mb-5">{t('loginCta.message')}</p>
+                <div className="w-full flex justify-center">
+                    <Image src="/assets/illustrations/login-nag.svg" alt="" width={943} height={796} className="w-72"/>
+                </div>
             </ModalBody>
             <ModalFooter>
                 <Button pill color="yellow" as={Link} href="/user">{t('login')}</Button>
