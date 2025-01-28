@@ -3,6 +3,8 @@
   "login": "Log In",
   "confirm": "Confirm",
   "cancel": "Cancel",
+  "close": "Close",
+  "selected": "(Selected)",
   "loginCta": {
     "title": "Log in to unlock more features!",
     "message": "Log in to use Pay Later, view your order history, and earn points! Currently only available to BAID students and faculty."

@@ -6,6 +6,10 @@ body {
     @apply bg-white dark:bg-yellow-950 text-black dark:text-white;
 }
 
+.bg-default {
+    @apply bg-white dark:bg-yellow-950 text-black dark:text-white;
+}
+
 .messagebox-container {
     display: flex;
     justify-content: center;
@@ -63,4 +67,12 @@ h3 {
 
 .th {
     @apply whitespace-nowrap font-medium text-gray-900 dark:text-white;
+}
+
+b {
+    @apply font-bold;
+}
+
+i {
+    @apply italic;
 }
