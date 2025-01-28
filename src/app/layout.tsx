@@ -1,9 +1,9 @@
-import type { Metadata } from 'next'
+import type {Metadata} from 'next'
 import './globals.css'
 import {Noto_Sans_SC, Noto_Serif_SC} from 'next/font/google'
-import { ReactNode } from 'react'
+import {ReactNode} from 'react'
 import NextTopLoader from 'nextjs-toploader'
-import { ThemeModeScript } from 'flowbite-react'
+import {ThemeModeScript} from 'flowbite-react'
 
 
 const notoSerif = Noto_Serif_SC({
@@ -17,7 +17,7 @@ const notoSans = Noto_Sans_SC({
 })
 
 export const metadata: Metadata = {
-    title: 'Whale',
+    title: 'Whale Cafe',
     description: 'The ordering management platform for Whale Cafe'
 }
 
@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <body
             className={`${notoSerif.variable} ${notoSans.variable} antialiased`}
         >
-        <NextTopLoader showSpinner={false} color="#3b82f6"/>
+        <NextTopLoader showSpinner={false} color="#facc15"/>
         {children}
         <p className="fixed bottom-2 right-2 secondary text-xs"><a
             href="https://beian.miit.gov.cn">{process.env.BOTTOM_TEXT}</a></p>

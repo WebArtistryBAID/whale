@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 body {
-    @apply bg-white dark:bg-gray-900 text-black dark:text-white;
+    @apply bg-white dark:bg-yellow-950 text-black dark:text-white;
 }
 
 .messagebox-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    @apply bg-blue-100 h-screen w-screen;
+    @apply bg-yellow-100 h-screen w-screen;
 }
 
 .messagebox {
@@ -18,15 +18,15 @@ body {
 }
 
 .btn {
-    @apply w-full rounded-full bg-blue-500 hover:bg-blue-600 hover:shadow-lg transition-all duration-100 p-2 text-white text-center;
+    @apply w-full rounded-full bg-yellow-500 hover:bg-yellow-600 hover:shadow-lg transition-all duration-100 p-2 text-white text-center;
 }
 
 .btn-icon-only {
-    @apply rounded-full bg-blue-500 hover:bg-blue-600 hover:shadow-lg transition-all duration-100 p-2 text-white flex justify-center items-center;
+    @apply rounded-full bg-yellow-500 hover:bg-yellow-600 hover:shadow-lg transition-all duration-100 p-2 text-white flex justify-center items-center;
 }
 
 a.inline {
-    @apply text-blue-500 hover:underline;
+    @apply text-yellow-500 hover:underline;
 }
 
 h1 {

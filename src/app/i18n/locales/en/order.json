@@ -1,0 +1,17 @@
+{
+  "brand": "Whale Cafe",
+  "login": "Log In",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "loginCta": {
+    "title": "Log in to unlock more features!",
+    "message": "Log in to use Pay Later, view your order history, and earn points! Currently only available to BAID students and faculty."
+  },
+  "updateCta": {
+    "title": "Latest Whale Cafe Update",
+    "point1": "Welcome back! Whale Cafe has been upgraded for the new semester.",
+    "point2": "Whale Cafe now comes with a better, more user-friendly experience.",
+    "point3": "We now support Weixin Pay! You no longer have to wait for your payment to be confirmed.",
+    "point4": "You can still pay with cash, coupons, or Pay Later."
+  }
+}
