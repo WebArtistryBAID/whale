@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URI")
+}
+
+model User {
+  id                 Int                @id
+  name               String
+  pinyin             String
+  phone              String?
+  permissions        String[]
+  logs               UserAuditLog[]
+  type               UserType
+  gender             Gender
+  blocked            Boolean            @default(false)
+  points             String             @default("0") // We are using String to replace Decimal so that we don't have to worry about serialization in RSC
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  balance            String             @default("0")
+  oaTokens           OATokens?
+  orders             Order[]
+  inboxNotifications NotificationType[] @default([])
+  smsNotifications   NotificationType[] @default([])
+  notifications      Notification[]
+}
+
+enum UserType {
+  student
+  teacher
+}
+
+enum Gender {
+  male
+  female
+  others
+}
+
+model OATokens {
+  id           Int    @id @default(autoincrement())
+  accessToken  String
+  refreshToken String
+  userId       Int    @unique
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum NotificationType {
+  orderCreated
+  pickupReminder
+  orderRefunded
+  custom
+  balanceToppedUp
+  pointsEarned
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  createdAt DateTime         @default(now())
+  type      NotificationType
+  values    String[]
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  order   Order? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int?
+}
+
+model Category {
+  id    Int        @id @default(autoincrement())
+  name  String
+  items ItemType[]
+}
+
+model Tag {
+  id    Int        @id @default(autoincrement())
+  name  String
+  color String
+  items ItemType[]
+}
+
+model OptionType {
+  id        Int          @id @default(autoincrement())
+  name      String
+  items     OptionItem[]
+  itemTypes ItemType[]
+}
+
+model OptionItem {
+  id           Int           @id @default(autoincrement())
+  type         OptionType    @relation(fields: [typeId], references: [id])
+  typeId       Int
+  name         String
+  default      Boolean       @default(false)
+  priceChange  String        @default("0")
+  soldOut      Boolean       @default(false)
+  orderedItems OrderedItem[]
+}
+
+model ItemType {
+  id               Int           @id @default(autoincrement())
+  category         Category      @relation(fields: [categoryId], references: [id])
+  categoryId       Int
+  name             String
+  image            String?
+  tags             Tag[]
+  description      String
+  shortDescription String
+  options          OptionType[]
+  basePrice        String
+  salePercent      String
+  soldOut          Boolean       @default(false)
+  orderedItems     OrderedItem[]
+}
+
+model OrderedItem {
+  id             Int          @id @default(autoincrement())
+  order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId        Int
+  itemType       ItemType     @relation(fields: [itemTypeId], references: [id], onDelete: Cascade)
+  itemTypeId     Int
+  appliedOptions OptionItem[]
+  amount         Int
+}
+
+enum OrderStatus {
+  waiting
+  done
+}
+
+enum OrderType {
+  pickUp
+  delivery
+}
+
+model Order {
+  id           Int           @id @default(autoincrement())
+  items        OrderedItem[]
+  totalPrice   String
+  number       String
+  status       OrderStatus
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  type         OrderType
+  deliveryRoom String?
+  user         User?         @relation(fields: [userId], references: [id])
+  userId       Int?
+  onSiteName   String?
+  paid         Boolean       @default(false)
+
+  notiRel Notification[]
+  logRel  UserAuditLog[]
+}
+
+model Ad {
+  id    Int     @id @default(autoincrement())
+  name  String
+  image String?
+  url   String
+}
+
+model SettingsItem {
+  key   String @id
+  value String
+}
+
+enum UserAuditLogType {
+  login
+  blocked
+  unblocked
+  permissionsUpdated
+  balanceUpdated
+  pointsUpdated
+
+  orderCreated
+  orderSetStatus
+  orderPaymentSuccess
+  orderPaymentFailed
+  orderRefunded
+}
+
+model UserAuditLog {
+  id      Int              @id @default(autoincrement())
+  time    DateTime         @default(now())
+  type    UserAuditLogType
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
+  order   Order?           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int?
+  values  String[]
+}
