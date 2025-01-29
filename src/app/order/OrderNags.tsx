@@ -1,18 +1,18 @@
 'use client'
 
-import {Button, Modal, ModalBody, ModalFooter, ModalHeader} from 'flowbite-react'
-import {useEffect, useState} from 'react'
-import {useCookies} from 'react-cookie'
-import {useTranslationClient} from '@/app/i18n/client'
+import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react'
+import { useEffect, useState } from 'react'
+import { useCookies } from 'react-cookie'
+import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import Image from 'next/image'
 
 export default function OrderNags() {
-    const {t} = useTranslationClient('order')
+    const { t } = useTranslationClient('order')
 
-    const [loginModal, setLoginModal] = useState(false)
-    const [updateModal, setUpdateModal] = useState(false)
-    const [cookies] = useCookies()
+    const [ loginModal, setLoginModal ] = useState(false)
+    const [ updateModal, setUpdateModal ] = useState(false)
+    const [ cookies ] = useCookies()
 
     useEffect(() => {
         if (localStorage.getItem('update-nag') !== '1') {
@@ -30,7 +30,7 @@ export default function OrderNags() {
                 setLoginModal(true)
             }
         }
-    }, [cookies.access_token])
+    }, [ cookies.access_token ])
 
     return <>
         <Modal show={loginModal && !updateModal} onClose={() => setLoginModal(false)}>

@@ -1,12 +1,12 @@
-import {getMyUser} from '@/app/login/login-actions'
-import {Button, Navbar, NavbarBrand} from 'flowbite-react'
+import { getMyUser } from '@/app/login/login-actions'
+import { Button, Navbar, NavbarBrand } from 'flowbite-react'
 import Link from 'next/link'
-import {serverTranslation} from '@/app/i18n'
+import { serverTranslation } from '@/app/i18n'
 import If from '@/app/lib/If'
 
 export default async function SimpleNav() {
     const me = await getMyUser()
-    const {t} = await serverTranslation('order')
+    const { t } = await serverTranslation('order')
 
     return <Navbar fluid rounded className="bg-yellow-100 dark:bg-yellow-900">
         <a href="#primary-content" className="sr-only">{t('a11y.skip')}</a>

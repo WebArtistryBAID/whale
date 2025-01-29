@@ -1,7 +1,7 @@
-import {NextRequest, NextResponse} from 'next/server'
-import {cookies} from 'next/headers'
-import {jwtVerify} from 'jose'
-import {getLoginTarget} from '@/app/login/login-actions'
+import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { jwtVerify } from 'jose'
+import { getLoginTarget } from '@/app/login/login-actions'
 
 const protectedRoutesPartial = [
     '/user'

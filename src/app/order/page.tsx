@@ -1,4 +1,4 @@
-import {getCoreItems} from '@/app/lib/ui-data-actions'
+import { getCoreItems } from '@/app/lib/ui-data-actions'
 import OrderDesktop from '@/app/order/OrderDesktop'
 import OrderMobile from '@/app/order/OrderMobile'
 

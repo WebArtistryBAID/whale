@@ -4,6 +4,7 @@
   "confirm": "Confirm",
   "cancel": "Cancel",
   "close": "Close",
+  "remove": "Remove",
   "a11y": {
     "selected": "(Selected)",
     "tag": "(Tag)",
@@ -11,8 +12,14 @@
     "item": "(Item)",
     "category": "(Category)",
     "priceAmount": "Adding {{item}} items. Total price: ¥{{price}}.",
+    "priceAmountShoppingCart": "{{item}} items. Total price for this item: ¥{{price}}.",
     "skip": "Skip to main content",
-    "sale": "On sale. Originally ¥{{price}}. Now ¥{{salePrice}}."
+    "sale": "On sale. Originally ¥{{price}}. Now ¥{{salePrice}}.",
+    "shoppingCartItem": "(Shopping Cart Item)",
+    "appliedOptions": "Applied Options.",
+    "shoppingCart": "Shopping Cart",
+    "products": "Products",
+    "itemDetails": "Product Details"
   },
   "loginCta": {
     "title": "Log in to unlock more features!",
@@ -32,5 +39,8 @@
     "minus": "Remove One",
     "cannotAddMore": "(Cannot add more)",
     "cannotMinusMore": "(Cannot remove more)"
-  }
+  },
+  "total": "Total ¥{{price}}",
+  "checkout": "Checkout",
+  "empty": "No items"
 }

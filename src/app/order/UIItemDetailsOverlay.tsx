@@ -1,14 +1,14 @@
 'use client'
 
-import {HydratedItemType} from '@/app/lib/ui-data-actions'
-import {useTranslationClient} from '@/app/i18n/client'
-import {HiMinus, HiPlus, HiX} from 'react-icons/hi'
+import { HydratedItemType } from '@/app/lib/ui-data-actions'
+import { useTranslationClient } from '@/app/i18n/client'
+import { HiMinus, HiPlus, HiX } from 'react-icons/hi'
 import Image from 'next/image'
 import Markdown from 'react-markdown'
 import UIOptionType from '@/app/order/UIOptionType'
-import {useEffect, useRef, useState} from 'react'
-import {Badge, Button} from 'flowbite-react'
-import {calculatePrice, OrderedItemTemplate, useShoppingCart} from '@/app/lib/shopping-cart'
+import { useEffect, useRef, useState } from 'react'
+import { Badge, Button } from 'flowbite-react'
+import { calculatePrice, OrderedItemTemplate, useShoppingCart } from '@/app/lib/shopping-cart'
 import If from '@/app/lib/If'
 import Decimal from 'decimal.js'
 
@@ -20,15 +20,15 @@ function getTextColor(backgroundColor: string): 'text-white' | 'text-black' {
     return luminance < 0.5 ? 'text-white' : 'text-black'
 }
 
-export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
+export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
     item: HydratedItemType,
     uploadPrefix: string,
     close: () => void
 }) {
-    const {t} = useTranslationClient('order')
-    const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: number }>({})
-    const [amount, setAmount] = useState(1)
-    const [typical, setTypical] = useState(0) // Trick to force re-render (VERY BAD practice, but I don't know why it doesn't work)
+    const { t } = useTranslationClient('order')
+    const [ selectedOptions, setSelectedOptions ] = useState<{ [key: string]: number }>({})
+    const [ amount, setAmount ] = useState(1)
+    const [ typical, setTypical ] = useState(0) // Trick to force re-render (VERY BAD practice, but I don't know why it doesn't work)
     const ref = useRef<HTMLDivElement>(null)
     const shoppingCart = useShoppingCart()
 
@@ -44,7 +44,7 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
         }
 
         setSelectedOptions(options)
-    }, [item.options])
+    }, [ item.options ])
 
     useEffect(() => {
         setTimeout(() => {
@@ -60,7 +60,8 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
         }
     }
 
-    return <div tabIndex={0} ref={ref} className="w-full h-full bg-default p-4 lg:p-8 xl:p-16 relative">
+    return <div tabIndex={0} ref={ref} aria-label={t('a11y.itemDetails')}
+                className="w-full h-full bg-default p-4 lg:p-8 xl:p-16 relative">
         <div className="flex items-center mb-5">
             <p className="text-2xl font-bold font-display mr-auto">{item.name}</p>
 
@@ -70,13 +71,13 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
                className="object-cover w-full rounded-3xl h-72 mb-3"/>
 
         <div className="flex gap-3 mb-3 items-center">
-            {item.tags.map(tag => <Badge key={tag.id} style={{backgroundColor: tag.color}}
+            {item.tags.map(tag => <Badge key={tag.id} style={{ backgroundColor: tag.color }}
                                          className={`rounded-full ${getTextColor(tag.color)}`}>{tag.name} <span
                 className="sr-only">{t('a11y.tag')}</span></Badge>)}
 
             <If condition={!Decimal(item.salePercent).eq(1)}>
                 <Badge color="success" className="rounded-full">
-                    {t('itemDetails.sale', {sale: Decimal(1).minus(Decimal(item.salePercent)).mul(100).toString()})}
+                    {t('itemDetails.sale', { sale: Decimal(1).minus(Decimal(item.salePercent)).mul(100).toString() })}
                     <span className="sr-only">{t('a11y.tag')}</span>
                 </Badge>
             </If>
@@ -94,7 +95,7 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
             }}/>)}
 
         <div className="fixed flex items-center bottom-0 left-0 w-full lg:w-1/2 bg-yellow-100 dark:bg-yellow-800 p-5">
-            <p className="mr-auto"
+            <p className="mr-auto text-lg"
                aria-hidden>¥{calculatePrice(getThisItem()).toString()}</p>
             <span aria-live="polite" className="sr-only">
                 {t('a11y.priceAmount', {

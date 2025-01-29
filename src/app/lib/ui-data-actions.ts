@@ -1,6 +1,6 @@
 'use server'
 
-import {Ad, OptionItem, PrismaClient, Tag} from '@prisma/client'
+import { Ad, OptionItem, PrismaClient, Tag } from '@prisma/client'
 
 const prisma = new PrismaClient()
 

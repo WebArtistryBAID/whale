@@ -1,8 +1,8 @@
 'use server'
 
-import {NotificationType, Order, PrismaClient, User} from '@prisma/client'
-import {me} from '@/app/login/login'
-import {decodeJwt} from 'jose'
+import { NotificationType, Order, PrismaClient, User } from '@prisma/client'
+import { me } from '@/app/login/login'
+import { decodeJwt } from 'jose'
 import Paginated from '@/app/lib/Paginated'
 
 const prisma = new PrismaClient()
@@ -40,7 +40,7 @@ export async function requireUserPermission(permission: string): Promise<User> {
 
 export async function getMyUser(): Promise<User | null> {
     return prisma.user.findUnique({
-        where: {id: await me() ?? -1}
+        where: { id: await me() ?? -1 }
     })
 }
 

@@ -4,6 +4,7 @@
   "confirm": "确认",
   "cancel": "取消",
   "close": "关闭",
+  "remove": "移除",
   "a11y": {
     "selected": "(已选中)",
     "tag": "(标签)",
@@ -11,8 +12,14 @@
     "item": "(商品)",
     "category": "(分类)",
     "priceAmount": "将要添加 {{item}} 件。总价 ¥{{price}}。",
+    "priceAmountShoppingCart": "{{item}} 件。此商品总价 ¥{{price}}。",
     "skip": "跳转到主要内容",
-    "sale": "折扣。原价 ¥{{price}}。现价 ¥{{salePrice}}。"
+    "sale": "折扣。原价 ¥{{price}}。现价 ¥{{salePrice}}。",
+    "shoppingCartItem": "(购物车商品)",
+    "appliedOptions": "自定义选项。",
+    "shoppingCart": "购物车",
+    "products": "商品",
+    "itemDetails": "选规格"
   },
   "loginCta": {
     "title": "登录以使用更多功能",
@@ -32,5 +39,8 @@
     "minus": "减一杯",
     "cannotAddMore": "(不能继续添加)",
     "cannotMinusMore": "(不能继续减少)"
-  }
+  },
+  "total": "总计 ¥{{price}}",
+  "checkout": "结账",
+  "empty": "购物车为空"
 }

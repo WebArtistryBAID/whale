@@ -1,6 +1,6 @@
-import {cookies} from 'next/headers'
-import {decodeJwt, jwtVerify} from 'jose'
-import {redirect} from 'next/navigation'
+import { cookies } from 'next/headers'
+import { decodeJwt, jwtVerify } from 'jose'
+import { redirect } from 'next/navigation'
 
 export function redirectToLogin(): string {
     return `${process.env.ONELOGIN_HOST}/oauth2/authorize?client_id=${process.env.ONELOGIN_CLIENT_ID}&redirect_uri=${process.env.HOST}/login/authorize&scope=basic+phone&response_type=code`
