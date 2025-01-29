@@ -2,7 +2,7 @@
 
 import { HydratedCategory } from '@/app/lib/ui-data-actions'
 import UICategory from '@/app/order/UICategory'
-import UIShoppingCart from '@/app/order/UIShoppingCart'
+import UIShoppingCartDesktop from '@/app/order/UIShoppingCartDesktop'
 import { useTranslationClient } from '@/app/i18n/client'
 
 export default function OrderDesktop({ categories, uploadPrefix }: {
@@ -22,7 +22,7 @@ export default function OrderDesktop({ categories, uploadPrefix }: {
 
                 </div>
                 <div className="h-1/2">
-                    <UIShoppingCart uploadPrefix={uploadPrefix}/>
+                    <UIShoppingCartDesktop uploadPrefix={uploadPrefix}/>
                 </div>
             </div>
         </div>

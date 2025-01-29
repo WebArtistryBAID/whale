@@ -15,7 +15,7 @@ export default function UIItemType({ item, uploadPrefix }: { item: HydratedItemT
 
     return <>
         <If condition={selected}>
-            <div className="z-10 absolute top-0 left-0 w-full h-full">
+            <div className="z-30 absolute top-0 left-0 w-full h-full">
                 <UIItemDetailsOverlay item={item} uploadPrefix={uploadPrefix} close={() => setSelected(false)}/>
             </div>
         </If>

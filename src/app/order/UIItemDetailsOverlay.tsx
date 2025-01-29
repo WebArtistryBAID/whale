@@ -61,7 +61,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
     }
 
     return <div tabIndex={0} ref={ref} aria-label={t('a11y.itemDetails')}
-                className="w-full h-full bg-default p-4 lg:p-8 xl:p-16 relative">
+                className="w-full h-full overflow-y-auto bg-default p-4 lg:p-8 xl:p-16 relative">
         <div className="flex items-center mb-5">
             <p className="text-2xl font-bold font-display mr-auto">{item.name}</p>
 
@@ -86,13 +86,15 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
         <div className="mb-5 text-sm p-5 bg-yellow-50 dark:bg-yellow-800 rounded-3xl">
             <Markdown>{item.description}</Markdown></div>
 
-        {item.options.map(option =>
-            <UIOptionType key={option.id} optionType={option}
-                          selected={selectedOptions[option.id.toString()]} onChange={n => {
-                selectedOptions[option.id.toString()] = n
-                setSelectedOptions(selectedOptions)
-                setTypical(typical + 1)
-            }}/>)}
+        <div className="mb-48">
+            {item.options.map(option =>
+                <UIOptionType key={option.id} optionType={option}
+                              selected={selectedOptions[option.id.toString()]} onChange={n => {
+                    selectedOptions[option.id.toString()] = n
+                    setSelectedOptions(selectedOptions)
+                    setTypical(typical + 1)
+                }}/>)}
+        </div>
 
         <div className="fixed flex items-center bottom-0 left-0 w-full lg:w-1/2 bg-yellow-50 dark:bg-yellow-800 p-5">
             <p className="mr-auto text-lg"

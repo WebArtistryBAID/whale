@@ -8,7 +8,7 @@ import { HiClock } from 'react-icons/hi'
 import { useRouter } from 'next/navigation'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 
-export default function UIShoppingCart({ uploadPrefix }: { uploadPrefix: string }) {
+export default function UIShoppingCartDesktop({ uploadPrefix }: { uploadPrefix: string }) {
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     const router = useRouter()

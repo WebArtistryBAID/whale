@@ -15,7 +15,7 @@ export default async function SimpleNav() {
             <span className="font-bold font-display text-xl hidden lg:block">{t('brand')}</span>
         </NavbarBrand>
 
-        <div className="hidden lg:flex gap-3">
+        <div className="flex gap-3">
             <If condition={me == null}>
                 <Button as={Link} href="/user" pill color="warning">{t('login')}</Button>
             </If>
