@@ -25,7 +25,7 @@ function PaymentMethodButton({ paymentMethod, selected, select }: {
     </Button>
 }
 
-export default function CheckoutDesktop({ uploadPrefix }: { uploadPrefix: string }) {
+export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string }) {
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     const router = useRouter()
@@ -38,8 +38,8 @@ export default function CheckoutDesktop({ uploadPrefix }: { uploadPrefix: string
         }
     }, [ shoppingCart.items, router ])
 
-    return <div className="flex w-screen h-[93vh]">
-        <div className="w-1/2 p-8 xl:p-16 h-full overflow-y-auto" aria-label={t('checkout.title')}>
+    return <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
+        <div className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto" aria-label={t('checkout.title')}>
             <h1 aria-hidden className="mb-5">{t('checkout.title')}</h1>
 
             <p aria-hidden className="mb-1">{t('checkout.orderDetails')}</p>
@@ -52,7 +52,7 @@ export default function CheckoutDesktop({ uploadPrefix }: { uploadPrefix: string
             </div>
 
             <p aria-hidden className="mb-1">{t('checkout.paymentMethod')}</p>
-            <div className="mb-5 flex gap-3" aria-label={t('checkout.paymentMethod')}>
+            <div className="mb-5 flex gap-3 flex-wrap" aria-label={t('checkout.paymentMethod')}>
                 <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
                                      selected={paymentMethod === PaymentMethod.wxPay}
                                      select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
@@ -76,7 +76,7 @@ export default function CheckoutDesktop({ uploadPrefix }: { uploadPrefix: string
             <Button fullSized color="warning">{t('checkout.pay')}</Button>
         </div>
         <div
-            className="w-1/2 p-8 xl:p-16 h-full overflow-y-auto border-l border-yellow-100 dark:border-yellow-800 flex flex-col gap-5"
+            className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto border-l border-yellow-100 dark:border-yellow-800 flex flex-col gap-5"
             aria-label={t('a11y.orderedItems')}>
             {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate key={index} item={item} index={-1}
                                                                             uploadPrefix={uploadPrefix}/>)}

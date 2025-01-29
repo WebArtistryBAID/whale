@@ -1,11 +1,7 @@
-import CheckoutDesktop from '@/app/order/checkout/CheckoutDesktop'
+import CheckoutClient from '@/app/order/checkout/CheckoutClient'
 
 export default async function CheckoutBase() {
-    return <>
-        <div className="hidden lg:block" id="primary-content">
-            <CheckoutDesktop uploadPrefix={`/${process.env.UPLOAD_SERVE_PATH}/`}/>
-        </div>
-        <div className="lg:hidden" id="primary-content">
-        </div>
-    </>
+    return <div id="primary-content">
+        <CheckoutClient uploadPrefix={`/${process.env.UPLOAD_SERVE_PATH}/`}/>
+    </div>
 }
