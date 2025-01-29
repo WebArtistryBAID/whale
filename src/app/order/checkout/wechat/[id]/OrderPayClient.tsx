@@ -70,7 +70,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
 
     async function pollPaymentStatus() {
         if (await getOrderPaymentStatus(order.id) === PaymentStatus.paid) {
-            router.push(`/order/details/${order.id}`)
+            location.href = `/order/details/${order.id}`
         }
     }
 
