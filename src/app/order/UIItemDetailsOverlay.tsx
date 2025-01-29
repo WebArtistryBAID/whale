@@ -8,7 +8,7 @@ import Markdown from 'react-markdown'
 import UIOptionType from '@/app/order/UIOptionType'
 import {useEffect, useRef, useState} from 'react'
 import {Badge, Button} from 'flowbite-react'
-import {calculatePrice} from '@/app/lib/item-utils'
+import {calculatePrice, OrderedItemTemplate, useShoppingCart} from '@/app/lib/shopping-cart'
 import If from '@/app/lib/If'
 import Decimal from 'decimal.js'
 
@@ -28,8 +28,9 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
     const {t} = useTranslationClient('order')
     const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: number }>({})
     const [amount, setAmount] = useState(1)
-    const [typical, setTypical] = useState(0) // Trick to force re-render (VERY BAD practice)
+    const [typical, setTypical] = useState(0) // Trick to force re-render (VERY BAD practice, but I don't know why it doesn't work)
     const ref = useRef<HTMLDivElement>(null)
+    const shoppingCart = useShoppingCart()
 
     useEffect(() => {
         // Select all default options
@@ -50,6 +51,14 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
             ref.current?.focus()
         }, 10)
     }, [])
+
+    function getThisItem(): OrderedItemTemplate {
+        return {
+            item: item,
+            amount: amount,
+            options: item.options.map(option => option.items.find(o => o.id === selectedOptions[option.id.toString()])!)
+        }
+    }
 
     return <div tabIndex={0} ref={ref} className="w-full h-full bg-default p-4 lg:p-8 xl:p-16 relative">
         <div className="flex items-center mb-5">
@@ -86,11 +95,11 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
 
         <div className="fixed flex items-center bottom-0 left-0 w-full lg:w-1/2 bg-yellow-100 dark:bg-yellow-800 p-5">
             <p className="mr-auto"
-               aria-hidden>¥{calculatePrice(item, amount, item.options.map(option => option.items.find(o => o.id === selectedOptions[option.id.toString()])!)).toString()}</p>
+               aria-hidden>¥{calculatePrice(getThisItem()).toString()}</p>
             <span aria-live="polite" className="sr-only">
                 {t('a11y.priceAmount', {
                     item: amount,
-                    price: calculatePrice(item, amount, item.options.map(option => option.items.find(o => o.id === selectedOptions[option.id.toString()])!)).toString()
+                    price: calculatePrice(getThisItem()).toString()
                 })}
             </span>
             <div className="flex bg-yellow-50 dark:bg-yellow-800 rounded-full items-center p-2 mr-3 gap-2">
@@ -111,7 +120,10 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
                             setTypical(typical + 1)
                         }}><HiPlus/></Button>
             </div>
-            <Button pill color="warning">{t('addItem')}</Button>
+            <Button pill color="warning" onClick={() => {
+                shoppingCart.addItem(getThisItem())
+                close()
+            }}>{t('addItem')}</Button>
         </div>
     </div>
 }
