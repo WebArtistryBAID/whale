@@ -12,12 +12,12 @@ import { calculatePrice, OrderedItemTemplate, useShoppingCart } from '@/app/lib/
 import If from '@/app/lib/If'
 import Decimal from 'decimal.js'
 
-function getTextColor(backgroundColor: string): 'text-white' | 'text-black' {
+function getTextColor(backgroundColor: string): 'white' | 'black' {
     const r = parseInt(backgroundColor.slice(1, 3), 16)
     const g = parseInt(backgroundColor.slice(3, 5), 16)
     const b = parseInt(backgroundColor.slice(5, 7), 16)
     const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
-    return luminance < 0.5 ? 'text-white' : 'text-black'
+    return luminance < 0.5 ? 'white' : 'black'
 }
 
 export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
@@ -71,9 +71,11 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                className="object-cover w-full rounded-3xl h-72 mb-3"/>
 
         <div className="flex gap-3 mb-3 items-center">
-            {item.tags.map(tag => <Badge key={tag.id} style={{ backgroundColor: tag.color }}
-                                         className={`rounded-full ${getTextColor(tag.color)}`}>{tag.name} <span
-                className="sr-only">{t('a11y.tag')}</span></Badge>)}
+            {item.tags.map(tag =>
+                <Badge key={tag.id}
+                       style={{ backgroundColor: tag.color, color: getTextColor(tag.color) }}
+                       className="rounded-full">{tag.name} <span
+                    className="sr-only">{t('a11y.tag')}</span></Badge>)}
 
             <If condition={!Decimal(item.salePercent).eq(1)}>
                 <Badge color="success" className="rounded-full">

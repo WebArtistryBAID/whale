@@ -57,9 +57,11 @@
     "cash": "Cash",
     "payLater": "Pay Later",
     "payForMe": "Pay For Me",
+    "loginNag": "You can pay with Balance and Pay Later after you <1>log in</1>.",
+    "onSiteNag": "You can pay with cash by ordering on-site.",
     "coupon": "Coupon Code",
     "couponInvalid": "Invalid coupon code.",
-    "couponTooBig": "Coupon amount (¥{{original}}) exceeds total price. The remaining amount will be lost.",
+    "couponTooBig": "Coupon value (¥{{original}}) exceeds total price. The remaining value will be lost.",
     "pay": "Pay",
     "details": "Details"
   }

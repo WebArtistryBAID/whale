@@ -13,6 +13,8 @@ export interface OrderedItemTemplate {
 
 export interface ShoppingCartState {
     items: OrderedItemTemplate[]
+    onSiteOrderMode: boolean
+    setOnSiteOrderMode: (mode: boolean) => void
     addItem: (item: OrderedItemTemplate) => void
     removeItem: (index: number) => void
     clear: () => void
@@ -35,6 +37,8 @@ export const useShoppingCart = create<ShoppingCartState>()(
     persist(
         (set, get) => ({
             items: [] as OrderedItemTemplate[],
+            onSiteOrderMode: false,
+            setOnSiteOrderMode: (mode: boolean) => set({ onSiteOrderMode: mode }),
             addItem: (item: OrderedItemTemplate) => set(state => ({ items: [ ...state.items, item ] })),
             removeItem: (index: number) => set(state => ({ items: state.items.filter((_, i) => i !== index) })),
             clear: () => set({ items: [] }),

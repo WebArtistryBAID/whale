@@ -162,7 +162,6 @@ model Order {
   deliveryRoom  String?
   user          User?         @relation(fields: [userId], references: [id])
   userId        Int?
-  onSiteName    String?
   paid          Boolean       @default(false)
   paymentMethod PaymentMethod
 

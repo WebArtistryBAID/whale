@@ -57,9 +57,11 @@
     "cash": "现金",
     "payLater": "先喝后付",
     "payForMe": "找朋友帮我付",
+    "loginNag": "<1>登录</1>后可使用余额和「先喝后付」付款。",
+    "onSiteNag": "现场点餐可使用现金付款。",
     "coupon": "代金券",
     "couponInvalid": "代金券无效。",
-    "couponTooBig": "代金券金额 (¥{{original}}) 超过了总价，剩余金额无法退还。",
+    "couponTooBig": "代金券金额 (¥{{original}}) 超过了总价，多余金额将会丢失。",
     "pay": "支付",
     "details": "详情"
   }
