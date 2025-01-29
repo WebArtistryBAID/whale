@@ -4,6 +4,7 @@ import { ItemType, OptionItem } from '@prisma/client'
 import Decimal from 'decimal.js'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
 
 export interface OrderedItemTemplate {
     item: ItemType
@@ -19,6 +20,12 @@ export interface ShoppingCartState {
     removeItem: (index: number) => void
     clear: () => void
     getTotalPrice: () => Decimal
+}
+
+export interface StoredOrderState {
+    order: number | null
+    setOrder: (order: number | null) => void
+    getIfValid: () => Promise<HydratedOrder | null>
 }
 
 export function calculatePrice(item: OrderedItemTemplate): Decimal {
@@ -45,8 +52,33 @@ export const useShoppingCart = create<ShoppingCartState>()(
             getTotalPrice: () => get().items.reduce((acc, item) => acc.add(calculatePrice(item)), new Decimal(0))
         }),
         {
-            name: 'shopping-cart-storage', // name of the item in the storage (must be unique)
-            storage: createJSONStorage(() => sessionStorage) // use sessionStorage
+            name: 'shopping-cart-storage',
+            storage: createJSONStorage(() => sessionStorage)
+        }
+    )
+)
+
+export const useStoredOrder = create<StoredOrderState>()(
+    persist(
+        (set, get) => ({
+            order: null,
+            setOrder: (order: number | null) => set({ order }),
+            getIfValid: async () => {
+                const toFind = get().order
+                if (toFind == null) {
+                    return null
+                }
+                const o = await getOrder(toFind)
+                if (o == null) {
+                    get().setOrder(null)
+                    return null
+                }
+                return o
+            }
+        }),
+        {
+            name: 'order-local-storage',
+            storage: createJSONStorage(() => localStorage)
         }
     )
 )

@@ -150,11 +150,16 @@ enum OrderType {
   delivery
 }
 
+enum PaymentStatus {
+  notPaid
+  paid
+  refunded
+}
+
 model Order {
   id            Int           @id @default(autoincrement())
   items         OrderedItem[]
   totalPrice    String
-  number        String
   status        OrderStatus
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -162,7 +167,7 @@ model Order {
   deliveryRoom  String?
   user          User?         @relation(fields: [userId], references: [id])
   userId        Int?
-  paid          Boolean       @default(false)
+  paymentStatus PaymentStatus @default(notPaid)
   paymentMethod PaymentMethod
 
   notiRel Notification[]

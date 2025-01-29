@@ -57,6 +57,7 @@ To contribute, simply open a pull request.
 * Allow ordering and payments
 * Allow "on-site order mode" - adjust available payment methods accordingly
 * Allow delivery in ordering
+* Add audit log everywhere
 * Add user dashboard - view data, points, and allow adding balance
 * Add settings for daily order cups cap, balance cap, per-order cap, etc.
 * Add management dashboard for processing orders

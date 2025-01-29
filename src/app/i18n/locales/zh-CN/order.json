@@ -5,6 +5,8 @@
   "cancel": "取消",
   "close": "关闭",
   "remove": "移除",
+  "continue": "继续",
+  "tryAgain": "再试一次",
   "a11y": {
     "selected": "(已选中)",
     "tag": "(标签)",
@@ -63,6 +65,9 @@
     "couponInvalid": "代金券无效。",
     "couponTooBig": "代金券金额 (¥{{original}}) 超过了总价，多余金额将会丢失。",
     "pay": "支付",
-    "details": "详情"
+    "details": "详情",
+    "pickUp": "自取",
+    "delivery": "外送",
+    "deliveryRoom": "外送房间"
   }
 }

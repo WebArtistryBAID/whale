@@ -1,15 +1,15 @@
 'use client'
 
 import { useTranslationClient } from '@/app/i18n/client'
-import { useShoppingCart } from '@/app/lib/shopping-cart'
+import { useShoppingCart, useStoredOrder } from '@/app/lib/shopping-cart'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
-import { Button, TextInput } from 'flowbite-react'
-import { CouponCode, PaymentMethod, User } from '@prisma/client'
-import { couponQuickValidate } from '@/app/lib/ordering-actions'
+import { Button, ButtonGroup, TextInput } from 'flowbite-react'
+import { CouponCode, PaymentMethod, PaymentStatus, User } from '@prisma/client'
+import { couponQuickValidate, createOrder } from '@/app/lib/ordering-actions'
 import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
@@ -20,10 +20,6 @@ function isiPad(): boolean {
 
 function isMobile(): boolean {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-}
-
-function isInWeChat(): boolean {
-    return /MicroMessenger/i.test(navigator.userAgent)
 }
 
 function PaymentMethodButton({ paymentMethod, selected, select }: {
@@ -44,11 +40,16 @@ function PaymentMethodButton({ paymentMethod, selected, select }: {
 export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string }) {
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
+    const storedOrder = useStoredOrder()
     const router = useRouter()
     const [ paymentMethod, setPaymentMethod ] = useState<PaymentMethod>(PaymentMethod.wxPay)
     const [ coupon, setCoupon ] = useState('')
     const [ foundCoupon, setFoundCoupon ] = useState<CouponCode | null>(null)
     const [ me, setMe ] = useState<User | null>(null)
+    const [ useDelivery, setUseDelivery ] = useState(false)
+    const [ deliveryRoom, setDeliveryRoom ] = useState('')
+    const [ orderFailed, setOrderFailed ] = useState(false)
+    const [ loading, setLoading ] = useState(false)
 
     useEffect(() => {
         if (shoppingCart.items.length < 1) {
@@ -61,14 +62,18 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             if (coupon.length < 1) {
                 setFoundCoupon(null)
             } else {
+                setLoading(true)
                 setFoundCoupon(await couponQuickValidate(coupon))
+                setLoading(false)
             }
         })()
     }, [ coupon ])
 
     useEffect(() => {
         (async () => {
+            setLoading(true)
             setMe(await getMyUser())
+            setLoading(false)
         })()
     }, [])
 
@@ -90,9 +95,44 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
         return Decimal(foundCoupon.value).greaterThan(shoppingCart.getTotalPrice())
     }
 
+    async function order() {
+        setLoading(true)
+        const order = await createOrder(shoppingCart.items, coupon.length > 0 ? coupon : null, shoppingCart.onSiteOrderMode,
+            useDelivery ? deliveryRoom : null, paymentMethod)
+        setLoading(false)
+        if (order == null) {
+            setOrderFailed(true)
+            return
+        }
+        storedOrder.setOrder(order.id)
+        if (order.paymentStatus === PaymentStatus.paid) {
+            // Redirect to check page directly
+            router.push(`/order/details/${order.id}`)
+        } else {
+            // Start payment process
+            router.push(`/order/checkout/pay/${order.id}`)
+        }
+    }
+
     return <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
         <div className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto" aria-label={t('checkout.title')}>
             <h1 aria-hidden className="mb-5">{t('checkout.title')}</h1>
+
+            <ButtonGroup className="mb-3">
+                <Button color={useDelivery ? 'gray' : 'yellow'} onClick={() => setUseDelivery(false)}>
+                    {t('checkout.pickUp')}
+                    <If condition={!useDelivery}>
+                        <span className="sr-only">{t('a11y.selected')}</span>
+                    </If>
+                </Button>
+
+                <Button color={useDelivery ? 'yellow' : 'gray'} onClick={() => setUseDelivery(true)}>
+                    {t('checkout.delivery')}
+                    <If condition={useDelivery}>
+                        <span className="sr-only">{t('a11y.selected')}</span>
+                    </If>
+                </Button>
+            </ButtonGroup>
 
             <p aria-hidden className="mb-1">{t('checkout.orderDetails')}</p>
             <div className="mb-5 text-sm p-5 bg-yellow-50 dark:bg-yellow-800 rounded-3xl"
@@ -146,7 +186,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                 </p>
             </If>
 
-            <p aria-hidden className="mt-4 mb-1">{t('checkout.coupon')}</p>
+            <p aria-hidden className="mt-5 mb-1">{t('checkout.coupon')}</p>
             <TextInput className="w-full" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
                        onChange={e => setCoupon(e.currentTarget.value)}/>
             <p className="mt-1 text-sm text-red-500" aria-live="polite">
@@ -160,8 +200,27 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                 </If>
             </p>
 
-            <Button fullSized className="mt-8" color="warning"
-                    disabled={(coupon.length > 0 && foundCoupon == null)}>{t('checkout.pay')}</Button>
+            <If condition={useDelivery}>
+                <p aria-hidden className="mt-5 mb-1">{t('checkout.deliveryRoom')}</p>
+                <TextInput className="w-full" type="text" value={deliveryRoom}
+                           placeholder={t('checkout.deliveryRoom') + '...'}
+                           onChange={e => setDeliveryRoom(e.currentTarget.value)}/>
+            </If>
+
+            <Button fullSized className="mt-8" color="warning" onClick={order}
+                    disabled={(coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3) || loading}>
+                <If condition={orderFailed}>
+                    {t('tryAgain')}
+                </If>
+                <If condition={!orderFailed}>
+                    <If condition={getRealTotal().eq(0) || paymentMethod === PaymentMethod.cash}>
+                        {t('continue')}
+                    </If>
+                    <If condition={!(getRealTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
+                        {t('checkout.pay')}
+                    </If>
+                </If>
+            </Button>
         </div>
         <div
             className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto border-l border-yellow-100 dark:border-yellow-800 flex flex-col gap-5"

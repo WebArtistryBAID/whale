@@ -5,6 +5,8 @@
   "cancel": "Cancel",
   "close": "Close",
   "remove": "Remove",
+  "continue": "Continue",
+  "tryAgain": "Try Again",
   "a11y": {
     "selected": "(Selected)",
     "tag": "(Tag)",
@@ -63,6 +65,9 @@
     "couponInvalid": "Invalid coupon code.",
     "couponTooBig": "Coupon value (¥{{original}}) exceeds total price. The remaining value will be lost.",
     "pay": "Pay",
-    "details": "Details"
+    "details": "Details",
+    "pickUp": "Pick Up",
+    "delivery": "Delivery",
+    "deliveryRoom": "Delivery Room"
   }
 }
