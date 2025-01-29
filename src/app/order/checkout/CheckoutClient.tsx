@@ -51,7 +51,8 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
         if (shoppingCart.items.length < 1) {
             router.push('/order')
         }
-    }, [ shoppingCart.items, router ])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ router ])
 
     useEffect(() => {
         (async () => {
@@ -101,6 +102,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             return
         }
         storedOrder.setOrder(order.id)
+        shoppingCart.clear()
         if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
             // Redirect to check page directly
             router.push(`/order/details/${order.id}`)
@@ -146,43 +148,46 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             </div>
 
             <p aria-hidden className="mb-1">{t('checkout.paymentMethod')}</p>
-            <div className="mb-1 flex gap-3 flex-wrap" aria-label={t('checkout.paymentMethod')}>
-                <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
-                                     selected={paymentMethod === PaymentMethod.wxPay}
-                                     select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
+            <div className="mb-5" aria-label={t('checkout.paymentMethod')}>
+                <div className="flex flex-wrap gap-3">
+                    <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
+                                         selected={paymentMethod === PaymentMethod.wxPay}
+                                         select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
 
-                <If condition={shoppingCart.onSiteOrderMode}>
-                    <PaymentMethodButton paymentMethod={PaymentMethod.cash}
-                                         selected={paymentMethod === PaymentMethod.cash}
-                                         select={() => setPaymentMethod(PaymentMethod.cash)}/>
+                    <If condition={shoppingCart.onSiteOrderMode}>
+                        <PaymentMethodButton paymentMethod={PaymentMethod.cash}
+                                             selected={paymentMethod === PaymentMethod.cash}
+                                             select={() => setPaymentMethod(PaymentMethod.cash)}/>
+                    </If>
+
+                    <If condition={me != null}>
+                        <PaymentMethodButton paymentMethod={PaymentMethod.balance}
+                                             selected={paymentMethod === PaymentMethod.balance}
+                                             select={() => setPaymentMethod(PaymentMethod.balance)}/>
+                        <PaymentMethodButton paymentMethod={PaymentMethod.payLater}
+                                             selected={paymentMethod === PaymentMethod.payLater}
+                                             select={() => setPaymentMethod(PaymentMethod.payLater)}/>
+                    </If>
+
+                    <If condition={isMobileOriPad()}>
+                        <PaymentMethodButton paymentMethod={PaymentMethod.payForMe}
+                                             selected={paymentMethod === PaymentMethod.payForMe}
+                                             select={() => setPaymentMethod(PaymentMethod.payForMe)}/>
+                    </If>
+                </div>
+
+                <If condition={!shoppingCart.onSiteOrderMode}>
+                    <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
                 </If>
-
-                <If condition={me != null}>
-                    <PaymentMethodButton paymentMethod={PaymentMethod.balance}
-                                         selected={paymentMethod === PaymentMethod.balance}
-                                         select={() => setPaymentMethod(PaymentMethod.balance)}/>
-                    <PaymentMethodButton paymentMethod={PaymentMethod.payLater}
-                                         selected={paymentMethod === PaymentMethod.payLater}
-                                         select={() => setPaymentMethod(PaymentMethod.payLater)}/>
-                </If>
-
-                <If condition={isMobileOriPad()}>
-                    <PaymentMethodButton paymentMethod={PaymentMethod.payForMe}
-                                         selected={paymentMethod === PaymentMethod.payForMe}
-                                         select={() => setPaymentMethod(PaymentMethod.payForMe)}/>
+                <If condition={me == null && !shoppingCart.onSiteOrderMode}>
+                    <p className="text-sm">
+                        <Trans t={t} i18nKey="checkout.loginNag"
+                               components={{ 1: <Link key="login" href="/user" className="inline"/> }}/>
+                    </p>
                 </If>
             </div>
-            <If condition={!shoppingCart.onSiteOrderMode}>
-                <p className="text-sm">{t('checkout.onSiteNag')}</p>
-            </If>
-            <If condition={me == null && !shoppingCart.onSiteOrderMode}>
-                <p className="text-sm">
-                    <Trans t={t} i18nKey="checkout.loginNag"
-                           components={{ 1: <Link key="login" href="/user" className="inline"/> }}/>
-                </p>
-            </If>
 
-            <p aria-hidden className="mt-5 mb-1">{t('checkout.coupon')}</p>
+            <p aria-hidden className="mb-1">{t('checkout.coupon')}</p>
             <TextInput className="w-full" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
                        onChange={e => setCoupon(e.currentTarget.value)}/>
             <p className="mt-1 text-sm text-red-500" aria-live="polite">

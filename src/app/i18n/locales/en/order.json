@@ -23,7 +23,8 @@
     "products": "Products",
     "itemDetails": "Product Details",
     "orderedItems": "Ordered Items",
-    "coupon": "Applied coupon for ¥{{price}} off."
+    "coupon": "Applied coupon for ¥{{price}} off.",
+    "qrCode": "Scan the QR Code by holding up your phone to the top-left of the screen. Make sure screen curtain is turned off."
   },
   "loginCta": {
     "title": "Log in to unlock more features!",
@@ -64,7 +65,7 @@
     "coupon": "Coupon Code",
     "couponInvalid": "Invalid coupon code.",
     "couponTooBig": "Coupon value (¥{{original}}) exceeds total price. The remaining value will be lost.",
-    "pay": "Pay",
+    "wechat": "Continue with WeChat",
     "details": "Details",
     "pickUp": "Pick Up",
     "delivery": "Delivery",

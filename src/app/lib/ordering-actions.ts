@@ -190,7 +190,7 @@ export async function createOrder(items: OrderedItemTemplate[],
             status: OrderStatus.waiting,
             type: deliveryRoom == null ? OrderType.pickUp : OrderType.delivery,
             deliveryRoom,
-            user: onSiteOrderMode ? undefined : {
+            user: (onSiteOrderMode || me == null) ? undefined : {
                 connect: {
                     id: me?.id
                 }

@@ -54,7 +54,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                 setQRCode(qr)
                 setTimeout(() => {
                     setQRCodeShowProcessing(true) // We don't actually know if the user finished paying or not, but we pretend we do
-                }, 5000)
+                }, 10000)
             })()
         }
         setTimeout(() => {
@@ -136,24 +136,33 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
     }
 
     return <div className="container">
-        <h1>{t('wechatPay.title')}</h1>
+        <h1 className="mb-5">{t('wechatPay.title')}</h1>
+        <p className="mb-3 text-lg">{t('checkout.total')} ¥{order.totalPrice}</p>
         <If condition={error}>
             <p className="mb-3">{t('wechatPay.error')}</p>
-            <Button onClick={() => router.refresh()} pill color="warning">{t('wechatPay.restart')}</Button>
+            <Button onClick={() => location.reload()} pill color="warning">{t('wechatPay.restart')}</Button>
         </If>
         <If condition={!error}>
             <If condition={isDesktop() || order.paymentMethod === PaymentMethod.payForMe}>
                 <If condition={qrCode == null}>
                     <Spinner color="warning"/>
                 </If>
+                <span className="sr-only" aria-live="polite">
+                    <If condition={qrCodeShowProcessing}>
+                        {t('wechatPay.processing')}
+                    </If>
+                </span>
                 <If condition={qrCode != null}>
                     <If condition={!qrCodeShowProcessing}>
-                        <p>{t('wechatPay.scan')}</p>
+                        <p className="mb-3">{t('wechatPay.scan')}</p>
                     </If>
-                    <QRCode value={qrCode ?? 'Please wait...'} size={256} className="w-full lg:w-96"/>
+                    <div aria-label={t('a11y.qrCode')} className="rounded-3xl border-white border-[2rem] mb-3"
+                         style={{ width: 'calc(200px + 4rem)', height: 'calc(200px + 4rem)' }}>
+                        <QRCode value={qrCode ?? 'Please wait...'} size={200} className="aspect-square"/>
+                    </div>
                     <If condition={qrCodeShowProcessing}>
                         <p className="mb-3">{t('wechatPay.processing')}</p>
-                        <Button disabled={!canRestart} onClick={() => router.refresh()} pill
+                        <Button disabled={!canRestart} onClick={() => location.reload()} pill
                                 color="warning">{t('wechatPay.restart')}</Button>
                     </If>
                 </If>
