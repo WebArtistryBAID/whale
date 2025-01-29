@@ -33,7 +33,7 @@ export default function OrderNags() {
     }, [cookies.access_token])
 
     return <>
-        <Modal show={loginModal} onClose={() => setLoginModal(false)}>
+        <Modal show={loginModal && !updateModal} onClose={() => setLoginModal(false)}>
             <ModalHeader>{t('loginCta.title')}</ModalHeader>
             <ModalBody>
                 <p className="mb-5">{t('loginCta.message')}</p>
