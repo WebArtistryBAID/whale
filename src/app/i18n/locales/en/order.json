@@ -20,7 +20,8 @@
     "shoppingCart": "Shopping Cart",
     "products": "Products",
     "itemDetails": "Product Details",
-    "orderedItems": "Ordered Items"
+    "orderedItems": "Ordered Items",
+    "coupon": "Applied coupon for ¥{{price}} off."
   },
   "loginCta": {
     "title": "Log in to unlock more features!",
@@ -57,6 +58,8 @@
     "payLater": "Pay Later",
     "payForMe": "Pay For Me",
     "coupon": "Coupon Code",
+    "couponInvalid": "Invalid coupon code.",
+    "couponTooBig": "Coupon amount (¥{{original}}) exceeds total price. The remaining amount will be lost.",
     "pay": "Pay",
     "details": "Details"
   }

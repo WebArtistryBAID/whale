@@ -20,7 +20,8 @@
     "shoppingCart": "购物车",
     "products": "商品",
     "itemDetails": "选规格",
-    "orderedItems": "已选商品"
+    "orderedItems": "已选商品",
+    "coupon": "使用代金券减 ¥{{price}}。"
   },
   "loginCta": {
     "title": "登录以使用更多功能",
@@ -57,6 +58,8 @@
     "payLater": "先喝后付",
     "payForMe": "找朋友帮我付",
     "coupon": "代金券",
+    "couponInvalid": "代金券无效。",
+    "couponTooBig": "代金券金额 (¥{{original}}) 超过了总价，剩余金额无法退还。",
     "pay": "支付",
     "details": "详情"
   }

@@ -8,7 +8,9 @@ import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
 import { Button, TextInput } from 'flowbite-react'
-import { PaymentMethod } from '@prisma/client'
+import { CouponCode, PaymentMethod } from '@prisma/client'
+import { couponQuickValidate } from '@/app/lib/ordering-actions'
+import Decimal from 'decimal.js'
 
 function PaymentMethodButton({ paymentMethod, selected, select }: {
     paymentMethod: PaymentMethod,
@@ -31,12 +33,41 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
     const router = useRouter()
     const [ paymentMethod, setPaymentMethod ] = useState<PaymentMethod>(PaymentMethod.wxPay)
     const [ coupon, setCoupon ] = useState('')
+    const [ foundCoupon, setFoundCoupon ] = useState<CouponCode | null>(null)
 
     useEffect(() => {
         if (shoppingCart.items.length < 1) {
             router.push('/order')
         }
     }, [ shoppingCart.items, router ])
+
+    useEffect(() => {
+        (async () => {
+            if (coupon.length < 1) {
+                setFoundCoupon(null)
+            } else {
+                setFoundCoupon(await couponQuickValidate(coupon))
+            }
+        })()
+    }, [ coupon ])
+
+    function getRealTotal(): Decimal {
+        if (foundCoupon == null) {
+            return shoppingCart.getTotalPrice()
+        }
+        return Decimal.max(0, shoppingCart.getTotalPrice().minus(Decimal(foundCoupon?.value ?? '0')))
+    }
+
+    function getActualCouponValue(): Decimal {
+        return shoppingCart.getTotalPrice().minus(getRealTotal())
+    }
+
+    function isCouponTooBig(): boolean {
+        if (foundCoupon == null) {
+            return false
+        }
+        return Decimal(foundCoupon.value).greaterThan(shoppingCart.getTotalPrice())
+    }
 
     return <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
         <div className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto" aria-label={t('checkout.title')}>
@@ -46,9 +77,15 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             <div className="mb-5 text-sm p-5 bg-yellow-50 dark:bg-yellow-800 rounded-3xl"
                  aria-label={t('checkout.orderDetails')}>
                 <p className="text-sm">{t('checkout.total')}</p>
-                <p className="mb-3 text-lg">¥{shoppingCart.getTotalPrice().toString()}</p>
+                <p className="mb-3 text-lg">¥{getRealTotal().toString()}</p>
                 <p className="text-sm">{t('checkout.wait')}</p>
                 <p className="text-lg"><Trans t={t} i18nKey="checkout.waitTime" count={3}/></p>
+                <If condition={foundCoupon != null}>
+                    <p className="text-sm mt-3" aria-hidden>{t('checkout.coupon')}</p>
+                    <p className="text-lg" aria-hidden>-¥{getActualCouponValue().toString()}</p>
+                    <span className="sr-only"
+                          aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
+                </If>
             </div>
 
             <p aria-hidden className="mb-1">{t('checkout.paymentMethod')}</p>
@@ -70,10 +107,21 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             </div>
 
             <p aria-hidden className="mb-1">{t('checkout.coupon')}</p>
-            <TextInput className="w-full mb-8" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
+            <TextInput className="w-full" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
                        onChange={e => setCoupon(e.currentTarget.value)}/>
+            <p className="mt-1 text-sm text-red-500" aria-live="polite">
+                <If condition={coupon.length > 0 && foundCoupon == null}>
+                    {t('checkout.couponInvalid')}
+                </If>
+            </p>
+            <p className="mt-1 text-sm" aria-live="polite">
+                <If condition={foundCoupon != null && isCouponTooBig()}>
+                    {t('checkout.couponTooBig', { original: foundCoupon?.value })}
+                </If>
+            </p>
 
-            <Button fullSized color="warning">{t('checkout.pay')}</Button>
+            <Button fullSized className="mt-8" color="warning"
+                    disabled={(coupon.length > 0 && foundCoupon == null)}>{t('checkout.pay')}</Button>
         </div>
         <div
             className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto border-l border-yellow-100 dark:border-yellow-800 flex flex-col gap-5"

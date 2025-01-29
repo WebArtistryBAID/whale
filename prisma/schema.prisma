@@ -77,7 +77,7 @@ model Notification {
 }
 
 model CouponCode {
-  id            Int    @id @default(autoincrement())
+  id            String @id
   value         String
   allowedUses   Int
   remainingUses Int
