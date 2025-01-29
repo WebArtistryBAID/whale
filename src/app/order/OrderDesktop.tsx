@@ -12,7 +12,7 @@ export default function OrderDesktop({categories, uploadPrefix}: {
             {categories.map(category => <UICategory category={category} key={category.id}
                                                     uploadPrefix={uploadPrefix}/>)}
         </div>
-        <div className="w-1/2 p-8 xl:p-16 h-full border-l border-gray-50 dark:border-yellow-800">
+        <div className="w-1/2 p-8 xl:p-16 h-full border-l border-yellow-100 dark:border-yellow-800">
 
         </div>
     </div>

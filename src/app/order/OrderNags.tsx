@@ -42,7 +42,7 @@ export default function OrderNags() {
                 </div>
             </ModalBody>
             <ModalFooter>
-                <Button pill color="yellow" as={Link} href="/user">{t('login')}</Button>
+                <Button pill color="warning" as={Link} href="/user">{t('login')}</Button>
                 <Button pill color="gray" onClick={() => setLoginModal(false)}>{t('cancel')}</Button>
             </ModalFooter>
         </Modal>
@@ -58,7 +58,7 @@ export default function OrderNags() {
                 </ul>
             </ModalBody>
             <ModalFooter>
-                <Button pill color="yellow" onClick={() => setUpdateModal(false)}>{t('confirm')}</Button>
+                <Button pill color="warning" onClick={() => setUpdateModal(false)}>{t('confirm')}</Button>
             </ModalFooter>
         </Modal>
     </>

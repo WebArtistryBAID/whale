@@ -4,7 +4,16 @@
   "confirm": "Confirm",
   "cancel": "Cancel",
   "close": "Close",
-  "selected": "(Selected)",
+  "a11y": {
+    "selected": "(Selected)",
+    "tag": "(Tag)",
+    "option": "(Option)",
+    "item": "(Item)",
+    "category": "(Category)",
+    "priceAmount": "Adding {{item}} items. Total price: ¥{{price}}.",
+    "skip": "Skip to main content",
+    "sale": "On sale. Originally ¥{{price}}. Now ¥{{salePrice}}."
+  },
   "loginCta": {
     "title": "Log in to unlock more features!",
     "message": "Log in to use Pay Later, view your order history, and earn points! Currently only available to BAID students and faculty."
@@ -16,5 +25,12 @@
     "point3": "We now support Weixin Pay! You no longer have to wait for your payment to be confirmed.",
     "point4": "You can still pay with cash, coupons, or Pay Later."
   },
-  "addItem": "Add"
+  "addItem": "Add",
+  "itemDetails": {
+    "sale": "{{sale}}% off!",
+    "add": "Add One",
+    "minus": "Remove One",
+    "cannotAddMore": "(Cannot add more)",
+    "cannotMinusMore": "(Cannot remove more)"
+  }
 }

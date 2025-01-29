@@ -4,7 +4,16 @@
   "confirm": "确认",
   "cancel": "取消",
   "close": "关闭",
-  "selected": "(已选中)",
+  "a11y": {
+    "selected": "(已选中)",
+    "tag": "(标签)",
+    "option": "(选项)",
+    "item": "(商品)",
+    "category": "(分类)",
+    "priceAmount": "将要添加 {{item}} 件。总价 ¥{{price}}。",
+    "skip": "跳转到主要内容",
+    "sale": "折扣。原价 ¥{{price}}。现价 ¥{{salePrice}}。"
+  },
   "loginCta": {
     "title": "登录以使用更多功能",
     "message": "登录后即可使用「先喝后付」、查看订单历史记录并获得积分! 北中国际学生与教职工可用。"
@@ -16,5 +25,12 @@
     "point3": "现在支持微信支付! 再也不需要等待人工确认付款了。",
     "point4": "您仍可使用现金、代金券或「先喝后付」付款。"
   },
-  "addItem": "选规格"
+  "addItem": "选规格",
+  "itemDetails": {
+    "sale": "{{sale}} 降价!",
+    "add": "加一杯",
+    "minus": "减一杯",
+    "cannotAddMore": "(不能继续添加)",
+    "cannotMinusMore": "(不能继续减少)"
+  }
 }

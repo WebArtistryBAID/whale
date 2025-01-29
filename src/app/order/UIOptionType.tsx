@@ -13,14 +13,14 @@ export default function UIOptionType({optionType, selected, onChange}: {
     const {t} = useTranslationClient('order')
 
     return <div className="mb-5">
-        <p className="mb-1 text-sm">{optionType.name}</p>
+        <p className="mb-1 text-sm">{optionType.name} <span className="sr-only">{t('a11y.option')}</span></p>
         <div className="flex gap-3">
             {optionType.items.map(item =>
-                <Button key={item.id} color={selected === item.id ? 'yellow' : 'gray'} pill size="xs"
+                <Button key={item.id} color={selected === item.id ? 'warning' : 'gray'} pill size="xs"
                         onClick={() => onChange(item.id)}>
                     {item.name}
                     <If condition={selected === item.id}>
-                        <span className="sr-only">{t('selected')}</span>
+                        <span className="sr-only">{t('a11y.selected')}</span>
                     </If>
                 </Button>)}
         </div>

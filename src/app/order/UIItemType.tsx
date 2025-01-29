@@ -7,6 +7,7 @@ import {useTranslationClient} from '@/app/i18n/client'
 import {useState} from 'react'
 import If from '@/app/lib/If'
 import UIItemDetailsOverlay from '@/app/order/UIItemDetailsOverlay'
+import Decimal from 'decimal.js'
 
 export default function UIItemType({item, uploadPrefix}: { item: HydratedItemType, uploadPrefix: string }) {
     const {t} = useTranslationClient('order')
@@ -26,9 +27,27 @@ export default function UIItemType({item, uploadPrefix}: { item: HydratedItemTyp
                        className="w-16 lg:w-24 rounded-full"/>
             </div>
             <div>
-                <p className="font-bold font-display text-lg">{item.name}</p>
+                <p className="font-bold font-display text-lg">{item.name} <span
+                    className="sr-only">{t('a11y.item')}</span></p>
                 <p className="text-sm secondary mb-2">{item.shortDescription}</p>
-                <Button pill size="xs" color="yellow" onClick={() => setSelected(true)}>{t('addItem')}</Button>
+                <div className="flex gap-3 items-center">
+                    <If condition={Decimal(item.salePercent).eq(1)}>
+                        <p>¥{Decimal(item.basePrice).toString()}</p>
+                    </If>
+                    <If condition={!Decimal(item.salePercent).eq(1)}>
+                        <p aria-hidden>
+                            <span className="line-through mr-1">¥{Decimal(item.basePrice).toString()}</span>
+                            ¥{Decimal(item.basePrice).mul(item.salePercent).toString()}
+                        </p>
+                        <p className="sr-only">
+                            {t('a11y.sale', {
+                                price: item.basePrice,
+                                salePrice: Decimal(item.basePrice).mul(item.salePercent).toString()
+                            })}
+                        </p>
+                    </If>
+                    <Button pill size="xs" color="warning" onClick={() => setSelected(true)}>{t('addItem')}</Button>
+                </div>
             </div>
         </div>
     </>

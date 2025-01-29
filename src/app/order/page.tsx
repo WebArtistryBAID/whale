@@ -5,10 +5,10 @@ import OrderMobile from '@/app/order/OrderMobile'
 export default async function OrderBase() {
     const categories = await getCoreItems()
     return <>
-        <div className="hidden lg:block">
+        <div className="hidden lg:block" id="primary-content">
             <OrderDesktop categories={categories} uploadPrefix={`/${process.env.UPLOAD_SERVE_PATH}/`}/>
         </div>
-        <div className="lg:hidden">
+        <div className="lg:hidden" id="primary-content">
             <OrderMobile categories={categories} uploadPrefix={`/${process.env.UPLOAD_SERVE_PATH}/`}/>
         </div>
     </>

@@ -2,11 +2,23 @@
 
 import {HydratedItemType} from '@/app/lib/ui-data-actions'
 import {useTranslationClient} from '@/app/i18n/client'
-import {HiX} from 'react-icons/hi'
+import {HiMinus, HiPlus, HiX} from 'react-icons/hi'
 import Image from 'next/image'
 import Markdown from 'react-markdown'
 import UIOptionType from '@/app/order/UIOptionType'
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
+import {Badge, Button} from 'flowbite-react'
+import {calculatePrice} from '@/app/lib/item-utils'
+import If from '@/app/lib/If'
+import Decimal from 'decimal.js'
+
+function getTextColor(backgroundColor: string): 'text-white' | 'text-black' {
+    const r = parseInt(backgroundColor.slice(1, 3), 16)
+    const g = parseInt(backgroundColor.slice(3, 5), 16)
+    const b = parseInt(backgroundColor.slice(5, 7), 16)
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+    return luminance < 0.5 ? 'text-white' : 'text-black'
+}
 
 export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
     item: HydratedItemType,
@@ -15,7 +27,9 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
 }) {
     const {t} = useTranslationClient('order')
     const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: number }>({})
+    const [amount, setAmount] = useState(1)
     const [typical, setTypical] = useState(0) // Trick to force re-render (VERY BAD practice)
+    const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         // Select all default options
@@ -31,7 +45,13 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
         setSelectedOptions(options)
     }, [item.options])
 
-    return <div className="w-full h-full bg-default p-4 lg:p-8 xl:p-16">
+    useEffect(() => {
+        setTimeout(() => {
+            ref.current?.focus()
+        }, 10)
+    }, [])
+
+    return <div tabIndex={0} ref={ref} className="w-full h-full bg-default p-4 lg:p-8 xl:p-16 relative">
         <div className="flex items-center mb-5">
             <p className="text-2xl font-bold font-display mr-auto">{item.name}</p>
 
@@ -39,15 +59,59 @@ export default function UIItemDetailsOverlay({item, uploadPrefix, close}: {
         </div>
         <Image src={uploadPrefix + item.image} alt="" width={512} height={512}
                className="object-cover w-full rounded-3xl h-72 mb-3"/>
+
+        <div className="flex gap-3 mb-3 items-center">
+            {item.tags.map(tag => <Badge key={tag.id} style={{backgroundColor: tag.color}}
+                                         className={`rounded-full ${getTextColor(tag.color)}`}>{tag.name} <span
+                className="sr-only">{t('a11y.tag')}</span></Badge>)}
+
+            <If condition={!Decimal(item.salePercent).eq(1)}>
+                <Badge color="success" className="rounded-full">
+                    {t('itemDetails.sale', {sale: Decimal(1).minus(Decimal(item.salePercent)).mul(100).toString()})}
+                    <span className="sr-only">{t('a11y.tag')}</span>
+                </Badge>
+            </If>
+        </div>
+
         <div className="mb-5 text-sm p-5 bg-yellow-100 dark:bg-yellow-800 rounded-3xl">
             <Markdown>{item.description}</Markdown></div>
 
         {item.options.map(option =>
-            <UIOptionType key={`${option.id}-${typical}`} optionType={option}
+            <UIOptionType key={option.id} optionType={option}
                           selected={selectedOptions[option.id.toString()]} onChange={n => {
                 selectedOptions[option.id.toString()] = n
                 setSelectedOptions(selectedOptions)
                 setTypical(typical + 1)
             }}/>)}
+
+        <div className="fixed flex items-center bottom-0 left-0 w-full lg:w-1/2 bg-yellow-100 dark:bg-yellow-800 p-5">
+            <p className="mr-auto"
+               aria-hidden>¥{calculatePrice(item, amount, item.options.map(option => option.items.find(o => o.id === selectedOptions[option.id.toString()])!)).toString()}</p>
+            <span aria-live="polite" className="sr-only">
+                {t('a11y.priceAmount', {
+                    item: amount,
+                    price: calculatePrice(item, amount, item.options.map(option => option.items.find(o => o.id === selectedOptions[option.id.toString()])!)).toString()
+                })}
+            </span>
+            <div className="flex bg-yellow-50 dark:bg-yellow-800 rounded-full items-center p-2 mr-3 gap-2">
+                <Button pill size="xs" color="warning" aria-label={t('itemDetails.minus')}
+                        onClick={() => {
+                            if (amount > 1) {
+                                setAmount(amount - 1)
+                                setTypical(typical + 1)
+                            }
+                        }}>
+                    <HiMinus/>
+                    <If condition={amount <= 1}><span className="sr-only">{t('itemDetails.cannotMinusMore')}</span></If>
+                </Button>
+                <p aria-hidden aria-label={t('a11y.amount')}>{amount}</p>
+                <Button pill size="xs" color="warning" aria-label={t('itemDetails.add')}
+                        onClick={() => {
+                            setAmount(amount + 1)
+                            setTypical(typical + 1)
+                        }}><HiPlus/></Button>
+            </div>
+            <Button pill color="warning">{t('addItem')}</Button>
+        </div>
     </div>
 }
