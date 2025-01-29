@@ -1,7 +1,7 @@
 'use client'
 
 import { HydratedOrder } from '@/app/lib/ordering-actions'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { Button, Spinner } from 'flowbite-react'
@@ -33,7 +33,6 @@ function isWeChat(): boolean {
 // If using (mobile device or iPad) AND outside WeChat, use external payment
 export default function OrderPayClient({ order }: { order: HydratedOrder }) {
     const { t } = useTranslationClient('order')
-    const router = useRouter()
     const searchParams = useSearchParams()
     const [ canRestart, setCanRestart ] = useState(false)
     const [ error, setError ] = useState(false)
