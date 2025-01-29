@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <body
             className={`${notoSerif.variable} ${notoSans.variable} antialiased`}
         >
-        <NextTopLoader showSpinner={false} color="#facc15"/>
+        <NextTopLoader showSpinner={false} color="#ff6900"/>
         {children}
         <p aria-hidden className="fixed bottom-2 right-2 secondary text-xs"><a
             href="https://beian.miit.gov.cn">{process.env.BOTTOM_TEXT}</a></p>

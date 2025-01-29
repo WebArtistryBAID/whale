@@ -19,7 +19,8 @@
     "appliedOptions": "自定义选项。",
     "shoppingCart": "购物车",
     "products": "商品",
-    "itemDetails": "选规格"
+    "itemDetails": "选规格",
+    "orderedItems": "已选商品"
   },
   "loginCta": {
     "title": "登录以使用更多功能",
@@ -41,6 +42,21 @@
     "cannotMinusMore": "(不能继续减少)"
   },
   "total": "总计 ¥{{price}}",
-  "checkout": "结账",
-  "empty": "购物车为空"
+  "empty": "购物车为空",
+  "checkout": {
+    "title": "结账",
+    "orderDetails": "订单详情",
+    "total": "总价",
+    "wait": "预计等待时间",
+    "waitTime_one": "{{count}} 分钟",
+    "waitTime_other": "{{count}} 分钟",
+    "paymentMethod": "支付方式",
+    "wxPay": "微信支付",
+    "balance": "余额",
+    "cash": "现金",
+    "payLater": "先喝后付",
+    "payForMe": "找朋友帮我付",
+    "coupon": "代金券",
+    "pay": "支付"
+  }
 }

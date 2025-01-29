@@ -83,7 +83,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
             </If>
         </div>
 
-        <div className="mb-5 text-sm p-5 bg-yellow-100 dark:bg-yellow-800 rounded-3xl">
+        <div className="mb-5 text-sm p-5 bg-yellow-50 dark:bg-yellow-800 rounded-3xl">
             <Markdown>{item.description}</Markdown></div>
 
         {item.options.map(option =>
@@ -94,7 +94,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                 setTypical(typical + 1)
             }}/>)}
 
-        <div className="fixed flex items-center bottom-0 left-0 w-full lg:w-1/2 bg-yellow-100 dark:bg-yellow-800 p-5">
+        <div className="fixed flex items-center bottom-0 left-0 w-full lg:w-1/2 bg-yellow-50 dark:bg-yellow-800 p-5">
             <p className="mr-auto text-lg"
                aria-hidden>¥{calculatePrice(getThisItem()).toString()}</p>
             <span aria-live="polite" className="sr-only">
@@ -103,7 +103,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                     price: calculatePrice(getThisItem()).toString()
                 })}
             </span>
-            <div className="flex bg-yellow-50 dark:bg-yellow-800 rounded-full items-center p-2 mr-3 gap-2">
+            <div className="flex bg-white dark:bg-yellow-900 rounded-full items-center p-2 mr-3 gap-2">
                 <Button pill size="xs" color="warning" aria-label={t('itemDetails.minus')}
                         onClick={() => {
                             if (amount > 1) {

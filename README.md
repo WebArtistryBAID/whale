@@ -51,3 +51,15 @@ To contribute, simply open a pull request.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
+
+## TODO
+
+* Allow ordering and payments
+* Allow "on-site order mode" - adjust available payment methods accordingly
+* Allow delivery in ordering
+* Add user dashboard - view data, points, and allow adding balance
+* Add settings for daily order cups cap, balance cap, per-order cap, etc.
+* Add management dashboard for processing orders
+* Add management dashboard for adding items
+* Add management dashboard for modifying users (adding permissions, mostly)
+* Add management dashboard for statistics

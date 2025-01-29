@@ -19,7 +19,8 @@
     "appliedOptions": "Applied Options.",
     "shoppingCart": "Shopping Cart",
     "products": "Products",
-    "itemDetails": "Product Details"
+    "itemDetails": "Product Details",
+    "orderedItems": "Ordered Items"
   },
   "loginCta": {
     "title": "Log in to unlock more features!",
@@ -41,6 +42,21 @@
     "cannotMinusMore": "(Cannot remove more)"
   },
   "total": "Total ¥{{price}}",
-  "checkout": "Checkout",
-  "empty": "No items"
+  "empty": "No items",
+  "checkout": {
+    "title": "Checkout",
+    "orderDetails": "Order Details",
+    "total": "Total",
+    "wait": "Estimated Wait Time",
+    "waitTime_one": "{{count}} minute",
+    "waitTime_other": "{{count}} minutes",
+    "paymentMethod": "Payment Method",
+    "wxPay": "Weixin Pay",
+    "balance": "Balance",
+    "cash": "Cash",
+    "payLater": "Pay Later",
+    "payForMe": "Pay For Me",
+    "coupon": "Coupon Code",
+    "pay": "Pay"
+  }
 }

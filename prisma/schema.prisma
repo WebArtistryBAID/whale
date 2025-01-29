@@ -39,6 +39,14 @@ enum Gender {
   others
 }
 
+enum PaymentMethod {
+  wxPay
+  balance
+  cash
+  payLater
+  payForMe
+}
+
 model OATokens {
   id           Int    @id @default(autoincrement())
   accessToken  String
@@ -66,6 +74,13 @@ model Notification {
   userId  Int
   order   Order? @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId Int?
+}
+
+model CouponCode {
+  id            Int    @id @default(autoincrement())
+  value         String
+  allowedUses   Int
+  remainingUses Int
 }
 
 model Category {
@@ -136,19 +151,20 @@ enum OrderType {
 }
 
 model Order {
-  id           Int           @id @default(autoincrement())
-  items        OrderedItem[]
-  totalPrice   String
-  number       String
-  status       OrderStatus
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  type         OrderType
-  deliveryRoom String?
-  user         User?         @relation(fields: [userId], references: [id])
-  userId       Int?
-  onSiteName   String?
-  paid         Boolean       @default(false)
+  id            Int           @id @default(autoincrement())
+  items         OrderedItem[]
+  totalPrice    String
+  number        String
+  status        OrderStatus
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  type          OrderType
+  deliveryRoom  String?
+  user          User?         @relation(fields: [userId], references: [id])
+  userId        Int?
+  onSiteName    String?
+  paid          Boolean       @default(false)
+  paymentMethod PaymentMethod
 
   notiRel Notification[]
   logRel  UserAuditLog[]
