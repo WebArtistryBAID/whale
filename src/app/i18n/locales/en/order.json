@@ -69,5 +69,12 @@
     "pickUp": "Pick Up",
     "delivery": "Delivery",
     "deliveryRoom": "Delivery Room"
+  },
+  "wechatPay": {
+    "title": "Weixin Pay",
+    "scan": "Please use WeChat to scan the QR code below.",
+    "processing": "Please wait while we are processing your payment.",
+    "error": "An error occurred while trying to begin the payment process. Please try again.",
+    "restart": "Restart Payment"
   }
 }

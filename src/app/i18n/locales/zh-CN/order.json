@@ -69,5 +69,12 @@
     "pickUp": "自取",
     "delivery": "外送",
     "deliveryRoom": "外送房间"
+  },
+  "wechatPay": {
+    "title": "微信支付",
+    "scan": "请使用微信扫描二维码进行支付。",
+    "processing": "请等待，我们正在处理您的付款。",
+    "error": "尝试开始支付流程时出现了错误，请再试一次。",
+    "restart": "重新支付"
   }
 }

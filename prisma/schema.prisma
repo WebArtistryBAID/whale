@@ -169,6 +169,7 @@ model Order {
   userId        Int?
   paymentStatus PaymentStatus @default(notPaid)
   paymentMethod PaymentMethod
+  wxPayId       String?
 
   notiRel Notification[]
   logRel  UserAuditLog[]

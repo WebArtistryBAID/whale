@@ -145,6 +145,21 @@ export async function createOrder(items: OrderedItemTemplate[],
         return null
     }
 
+    // No using wechat later if you're not logged in or have unpaid orders before
+    if (paymentMethod === PaymentMethod.payLater) {
+        if (me == null) {
+            return null
+        }
+        if (await prisma.order.count({
+            where: {
+                userId: me.id,
+                paymentStatus: PaymentStatus.notPaid
+            }
+        }) > 0) {
+            return null
+        }
+    }
+
     const order = await prisma.order.create({
         include: {
             items: {

@@ -14,12 +14,8 @@ import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
 
-function isiPad(): boolean {
-    return /Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1
-}
-
-function isMobile(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+function isMobileOriPad(): boolean {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || /Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1
 }
 
 function PaymentMethodButton({ paymentMethod, selected, select }: {
@@ -105,12 +101,12 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             return
         }
         storedOrder.setOrder(order.id)
-        if (order.paymentStatus === PaymentStatus.paid) {
+        if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
             // Redirect to check page directly
             router.push(`/order/details/${order.id}`)
         } else {
             // Start payment process
-            router.push(`/order/checkout/pay/${order.id}`)
+            router.push(`/order/checkout/wechat/${order.id}`)
         }
     }
 
@@ -170,7 +166,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                                          select={() => setPaymentMethod(PaymentMethod.payLater)}/>
                 </If>
 
-                <If condition={isiPad() || isMobile()}>
+                <If condition={isMobileOriPad()}>
                     <PaymentMethodButton paymentMethod={PaymentMethod.payForMe}
                                          selected={paymentMethod === PaymentMethod.payForMe}
                                          select={() => setPaymentMethod(PaymentMethod.payForMe)}/>
@@ -217,7 +213,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                         {t('continue')}
                     </If>
                     <If condition={!(getRealTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
-                        {t('checkout.pay')}
+                        {t('checkout.wechat')}
                     </If>
                 </If>
             </Button>
