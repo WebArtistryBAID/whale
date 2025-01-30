@@ -15,13 +15,14 @@ import {
 } from '@/app/lib/wx-pay-actions'
 import { PaymentMethod, PaymentStatus } from '@prisma/client'
 import QRCode from 'react-qr-code'
+import { useShoppingCart } from '@/app/lib/shopping-cart'
 
 function isDesktop(): boolean {
     return !isMobileOriPad()
 }
 
 function isMobileOriPad(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || /Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
 }
 
 function isWeChat(): boolean {
@@ -38,12 +39,14 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
     const [ error, setError ] = useState(false)
     const [ qrCode, setQRCode ] = useState<string | null>(null)
     const [ qrCodeShowProcessing, setQRCodeShowProcessing ] = useState(false)
+    const [ shareCopied, setShareCopied ] = useState(false)
+    const shoppingCart = useShoppingCart()
 
     useEffect(() => {
-        if (isMobileOriPad()) {
+        if (isMobileOriPad() && order.paymentMethod !== PaymentMethod.payForMe && !shoppingCart.onSiteOrderMode) {
             void launchWeChat()
         }
-        if (isDesktop() || order.paymentMethod === PaymentMethod.payForMe) {
+        if (isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode) {
             (async () => {
                 const qr = await getPaymentQRCode(order.id)
                 if (qr == null) {
@@ -66,6 +69,30 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
         // We don't want any more dependencies
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    async function share() {
+        if (navigator.canShare()) {
+            try {
+                await navigator.share({
+                    title: t('wechatPay.shareTitle'),
+                    text: t('wechatPay.shareText'),
+                    url: location.href
+                })
+            } catch {
+                await navigator.clipboard.writeText(location.href)
+                setShareCopied(true)
+                setTimeout(() => {
+                    setShareCopied(false)
+                }, 3000)
+            }
+        } else {
+            await navigator.clipboard.writeText(location.href)
+            setShareCopied(true)
+            setTimeout(() => {
+                setShareCopied(false)
+            }, 3000)
+        }
+    }
 
     async function pollPaymentStatus() {
         if (await getOrderPaymentStatus(order.id) === PaymentStatus.paid) {
@@ -142,7 +169,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
             <Button onClick={() => location.reload()} pill color="warning">{t('wechatPay.restart')}</Button>
         </If>
         <If condition={!error}>
-            <If condition={isDesktop() || order.paymentMethod === PaymentMethod.payForMe}>
+            <If condition={isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode}>
                 <If condition={qrCode == null}>
                     <Spinner color="warning"/>
                 </If>
@@ -164,12 +191,16 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                         <Button disabled={!canRestart} onClick={() => location.reload()} pill
                                 color="warning">{t('wechatPay.restart')}</Button>
                     </If>
+                    <Button className="mt-3" pill color="warning"
+                            onClick={share}>{shareCopied ? t('copied') : t('wechatPay.share')}</Button>
                 </If>
             </If>
-            <If condition={isMobileOriPad()}>
+            <If condition={isMobileOriPad() && order.paymentMethod !== PaymentMethod.payForMe && !shoppingCart.onSiteOrderMode}>
                 <p className="mb-3">{t('wechatPay.processing')}</p>
                 <Button disabled={!canRestart} onClick={launchWeChat} pill
                         color="warning">{t('wechatPay.restart')}</Button>
+                <Button className="mt-3" pill color="warning"
+                        onClick={share}>{shareCopied ? t('copied') : t('wechatPay.share')}</Button>
             </If>
         </If>
     </div>

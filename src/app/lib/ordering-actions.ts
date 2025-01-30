@@ -81,6 +81,27 @@ export async function getOrder(id: number): Promise<HydratedOrder | null> {
     })
 }
 
+export async function canPayWithBalance(totalPrice: string): Promise<boolean> {
+    const me = await getMyUser()
+    if (me == null) {
+        return false
+    }
+    return Decimal(me.balance).gte(totalPrice)
+}
+
+export async function canPayWithPayLater(): Promise<boolean> {
+    const me = await getMyUser()
+    if (me == null) {
+        return false
+    }
+    return await prisma.order.count({
+        where: {
+            userId: me.id,
+            paymentStatus: PaymentStatus.notPaid
+        }
+    }) === 0
+}
+
 export async function createOrder(items: OrderedItemTemplate[],
                                   coupon: string | null,
                                   onSiteOrderMode: boolean,
@@ -90,7 +111,7 @@ export async function createOrder(items: OrderedItemTemplate[],
 
     // We didn't perform atomization - for a small use case like this, we should be fine.
 
-    // SANITY CHECKS - These should be enforced by the frontend
+    // SANITY CHECKS - These should be enforced by the frontend as well
     // On site order mode require administrative permissions
     if (onSiteOrderMode && (me == null || !me.permissions.includes('admin.manage'))) {
         return null
@@ -145,7 +166,7 @@ export async function createOrder(items: OrderedItemTemplate[],
         return null
     }
 
-    // No using wechat later if you're not logged in or have unpaid orders before
+    // No using pay later if you're not logged in or have unpaid orders before
     if (paymentMethod === PaymentMethod.payLater) {
         if (me == null) {
             return null
@@ -158,6 +179,11 @@ export async function createOrder(items: OrderedItemTemplate[],
         }) > 0) {
             return null
         }
+    }
+
+    // Pay later, balance, and pay for me aren't available with on-site
+    if ((paymentMethod === PaymentMethod.payLater || paymentMethod === PaymentMethod.balance || paymentMethod === PaymentMethod.payForMe) && onSiteOrderMode) {
+        return null
     }
 
     const order = await prisma.order.create({

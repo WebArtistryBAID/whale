@@ -9,23 +9,24 @@ import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
 import { Button, ButtonGroup, TextInput } from 'flowbite-react'
 import { CouponCode, PaymentMethod, PaymentStatus, User } from '@prisma/client'
-import { couponQuickValidate, createOrder } from '@/app/lib/ordering-actions'
+import { canPayWithBalance, canPayWithPayLater, couponQuickValidate, createOrder } from '@/app/lib/ordering-actions'
 import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
 
 function isMobileOriPad(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || /Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
 }
 
-function PaymentMethodButton({ paymentMethod, selected, select }: {
+function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     paymentMethod: PaymentMethod,
     selected: boolean,
-    select: () => void
+    select: () => void,
+    disabled: boolean
 }) {
     const { t } = useTranslationClient('order')
     return <Button color={selected ? 'warning' : 'gray'} pill size="xs"
-                   onClick={select}>
+                   onClick={select} disabled={disabled}>
         {t(`checkout.${paymentMethod}`)}
         <If condition={selected}>
             <span className="sr-only">{t('a11y.selected')}</span>
@@ -46,6 +47,8 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
     const [ deliveryRoom, setDeliveryRoom ] = useState('')
     const [ orderFailed, setOrderFailed ] = useState(false)
     const [ loading, setLoading ] = useState(false)
+    const [ balanceEnabled, setBalanceEnabled ] = useState(true)
+    const [ payLaterEnabled, setPayLaterEnabled ] = useState(true)
 
     useEffect(() => {
         if (shoppingCart.items.length < 1) {
@@ -73,6 +76,14 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             setLoading(false)
         })()
     }, [])
+
+    useEffect(() => {
+        (async () => {
+            setBalanceEnabled(await canPayWithBalance(getRealTotal().toString()))
+            setPayLaterEnabled(await canPayWithPayLater())
+        })()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ shoppingCart.items, foundCoupon ])
 
     function getRealTotal(): Decimal {
         if (foundCoupon == null) {
@@ -152,25 +163,30 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                 <div className="flex flex-wrap gap-3">
                     <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
                                          selected={paymentMethod === PaymentMethod.wxPay}
+                                         disabled={loading}
                                          select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
 
                     <If condition={shoppingCart.onSiteOrderMode}>
                         <PaymentMethodButton paymentMethod={PaymentMethod.cash}
                                              selected={paymentMethod === PaymentMethod.cash}
+                                             disabled={loading}
                                              select={() => setPaymentMethod(PaymentMethod.cash)}/>
                     </If>
 
-                    <If condition={me != null}>
+                    <If condition={me != null && !shoppingCart.onSiteOrderMode}>
                         <PaymentMethodButton paymentMethod={PaymentMethod.balance}
+                                             disabled={!balanceEnabled || loading}
                                              selected={paymentMethod === PaymentMethod.balance}
                                              select={() => setPaymentMethod(PaymentMethod.balance)}/>
                         <PaymentMethodButton paymentMethod={PaymentMethod.payLater}
+                                             disabled={!payLaterEnabled || loading}
                                              selected={paymentMethod === PaymentMethod.payLater}
                                              select={() => setPaymentMethod(PaymentMethod.payLater)}/>
                     </If>
 
-                    <If condition={isMobileOriPad()}>
+                    <If condition={isMobileOriPad() && !shoppingCart.onSiteOrderMode}>
                         <PaymentMethodButton paymentMethod={PaymentMethod.payForMe}
+                                             disabled={loading}
                                              selected={paymentMethod === PaymentMethod.payForMe}
                                              select={() => setPaymentMethod(PaymentMethod.payForMe)}/>
                     </If>
@@ -184,6 +200,12 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                         <Trans t={t} i18nKey="checkout.loginNag"
                                components={{ 1: <Link key="login" href="/user" className="inline"/> }}/>
                     </p>
+                </If>
+                <If condition={me != null && !balanceEnabled}>
+                    <p className="mt-1 text-sm">{t('checkout.balanceDisabled')}</p>
+                </If>
+                <If condition={me != null && !payLaterEnabled}>
+                    <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
                 </If>
             </div>
 
@@ -218,7 +240,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                         {t('continue')}
                     </If>
                     <If condition={!(getRealTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
-                        {t('checkout.wechat')}
+                        {t('checkout.pay')}
                     </If>
                 </If>
             </Button>

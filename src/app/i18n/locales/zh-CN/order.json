@@ -7,6 +7,7 @@
   "remove": "移除",
   "continue": "继续",
   "tryAgain": "再试一次",
+  "copied": "已复制链接",
   "a11y": {
     "selected": "(已选中)",
     "tag": "(标签)",
@@ -62,10 +63,12 @@
     "payForMe": "找朋友帮我付",
     "loginNag": "<1>登录</1>后可使用余额和「先喝后付」付款。",
     "onSiteNag": "现场点餐可使用现金付款。",
+    "balanceDisabled": "您的余额不足以支付此订单。",
+    "payLaterDisabled": "您有一笔未支付的「先喝后付」订单。",
     "coupon": "代金券",
     "couponInvalid": "代金券无效。",
     "couponTooBig": "代金券金额 (¥{{original}}) 超过了总价，多余金额将会丢失。",
-    "wechat": "使用微信支付",
+    "pay": "付款",
     "details": "详情",
     "pickUp": "自取",
     "delivery": "外送",
@@ -76,6 +79,9 @@
     "scan": "请使用微信扫描二维码进行支付。",
     "processing": "请等待，我们正在处理您的付款。",
     "error": "尝试开始支付流程时出现了错误，请再试一次。",
-    "restart": "重新支付"
+    "restart": "重新支付",
+    "share": "找朋友帮我付",
+    "shareTitle": "帮我支付白鲸咖啡订单",
+    "shareMessage": "我在白鲸咖啡下了一个订单，帮我支付一下吧!"
   }
 }

@@ -7,6 +7,7 @@
   "remove": "Remove",
   "continue": "Continue",
   "tryAgain": "Try Again",
+  "copied": "Copied Link",
   "a11y": {
     "selected": "(Selected)",
     "tag": "(Tag)",
@@ -62,10 +63,12 @@
     "payForMe": "Pay For Me",
     "loginNag": "You can pay with Balance and Pay Later after you <1>log in</1>.",
     "onSiteNag": "You can pay with cash by ordering on-site.",
+    "balanceDisabled": "You have insufficient balance to pay for this order.",
+    "payLaterDisabled": "You have a Pay Later order that has not been paid yet.",
     "coupon": "Coupon Code",
     "couponInvalid": "Invalid coupon code.",
     "couponTooBig": "Coupon value (¥{{original}}) exceeds total price. The remaining value will be lost.",
-    "wechat": "Continue with WeChat",
+    "pay": "Pay",
     "details": "Details",
     "pickUp": "Pick Up",
     "delivery": "Delivery",
@@ -76,6 +79,9 @@
     "scan": "Please use WeChat to scan the QR code below.",
     "processing": "Please wait while we are processing your payment.",
     "error": "An error occurred while trying to begin the payment process. Please try again.",
-    "restart": "Restart Payment"
+    "restart": "Restart Payment",
+    "share": "Ask Friend to Pay",
+    "shareTitle": "Help me pay for my order at Whale Cafe",
+    "shareText": "I need help paying for my order at Whale Cafe. Can you help me out?"
   }
 }
