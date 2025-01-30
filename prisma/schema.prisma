@@ -160,6 +160,7 @@ model Order {
   id            Int           @id @default(autoincrement())
   items         OrderedItem[]
   totalPrice    String
+  totalPriceRaw String
   status        OrderStatus
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

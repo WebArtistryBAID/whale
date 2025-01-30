@@ -49,7 +49,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
     useEffect(() => {
         setTimeout(() => {
             ref.current?.focus()
-        }, 10)
+        }, 100)
     }, [])
 
     function getThisItem(): OrderedItemTemplate {
@@ -60,10 +60,11 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
         }
     }
 
-    return <div tabIndex={0} ref={ref} aria-label={t('a11y.itemDetails')}
+    return <div tabIndex={0} aria-label={t('a11y.itemDetails')}
                 className="w-full h-full overflow-y-auto bg-default p-4 lg:p-8 xl:p-16 relative">
         <div className="flex items-center mb-5">
-            <p className="text-2xl font-bold font-display mr-auto">{item.name}</p>
+            <p className="text-2xl font-bold font-display mr-auto" tabIndex={0} ref={ref}>{item.name} <span
+                className="sr-only">({t('a11y.itemDetails')})</span></p>
 
             <button className="btn-icon-only" onClick={close} aria-label={t('close')}><HiX/></button>
         </div>

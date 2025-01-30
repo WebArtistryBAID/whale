@@ -7,7 +7,7 @@
   "remove": "Remove",
   "continue": "Continue",
   "tryAgain": "Try Again",
-  "copied": "Copied Link",
+  "copied": "Copied Link!",
   "a11y": {
     "selected": "(Selected)",
     "tag": "(Tag)",
@@ -26,7 +26,9 @@
     "orderedItems": "Ordered Items",
     "coupon": "Applied coupon for ¥{{price}} off.",
     "paymentMethods": "Information about Payment Methods",
-    "qrCode": "Scan the QR Code by holding up your phone to the top-left of the screen. Make sure screen curtain is turned off."
+    "qrCode": "Scan the QR Code by holding up your phone to the top-left of the screen. Make sure screen curtain is turned off.",
+    "waitTime": "Order Status",
+    "orderNumber": "(Order Number)"
   },
   "loginCta": {
     "title": "Log in to unlock more features!",
@@ -89,5 +91,27 @@
     "share": "Ask Friend to Pay",
     "shareTitle": "Help me pay for my order at Whale Cafe",
     "shareText": "I need help paying for my order at Whale Cafe. Can you help me out?"
+  },
+  "details": {
+    "waitTime": {
+      "cups_one": "{{count}} cup is being prepared",
+      "cups_other": "{{count}} cups are being prepared",
+      "minutes_one": "{{count}} minute remaining",
+      "minutes_other": "{{count}} minutes remaining",
+      "done_pickUp": "Your order is ready for pickup!",
+      "done_delivery": "Your order is on its way!",
+      "finePrint": "Time is an estimate and may vary."
+    },
+    "onSiteContinue": "Continue On-Site Ordering",
+    "orderNumberPrompt": "Please remember your order number. You will need it when picking up.",
+    "paymentTitle": "Payment",
+    "paymentPromptPayLater": "This Pay Later order hasn't been paid for yet.",
+    "paymentPrompt": "This order hasn't been paid for yet. This order will not start until you pay.",
+    "payNow": "Pay Now",
+    "refundedPrompt": "This order has been refunded.",
+    "refundTip": "Please contact us if you need a refund.",
+    "paymentMethod": "Payment Method",
+    "paymentMethodMessage": "How would you like to pay for this order?",
+    "insufficientBalance": "Insufficient Balance"
   }
 }

@@ -7,7 +7,7 @@
   "remove": "移除",
   "continue": "继续",
   "tryAgain": "再试一次",
-  "copied": "已复制链接",
+  "copied": "已复制链接!",
   "a11y": {
     "selected": "(已选中)",
     "tag": "(标签)",
@@ -26,7 +26,9 @@
     "orderedItems": "已选商品",
     "coupon": "使用代金券减 ¥{{price}}。",
     "paymentMethods": "支付方式信息",
-    "qrCode": "抬起手机，向屏幕左上方扫描二维码。请确保您的显示屏未关闭。"
+    "qrCode": "抬起手机，向屏幕左上方扫描二维码。请确保您的显示屏未关闭。",
+    "waitTime": "订单状态",
+    "orderNumber": "(订单号)"
   },
   "loginCta": {
     "title": "登录以使用更多功能",
@@ -89,5 +91,26 @@
     "share": "找朋友帮我付",
     "shareTitle": "帮我支付白鲸咖啡订单",
     "shareMessage": "我在白鲸咖啡下了一个订单，帮我支付一下吧!"
+  },
+  "details": {
+    "waitTime": {
+      "cups_one": "正在准备 {{count}} 杯",
+      "cups_other": "正在准备 {{count}} 杯",
+      "minutes_one": "还剩 {{count}} 分钟",
+      "minutes_other": "还剩 {{count}} 分钟",
+      "done_pickUp": "您的订单已准备好!",
+      "done_delivery": "您的订单已送出!",
+      "finePrint": "时间仅供参考，实际等待时间可能有所不同。"
+    },
+    "onSiteContinue": "继续现场点单",
+    "orderNumberPrompt": "请记住您的订单号，您在取餐时会用到。",
+    "paymentPromptPayLater": "此「先喝后付」订单尚未支付。",
+    "paymentPrompt": "此订单尚未支付。支付后，订单才会开始准备。",
+    "payNow": "立即支付",
+    "refundedPrompt": "此订单已退款。",
+    "refundTip": "如需退款，请联系我们。",
+    "paymentMethod": "支付方式",
+    "paymentMethodMessage": "您想使用什么方式付款?",
+    "insufficientBalance": "余额不足"
   }
 }

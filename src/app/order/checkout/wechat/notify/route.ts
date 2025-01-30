@@ -2,6 +2,7 @@ import { PaymentStatus, PrismaClient } from '@prisma/client'
 import md5 from 'md5'
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrder } from '@/app/lib/ordering-actions'
+import Decimal from 'decimal.js'
 
 const prisma = new PrismaClient()
 
@@ -49,6 +50,28 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             wxPayId: body.payNo
         }
     })
+
+    // Add points upon payment
+    if (order.userId != null) {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: order.userId
+            }
+        })
+
+        if (user == null) {
+            return new NextResponse('SUCCESS')
+        }
+
+        await prisma.user.update({
+            where: {
+                id: order.userId
+            },
+            data: {
+                points: Decimal(user.points).add(order.totalPriceRaw).toString()
+            }
+        })
+    }
 
     return new NextResponse('SUCCESS')
 }

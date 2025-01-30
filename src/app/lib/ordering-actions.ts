@@ -30,6 +30,7 @@ export interface HydratedOrder {
     id: number
     items: HydratedOrderedItem[]
     totalPrice: string
+    totalPriceRaw: string
     status: OrderStatus
     createdAt: Date
     updatedAt: Date
@@ -106,6 +107,42 @@ export async function canPayWithPayLater(): Promise<boolean> {
             paymentStatus: PaymentStatus.notPaid
         }
     }) === 0
+}
+
+export async function payLaterBalance(id: number): Promise<boolean> {
+    const me = await getMyUser()
+    if (me == null) {
+        return false
+    }
+    const order = await prisma.order.findUnique({
+        where: {
+            id,
+            paymentStatus: PaymentStatus.notPaid
+        }
+    })
+    if (order == null) {
+        return false
+    }
+    if (Decimal(me.balance).lt(order.totalPrice)) {
+        return false
+    }
+    await prisma.user.update({
+        where: {
+            id: me.id
+        },
+        data: {
+            balance: Decimal(me.balance).minus(order.totalPrice).toString()
+        }
+    })
+    await prisma.order.update({
+        where: {
+            id
+        },
+        data: {
+            paymentStatus: PaymentStatus.paid
+        }
+    })
+    return true
 }
 
 export async function createOrder(items: OrderedItemTemplate[],
@@ -219,6 +256,7 @@ export async function createOrder(items: OrderedItemTemplate[],
                 }))
             },
             totalPrice: totalPrice.toString(),
+            totalPriceRaw: totalPriceNoCoupon.toString(),
             status: OrderStatus.waiting,
             type: deliveryRoom == null ? OrderType.pickUp : OrderType.delivery,
             deliveryRoom,
@@ -233,7 +271,7 @@ export async function createOrder(items: OrderedItemTemplate[],
     })
 
     // Add points to user
-    if (me != null) {
+    if (me != null && order.paymentStatus === PaymentStatus.paid) {
         await prisma.user.update({
             where: {
                 id: me.id
@@ -251,6 +289,51 @@ export async function getEstimatedWaitTime(): Promise<EstimatedWaitTimeResponse>
     const orders = await prisma.order.findMany({
         where: {
             status: OrderStatus.waiting,
+            OR: [
+                {
+                    paymentStatus: PaymentStatus.paid
+                },
+                {
+                    paymentMethod: PaymentMethod.payLater
+                }
+            ]
+        },
+        include: {
+            items: true
+        }
+    })
+    let cups = 0
+    for (const order of orders) {
+        for (const item of order.items) {
+            cups += item.amount
+        }
+    }
+    return {
+        time: cups * 2, // Assuming 2 minutes per cup
+        cups,
+        orders: orders.length
+    }
+}
+
+export async function getEstimatedWaitTimeFor(order: number): Promise<EstimatedWaitTimeResponse> {
+    const o = await prisma.order.findUnique({
+        where: {
+            id: order
+        }
+    })
+    if (o == null) {
+        return {
+            time: 0,
+            cups: 0,
+            orders: 0
+        }
+    }
+    const orders = await prisma.order.findMany({
+        where: {
+            status: OrderStatus.waiting,
+            createdAt: {
+                lte: o.createdAt
+            },
             OR: [
                 {
                     paymentStatus: PaymentStatus.paid

@@ -7,7 +7,17 @@ import { useEffect, useState } from 'react'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
-import { Button, ButtonGroup, Modal, ModalBody, ModalFooter, ModalHeader, Popover, TextInput } from 'flowbite-react'
+import {
+    Badge,
+    Button,
+    ButtonGroup,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader,
+    Popover,
+    TextInput
+} from 'flowbite-react'
 import { CouponCode, PaymentMethod, PaymentStatus, User } from '@prisma/client'
 import {
     canPayWithBalance,
@@ -19,7 +29,7 @@ import {
 import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
-import { HiInformationCircle } from 'react-icons/hi'
+import { HiMagnifyingGlass } from 'react-icons/hi2'
 import Image from 'next/image'
 
 function isMobileOriPad(): boolean {
@@ -244,7 +254,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                                 <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
                             </If>
                         </div>}>
-                            <HiInformationCircle className="text-yellow-300 dark:text-yellow-600"/>
+                            <Badge color="warning" icon={HiMagnifyingGlass}/>
                         </Popover>
                     </div>
 
