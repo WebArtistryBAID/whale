@@ -7,6 +7,7 @@ The ordering management platform of Whale Cafe. Built with Next.js.
 To run in production:
 
 * Using `pm2` allows for proper deployment in production.
+* Set up a scheduled task to call /order/prune every once in a while.
 
 To run in development:
 
@@ -56,11 +57,11 @@ To contribute, simply open a pull request.
 
 ## TODO
 
-* Allow "on-site order mode" - adjust available payment methods accordingly
-* Add audit log everywhere
 * Add user dashboard - view data, points, and allow adding balance
+* Allow "on-site order mode" - adjust available payment methods accordingly
 * Add settings for daily order cups cap, balance cap, per-order cap, etc.
 * Add management dashboard for processing orders
 * Add management dashboard for adding items
 * Add management dashboard for modifying users (adding permissions, mostly)
 * Add management dashboard for statistics
+* Add audit log everywhere
