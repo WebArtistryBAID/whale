@@ -1,0 +1,16 @@
+{
+  "welcome": "Welcome",
+  "news": "News",
+  "title": "Welcome to Whale Cafe",
+  "subtitle": "Your favorite school cafe.",
+  "order": "Order",
+  "orderSub": "Start Ordering",
+  "login": "Log In",
+  "loginSub": "Enjoy More Features",
+  "user": "User Center",
+  "userSub": "Top-Up Balance",
+  "recentOrder": "Recent Order",
+  "recentOrderSub": "View Details",
+  "orderNumber": "(Order Number)",
+  "ads": "Sponsored Messages"
+}

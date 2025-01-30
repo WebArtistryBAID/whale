@@ -1,0 +1,15 @@
+{
+  "welcome": "欢迎",
+  "news": "新闻",
+  "title": "欢迎来到白鲸咖啡馆",
+  "subtitle": "您最喜欢的学校咖啡馆。",
+  "order": "点单",
+  "orderSub": "开始下单",
+  "login": "登录",
+  "loginSub": "解锁更多功能",
+  "user": "用户中心",
+  "userSub": "余额充值",
+  "recentOrder": "近期订单",
+  "recentOrderSub": "查看订单详情",
+  "orderNumber": "(订单号)"
+}

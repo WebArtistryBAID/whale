@@ -4,9 +4,12 @@ import { HydratedCategory } from '@/app/lib/ui-data-actions'
 import UICategory from '@/app/order/UICategory'
 import UIShoppingCartDesktop from '@/app/order/UIShoppingCartDesktop'
 import { useTranslationClient } from '@/app/i18n/client'
+import { Ad } from '@prisma/client'
+import UIAdsClient from '@/app/core-components/UIAdsClient'
 
-export default function OrderDesktop({ categories, uploadPrefix }: {
+export default function OrderDesktop({ categories, ads, uploadPrefix }: {
     categories: HydratedCategory[],
+    ads: Ad[]
     uploadPrefix: string
 }) {
     const { t } = useTranslationClient('order')
@@ -17,9 +20,9 @@ export default function OrderDesktop({ categories, uploadPrefix }: {
                                                     uploadPrefix={uploadPrefix}/>)}
         </div>
         <div className="w-1/2 p-8 xl:p-16 h-full border-l border-yellow-100 dark:border-yellow-800">
-            <div className="h-full flex flex-col gap-3">
+            <div className="h-full flex flex-col gap-8">
                 <div className="h-1/2">
-
+                    <UIAdsClient ads={ads} uploadPrefix={uploadPrefix}/>
                 </div>
                 <div className="h-1/2">
                     <UIShoppingCartDesktop uploadPrefix={uploadPrefix}/>

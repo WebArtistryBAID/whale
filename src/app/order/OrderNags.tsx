@@ -11,15 +11,9 @@ export default function OrderNags() {
     const { t } = useTranslationClient('order')
 
     const [ loginModal, setLoginModal ] = useState(false)
-    const [ updateModal, setUpdateModal ] = useState(false)
     const [ cookies ] = useCookies()
 
     useEffect(() => {
-        if (localStorage.getItem('update-nag') !== '1') {
-            setUpdateModal(true)
-            localStorage.setItem('update-nag', '1') // With a new update modal, we change this value.
-        }
-
         if (!cookies.access_token) {
             // Sorry, we nag users every 16 hours
             const lastShown = localStorage.getItem('login-nag')
@@ -33,7 +27,7 @@ export default function OrderNags() {
     }, [ cookies.access_token ])
 
     return <>
-        <Modal show={loginModal && !updateModal} onClose={() => setLoginModal(false)}>
+        <Modal show={loginModal} onClose={() => setLoginModal(false)}>
             <ModalHeader>{t('loginCta.title')}</ModalHeader>
             <ModalBody>
                 <p className="mb-5">{t('loginCta.message')}</p>
@@ -42,23 +36,8 @@ export default function OrderNags() {
                 </div>
             </ModalBody>
             <ModalFooter>
-                <Button pill color="warning" as={Link} href="/user">{t('login')}</Button>
+                <Button pill color="warning" as={Link} href="/login?redirect=%2Forder">{t('login')}</Button>
                 <Button pill color="gray" onClick={() => setLoginModal(false)}>{t('cancel')}</Button>
-            </ModalFooter>
-        </Modal>
-
-        <Modal show={updateModal} onClose={() => setUpdateModal(false)}>
-            <ModalHeader>{t('updateCta.title')}</ModalHeader>
-            <ModalBody>
-                <ul className="list-disc list-inside">
-                    <li>{t('updateCta.point1')}</li>
-                    <li>{t('updateCta.point2')}</li>
-                    <li>{t('updateCta.point3')}</li>
-                    <li>{t('updateCta.point4')}</li>
-                </ul>
-            </ModalBody>
-            <ModalFooter>
-                <Button pill color="warning" onClick={() => setUpdateModal(false)}>{t('confirm')}</Button>
             </ModalFooter>
         </Modal>
     </>

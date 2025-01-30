@@ -154,7 +154,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                 </div>
             </ModalBody>
             <ModalFooter>
-                <Button pill color="warning" as={Link} href="/user">{t('login')}</Button>
+                <Button pill color="warning" as={Link} href="/login?redirect=%2Forder%2Fcheckout">{t('login')}</Button>
                 <Button pill color="gray" onClick={() => {
                     setShowLoginNag(false)
                     void order()
@@ -244,7 +244,10 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                             <If condition={me == null && !shoppingCart.onSiteOrderMode}>
                                 <p className="text-sm">
                                     <Trans t={t} i18nKey="checkout.loginNag"
-                                           components={{ 1: <Link key="login" href="/user" className="inline"/> }}/>
+                                           components={{
+                                               1: <Link key="login" href="/login?redirect=%2Forder%2Fcheckout"
+                                                        className="inline"/>
+                                           }}/>
                                 </p>
                             </If>
                             <If condition={me != null && !balanceEnabled}>
@@ -265,7 +268,10 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                         <If condition={me == null && !shoppingCart.onSiteOrderMode}>
                             <p className="text-sm">
                                 <Trans t={t} i18nKey="checkout.loginNag"
-                                       components={{ 1: <Link key="login" href="/user" className="inline"/> }}/>
+                                       components={{
+                                           1: <Link key="login" href="/login?redirect=%2Forder%2Fcheckout"
+                                                    className="inline"/>
+                                       }}/>
                             </p>
                         </If>
                         <If condition={me != null && !balanceEnabled}>

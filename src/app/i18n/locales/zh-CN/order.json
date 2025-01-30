@@ -34,13 +34,6 @@
     "title": "登录以使用更多功能",
     "message": "登录后即可使用「先喝后付」、查看订单历史记录并获得积分! 北中国际学生与教职工可用。"
   },
-  "updateCta": {
-    "title": "更新内容",
-    "point1": "欢迎回来! 新学期，新气象。",
-    "point2": "白鲸咖啡的新用户界面带来了更友好的用户体验。",
-    "point3": "现在支持微信支付! 再也不需要等待人工确认付款了。",
-    "point4": "您仍可使用现金、代金券或「先喝后付」付款。"
-  },
   "addItem": "选规格",
   "itemDetails": {
     "sale": "{{sale}} 降价!",
@@ -112,8 +105,5 @@
     "paymentMethod": "支付方式",
     "paymentMethodMessage": "您想使用什么方式付款?",
     "insufficientBalance": "余额不足"
-  },
-  "bubble": {
-    "title": "近期订单"
   }
 }

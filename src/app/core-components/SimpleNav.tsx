@@ -17,7 +17,7 @@ export default async function SimpleNav() {
 
         <div className="flex gap-3">
             <If condition={me == null}>
-                <Button as={Link} href="/user" pill color="warning">{t('login')}</Button>
+                <Button as={Link} href="/login" pill color="warning">{t('login')}</Button>
             </If>
             <If condition={me != null}>
                 <Link href="/user" className="btn-icon-only w-10 h-10" aria-label="User Icon">
