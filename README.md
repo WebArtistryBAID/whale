@@ -7,7 +7,13 @@ The ordering management platform of Whale Cafe. Built with Next.js.
 To run in production:
 
 * Using `pm2` allows for proper deployment in production.
-* Set up a scheduled task to call /order/prune every once in a while.
+* Set up scheduled tasks.
+
+For each task, you need to pass the query parameter `key={CRON_KEY}`.
+
+| Path           | Unit Time  | Description           |
+|----------------|------------|-----------------------|
+| `/order/prune` | 30 minutes | Delete unpaid orders. |
 
 To run in development:
 
@@ -28,6 +34,7 @@ To run in development:
 | `ONELOGIN_CLIENT_SECRET` | OneLogin client secret.                                                                                         |
 | `WXPAY_MCH_ID`           | Weixin Pay merchant ID.                                                                                         |
 | `WXPAY_MCH_KEY`          | Weixin Pay signature key.                                                                                       |
+| `CRON_KEY`               | Cron task verification key.                                                                                     |
 
 * Run `npm run dev`.
 

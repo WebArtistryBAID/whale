@@ -1,10 +1,13 @@
 import { PaymentMethod, PaymentStatus, PrismaClient } from '@prisma/client'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 const prisma = new PrismaClient()
 
 // Remove all orders that are older than 1 hour and aren't paid
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
+    if (request.nextUrl.searchParams.get('key') !== process.env.CRON_KEY) {
+        return NextResponse.json({ success: false })
+    }
     await prisma.order.deleteMany({
         where: {
             paymentStatus: PaymentStatus.notPaid,
