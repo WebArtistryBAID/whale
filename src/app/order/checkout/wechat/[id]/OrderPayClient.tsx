@@ -161,7 +161,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
         }
     }
 
-    return <div className="container">
+    return <div id="primary-content" className="container">
         <h1 className="mb-5">{t('wechatPay.title')}</h1>
         <p className="mb-3 text-lg">{t('checkout.total')} ¥{order.totalPrice}</p>
         <If condition={error}>

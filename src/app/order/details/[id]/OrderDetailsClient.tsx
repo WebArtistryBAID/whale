@@ -82,7 +82,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
         </Modal>
 
         <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
-            <div
+            <div id="primary-content"
                 className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full flex text-center flex-col justify-center items-center overflow-y-auto"
                 aria-label={t('a11y.waitTime')}>
                 <h1 className="text-7xl font-display mb-3 flex items-center">

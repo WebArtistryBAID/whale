@@ -163,7 +163,8 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
         </Modal>
 
         <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
-            <div className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto" aria-label={t('checkout.title')}>
+            <div id="primary-content" className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto"
+                 aria-label={t('checkout.title')}>
                 <h1 aria-hidden className="mb-5">{t('checkout.title')}</h1>
 
                 <ButtonGroup className="mb-3">
