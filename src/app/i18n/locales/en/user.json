@@ -1,0 +1,20 @@
+{
+  "brand": "Whale Cafe",
+  "close": "Close",
+  "nav": {
+    "sidebar": "Open Navigation",
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "inbox": "Inbox",
+    "auditLogs": "Transactions",
+    "manageCategory": "Management",
+    "manageStore": "Store",
+    "manageAuditLogs": "Transactions",
+    "manageStats": "Statistics",
+    "manageSettings": "Settings",
+    "manageUsers": "Users",
+    "logOut": "Log Out",
+    "beta": "Beta",
+    "betaDetails": "Project Whale is in beta. Contact Lin with any issues."
+  }
+}

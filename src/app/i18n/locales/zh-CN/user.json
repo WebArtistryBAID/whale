@@ -1,0 +1,20 @@
+{
+  "brand": "白鲸咖啡",
+  "close": "关闭",
+  "nav": {
+    "sidebar": "打开导航栏",
+    "dashboard": "主页",
+    "orders": "订单",
+    "inbox": "收件箱",
+    "auditLogs": "交易记录",
+    "manageCategory": "管理",
+    "manageStore": "商店",
+    "manageAuditLogs": "交易记录",
+    "manageStats": "统计数据",
+    "manageSettings": "设置",
+    "manageUsers": "用户",
+    "logOut": "退出登录",
+    "beta": "Beta",
+    "betaDetails": "Project Whale 正在测试。如遇问题，请联系 Lin。"
+  }
+}
