@@ -125,7 +125,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
             </Button>
         </div>
 
-        <div className="h-screen flex">
+        <div className="h-screen flex overflow-y-hidden">
             <div className="h-screen hidden lg:block">
                 {sidebar}
             </div>

@@ -10,7 +10,7 @@ export default function UIAdsClient({ ads, uploadPrefix }: { ads: Ad[], uploadPr
     const { t } = useTranslationClient('welcome')
 
     return <If condition={ads.length > 0}>
-        <Carousel aria-label={t('ads')} indicators={false} className="rounded-3xl bg-yellow-100 dark:bg-yellow-800"
+        <Carousel aria-label={t('ads')} indicators={false} className="rounded-3xl bg-yellow-50 dark:bg-yellow-800"
                   slideInterval={5000} pauseOnHover>
             {ads.map(ad => <a href={ad.url ?? '#'} className="block h-full w-full" key={ad.id}>
                 <Image src={uploadPrefix + ad.image} width={100} height={100} alt=""

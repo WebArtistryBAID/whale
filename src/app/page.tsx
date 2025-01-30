@@ -20,29 +20,29 @@ export default async function Home() {
                 <h2 className="text-lg font-normal mb-5">{t('subtitle')}</h2>
 
                 <div className="flex flex-wrap justify-center items-center gap-5">
-                    <Link aria-label={t('order')} className="w-40 h-40 rounded-3xl bg-yellow-100 dark:bg-yellow-800
-                    hover:bg-yellow-200 dark:hover:bg-yellow-700 transition-colors duration-100
+                    <Link aria-label={t('order')} className="w-40 h-40 rounded-3xl bg-yellow-50 dark:bg-yellow-800
+                    hover:bg-yellow-100 dark:hover:bg-yellow-700 transition-colors duration-100
                     flex flex-col text-center items-center justify-center p-5" href="/order">
-                        <HiCake className="text-yellow-400 text-3xl mb-1"/>
+                        <HiCake className="text-yellow-300 dark:text-yellow-400 text-3xl mb-1"/>
                         <p className="font-bold text-lg" aria-hidden>{t('order')}</p>
                         <p className="secondary text-xs" aria-hidden>{t('orderSub')}</p>
                     </Link>
 
                     <If condition={user == null}>
-                        <Link aria-label={t('login')} className="w-40 h-40 rounded-3xl bg-yellow-100 dark:bg-yellow-800
-                    hover:bg-yellow-200 dark:hover:bg-yellow-700 transition-colors duration-100
+                        <Link aria-label={t('login')} className="w-40 h-40 rounded-3xl bg-yellow-50 dark:bg-yellow-800
+                    hover:bg-yellow-100 dark:hover:bg-yellow-700 transition-colors duration-100
                     flex flex-col text-center items-center justify-center p-5" href="/login">
-                            <HiUser className="text-yellow-400 text-3xl mb-1"/>
+                            <HiUser className="text-yellow-300 dark:text-yellow-400 text-3xl mb-1"/>
                             <p className="font-bold text-lg" aria-hidden>{t('login')}</p>
                             <p className="secondary text-xs" aria-hidden>{t('loginSub')}</p>
                         </Link>
                     </If>
 
                     <If condition={user != null}>
-                        <Link aria-label={t('login')} className="w-40 h-40 rounded-3xl bg-yellow-100 dark:bg-yellow-800
-                    hover:bg-yellow-200 dark:hover:bg-yellow-700 transition-colors duration-100
+                        <Link aria-label={t('login')} className="w-40 h-40 rounded-3xl bg-yellow-50 dark:bg-yellow-800
+                    hover:bg-yellow-100 dark:hover:bg-yellow-700 transition-colors duration-100
                     flex flex-col text-center items-center justify-center p-5" href="/user">
-                            <HiUser className="text-yellow-400 text-3xl mb-1"/>
+                            <HiUser className="text-yellow-300 dark:text-yellow-400 text-3xl mb-1"/>
                             <p className="font-bold text-lg" aria-hidden>{t('user')}</p>
                             <p className="secondary text-xs" aria-hidden>{t('userSub')}</p>
                         </Link>

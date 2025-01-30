@@ -59,9 +59,9 @@ enum NotificationType {
   orderCreated
   pickupReminder
   orderRefunded
-  custom
   balanceToppedUp
   pointsEarned
+  payLaterReminder
 }
 
 model Notification {

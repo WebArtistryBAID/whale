@@ -16,5 +16,48 @@
     "logOut": "退出登录",
     "beta": "Beta",
     "betaDetails": "Project Whale 正在测试。如遇问题，请联系 Lin。"
+  },
+  "breadcrumb": {
+    "bc": "导航",
+    "user": "用户"
+  },
+  "settings": {
+    "title": "主页",
+    "profile": {
+      "title": "用户资料",
+      "name": "姓名",
+      "pinyin": "拼音",
+      "phone": "手机号码",
+      "updateInfo": "这些数据与学校系统同步。如需更新，请联系学校管理员。"
+    },
+    "balance": {
+      "title": "余额",
+      "recharge": "充值",
+      "balanceInfo": "余额不可退还，最多能持有 ¥500。"
+    },
+    "points": {
+      "title": "积分",
+      "pointsInfo": "每次消费都能获取积分，积分可用于兑换奖励。"
+    },
+    "notifications": {
+      "title": "通知",
+      "smsInfo": "如果您未在 OneLogin 中授权，您将无法收到短信通知。",
+      "inbox": "收件箱",
+      "sms": "短信",
+      "type": "类型",
+      "types": {
+        "orderCreated": "订单创建",
+        "pickupReminder": "取餐提醒",
+        "orderRefunded": "订单退款",
+        "balanceToppedUp": "余额充值",
+        "pointsEarned": "积分获取",
+        "payLaterReminder": "「先喝再付」提醒"
+      }
+    },
+    "others": {
+      "title": "其他",
+      "logOut": "退出登录",
+      "credits": "Project Whale 由 WebArtistry 和白鲸咖啡馆合作开发。感谢所有贡献者。"
+    }
   }
 }

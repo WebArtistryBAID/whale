@@ -16,5 +16,48 @@
     "logOut": "Log Out",
     "beta": "Beta",
     "betaDetails": "Project Whale is in beta. Contact Lin with any issues."
+  },
+  "breadcrumb": {
+    "bc": "Breadcrumb",
+    "user": "User"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "profile": {
+      "title": "User Profile",
+      "name": "Name",
+      "pinyin": "Pinyin",
+      "phone": "Phone Number",
+      "updateInfo": "These data are synchronized with the school portal. Please contact school administrators to update your information."
+    },
+    "balance": {
+      "title": "Balance",
+      "recharge": "Recharge",
+      "balanceInfo": "Balance is non-refundable. You can hold up to ¥500 at a time."
+    },
+    "points": {
+      "title": "Points",
+      "pointsInfo": "You can earn points with every purchase. Points can be used to redeem rewards."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "smsInfo": "You will not receive SMS notifications if you did not authorize in OneLogin.",
+      "inbox": "Inbox",
+      "sms": "SMS",
+      "type": "Type",
+      "types": {
+        "orderCreated": "Order Created",
+        "pickupReminder": "Pick Up Reminder",
+        "orderRefunded": "Order Refunded",
+        "balanceToppedUp": "Balance Recharged",
+        "pointsEarned": "Points Earned",
+        "payLaterReminder": "Pay Later Reminder"
+      }
+    },
+    "others": {
+      "title": "Others",
+      "logOut": "Log Out",
+      "credits": "Project Whale is developed with a collaboration between WebArtistry and Whale Cafe. Thank you to all contributors."
+    }
   }
 }

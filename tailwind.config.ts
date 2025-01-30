@@ -1,4 +1,4 @@
-import type {Config} from 'tailwindcss'
+import type { Config } from 'tailwindcss'
 import * as flowbite from 'flowbite-react/tailwind'
 
 export default {
@@ -12,8 +12,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                display: ['Noto Serif', 'system-ui', 'sans-serif'],
-                body: ['Noto Sans', 'system-ui', 'sans-serif']
+                display: [ 'system-ui', 'sans-serif' ],
+                body: [ 'system-ui', 'sans-serif' ]
             }
         }
     },
