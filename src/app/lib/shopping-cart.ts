@@ -75,6 +75,10 @@ export const useStoredOrder = create<StoredOrderState>()(
                     get().setOrder(null)
                     return null
                 }
+                if (new Date().getTime() - new Date(o.createdAt).getTime() > 10 * 60 * 60 * 1000) {
+                    get().setOrder(null)
+                    return null
+                }
                 return o
             }
         }),

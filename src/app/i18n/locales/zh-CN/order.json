@@ -112,5 +112,8 @@
     "paymentMethod": "支付方式",
     "paymentMethodMessage": "您想使用什么方式付款?",
     "insufficientBalance": "余额不足"
+  },
+  "bubble": {
+    "title": "近期订单"
   }
 }

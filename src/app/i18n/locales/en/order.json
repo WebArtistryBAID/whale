@@ -113,5 +113,8 @@
     "paymentMethod": "Payment Method",
     "paymentMethodMessage": "How would you like to pay for this order?",
     "insufficientBalance": "Insufficient Balance"
+  },
+  "bubble": {
+    "title": "Recent Order"
   }
 }

@@ -119,7 +119,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                     </If>
                 </div>
 
-                <Alert color="green" rounded className="mb-3 w-full" icon={HiInformationCircle}>
+                <Alert color="green" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
                     {t('details.orderNumberPrompt')}
                 </Alert>
 
@@ -131,7 +131,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                                     className="inline-block"
                                     onClick={() => setPayModal(true)}>{t('details.payNow')}</Button>
                         </div>}
-                               color="yellow" rounded className="mb-3 w-full" icon={HiInformationCircle}>
+                               color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
                             <span className="font-bold">{t('details.paymentTitle')}</span>
                         </Alert>
                     </If>
@@ -141,7 +141,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                             <Button size="xs" as={Link} href={`/order/checkout/wechat/${order.id}`} pill color="warning"
                                     className="inline-block">{t('details.payNow')}</Button>
                         </div>}
-                               color="yellow" rounded className="mb-3 w-full" icon={HiInformationCircle}>
+                               color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
                             <span className="font-bold">{t('details.paymentTitle')}</span>
                         </Alert>
                     </If>
