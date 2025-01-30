@@ -41,6 +41,12 @@ export interface HydratedOrder {
     paymentMethod: PaymentMethod
 }
 
+export interface EstimatedWaitTimeResponse {
+    time: number
+    cups: number
+    orders: number
+}
+
 export async function couponQuickValidate(code: string): Promise<CouponCode | null> {
     return prisma.couponCode.findUnique({
         where: {
@@ -239,4 +245,34 @@ export async function createOrder(items: OrderedItemTemplate[],
     }
 
     return order
+}
+
+export async function getEstimatedWaitTime(): Promise<EstimatedWaitTimeResponse> {
+    const orders = await prisma.order.findMany({
+        where: {
+            status: OrderStatus.waiting,
+            OR: [
+                {
+                    paymentStatus: PaymentStatus.paid
+                },
+                {
+                    paymentMethod: PaymentMethod.payLater
+                }
+            ]
+        },
+        include: {
+            items: true
+        }
+    })
+    let cups = 0
+    for (const order of orders) {
+        for (const item of order.items) {
+            cups += item.amount
+        }
+    }
+    return {
+        time: cups * 2, // Assuming 2 minutes per cup
+        cups,
+        orders: orders.length
+    }
 }

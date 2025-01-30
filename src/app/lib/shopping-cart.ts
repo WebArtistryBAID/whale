@@ -18,6 +18,7 @@ export interface ShoppingCartState {
     setOnSiteOrderMode: (mode: boolean) => void
     addItem: (item: OrderedItemTemplate) => void
     removeItem: (index: number) => void
+    getAmount: () => number
     clear: () => void
     getTotalPrice: () => Decimal
 }
@@ -48,6 +49,7 @@ export const useShoppingCart = create<ShoppingCartState>()(
             setOnSiteOrderMode: (mode: boolean) => set({ onSiteOrderMode: mode }),
             addItem: (item: OrderedItemTemplate) => set(state => ({ items: [ ...state.items, item ] })),
             removeItem: (index: number) => set(state => ({ items: state.items.filter((_, i) => i !== index) })),
+            getAmount: () => get().items.reduce((acc, item) => acc + item.amount, 0),
             clear: () => set({ items: [] }),
             getTotalPrice: () => get().items.reduce((acc, item) => acc.add(calculatePrice(item)), new Decimal(0))
         }),

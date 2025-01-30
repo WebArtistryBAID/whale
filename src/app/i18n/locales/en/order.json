@@ -73,7 +73,12 @@
     "details": "Details",
     "pickUp": "Pick Up",
     "delivery": "Delivery",
-    "deliveryRoom": "Delivery Room"
+    "deliveryRoom": "Delivery Room",
+    "loginNagModal": {
+      "title": "You will not receive points for this order",
+      "message": "You are not logged in, and you will not receive points for this order. Would you like to log in now? Currently only available to BAID students and faculty.",
+      "continue": "Continue as Guest"
+    }
   },
   "wechatPay": {
     "title": "Weixin Pay",

@@ -73,7 +73,12 @@
     "details": "详情",
     "pickUp": "自取",
     "delivery": "外送",
-    "deliveryRoom": "外送房间"
+    "deliveryRoom": "外送房间",
+    "loginNagModal": {
+      "title": "本订单无法获得积分",
+      "message": "您尚未登录，因此无法从本订单获得积分。是否现在登录? 北中国际学生与教职工可用。",
+      "continue": "不登录，直接下单"
+    }
   },
   "wechatPay": {
     "title": "微信支付",

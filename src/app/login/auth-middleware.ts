@@ -20,12 +20,12 @@ export default async function authMiddleware(req: NextRequest): Promise<NextResp
     }
     const cookie = (await cookies()).get('access_token')?.value
     if (cookie == null) {
-        return NextResponse.redirect(new URL(await getLoginTarget('/'), req.nextUrl))
+        return NextResponse.redirect(new URL(await getLoginTarget(req.nextUrl.pathname), req.nextUrl))
     }
     try {
         await jwtVerify(cookie, new TextEncoder().encode(process.env.JWT_SECRET!))
     } catch {
-        return NextResponse.redirect(new URL(await getLoginTarget('/'), req.nextUrl))
+        return NextResponse.redirect(new URL(await getLoginTarget(req.nextUrl.pathname), req.nextUrl))
     }
 
     return null
