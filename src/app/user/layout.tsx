@@ -77,6 +77,9 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                         <SidebarItem as={Link} href="/user/manage/stats" icon={HiChartPie}>
                             {t('nav.manageStats')}
                         </SidebarItem>
+                        <SidebarItem as={Link} href="/user/manage/orders" icon={HiCake}>
+                            {t('nav.manageOrders')}
+                        </SidebarItem>
                         <SidebarItem as={Link} href="/user/manage/users" icon={HiUsers}>
                             {t('nav.manageUsers')}
                         </SidebarItem>
