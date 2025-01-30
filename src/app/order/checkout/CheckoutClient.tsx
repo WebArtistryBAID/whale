@@ -7,12 +7,13 @@ import { useEffect, useState } from 'react'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
-import { Button, ButtonGroup, TextInput } from 'flowbite-react'
+import { Button, ButtonGroup, Popover, TextInput } from 'flowbite-react'
 import { CouponCode, PaymentMethod, PaymentStatus, User } from '@prisma/client'
 import { canPayWithBalance, canPayWithPayLater, couponQuickValidate, createOrder } from '@/app/lib/ordering-actions'
 import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
+import { HiInformationCircle } from 'react-icons/hi'
 
 function isMobileOriPad(): boolean {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
@@ -128,14 +129,14 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             <h1 aria-hidden className="mb-5">{t('checkout.title')}</h1>
 
             <ButtonGroup className="mb-3">
-                <Button color={useDelivery ? 'gray' : 'yellow'} onClick={() => setUseDelivery(false)}>
+                <Button color={useDelivery ? 'gray' : 'warning'} onClick={() => setUseDelivery(false)}>
                     {t('checkout.pickUp')}
                     <If condition={!useDelivery}>
                         <span className="sr-only">{t('a11y.selected')}</span>
                     </If>
                 </Button>
 
-                <Button color={useDelivery ? 'yellow' : 'gray'} onClick={() => setUseDelivery(true)}>
+                <Button color={useDelivery ? 'warning' : 'gray'} onClick={() => setUseDelivery(true)}>
                     {t('checkout.delivery')}
                     <If condition={useDelivery}>
                         <span className="sr-only">{t('a11y.selected')}</span>
@@ -160,7 +161,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
 
             <p aria-hidden className="mb-1">{t('checkout.paymentMethod')}</p>
             <div className="mb-5" aria-label={t('checkout.paymentMethod')}>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 items-center">
                     <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
                                          selected={paymentMethod === PaymentMethod.wxPay}
                                          disabled={loading}
@@ -190,23 +191,45 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                                              selected={paymentMethod === PaymentMethod.payForMe}
                                              select={() => setPaymentMethod(PaymentMethod.payForMe)}/>
                     </If>
+
+                    <Popover trigger="hover" aria-hidden content={<div className="p-3">
+                        <If condition={!shoppingCart.onSiteOrderMode}>
+                            <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
+                        </If>
+                        <If condition={me == null && !shoppingCart.onSiteOrderMode}>
+                            <p className="text-sm">
+                                <Trans t={t} i18nKey="checkout.loginNag"
+                                       components={{ 1: <Link key="login" href="/user" className="inline"/> }}/>
+                            </p>
+                        </If>
+                        <If condition={me != null && !balanceEnabled}>
+                            <p className="mt-1 text-sm">{t('checkout.balanceDisabled')}</p>
+                        </If>
+                        <If condition={me != null && !payLaterEnabled}>
+                            <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
+                        </If>
+                    </div>}>
+                        <HiInformationCircle className="text-yellow-300 dark:text-yellow-600"/>
+                    </Popover>
                 </div>
 
-                <If condition={!shoppingCart.onSiteOrderMode}>
-                    <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
-                </If>
-                <If condition={me == null && !shoppingCart.onSiteOrderMode}>
-                    <p className="text-sm">
-                        <Trans t={t} i18nKey="checkout.loginNag"
-                               components={{ 1: <Link key="login" href="/user" className="inline"/> }}/>
-                    </p>
-                </If>
-                <If condition={me != null && !balanceEnabled}>
-                    <p className="mt-1 text-sm">{t('checkout.balanceDisabled')}</p>
-                </If>
-                <If condition={me != null && !payLaterEnabled}>
-                    <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
-                </If>
+                <div aria-label={t('a11y.paymentMethods')} className="sr-only">
+                    <If condition={!shoppingCart.onSiteOrderMode}>
+                        <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
+                    </If>
+                    <If condition={me == null && !shoppingCart.onSiteOrderMode}>
+                        <p className="text-sm">
+                            <Trans t={t} i18nKey="checkout.loginNag"
+                                   components={{ 1: <Link key="login" href="/user" className="inline"/> }}/>
+                        </p>
+                    </If>
+                    <If condition={me != null && !balanceEnabled}>
+                        <p className="mt-1 text-sm">{t('checkout.balanceDisabled')}</p>
+                    </If>
+                    <If condition={me != null && !payLaterEnabled}>
+                        <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
+                    </If>
+                </div>
             </div>
 
             <p aria-hidden className="mb-1">{t('checkout.coupon')}</p>

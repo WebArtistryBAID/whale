@@ -25,6 +25,7 @@
     "itemDetails": "选规格",
     "orderedItems": "已选商品",
     "coupon": "使用代金券减 ¥{{price}}。",
+    "paymentMethods": "支付方式信息",
     "qrCode": "抬起手机，向屏幕左上方扫描二维码。请确保您的显示屏未关闭。"
   },
   "loginCta": {

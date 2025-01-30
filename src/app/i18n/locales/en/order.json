@@ -25,6 +25,7 @@
     "itemDetails": "Product Details",
     "orderedItems": "Ordered Items",
     "coupon": "Applied coupon for ¥{{price}} off.",
+    "paymentMethods": "Information about Payment Methods",
     "qrCode": "Scan the QR Code by holding up your phone to the top-left of the screen. Make sure screen curtain is turned off."
   },
   "loginCta": {
