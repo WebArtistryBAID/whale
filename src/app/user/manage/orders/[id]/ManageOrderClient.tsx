@@ -8,13 +8,11 @@ import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@prisma/cl
 import { markOrderDone, refundOrder } from '@/app/lib/manage-actions'
 import { useEffect, useState } from 'react'
 import If from '@/app/lib/If'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
 
 export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
     const { t } = useTranslationClient('user')
-    const router = useRouter()
     const [ order, setOrder ] = useState(init)
     const [ refundModal, setRefundModal ] = useState(false)
     const [ loading, setLoading ] = useState(false)
@@ -118,7 +116,12 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
                             onClick={async () => {
                                 setLoading(true)
                                 await markOrderDone(order.id)
-                                router.refresh()
+                                const o = await getOrder(order.id)
+                                if (o == null) {
+                                    location.href = '/'
+                                    return
+                                }
+                                setOrder(o)
                                 setLoading(false)
                             }}>
                         <HiCheck

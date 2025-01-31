@@ -29,7 +29,7 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
             <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                    className="hidden dark:block w-72" alt=""/>
             <p className="mb-3">{t('today.empty')}</p>
-            <Button color="warning" as={Link} href="/user/manage/orders">{t('orders.return')}</Button>
+            <Button color="warning" as={Link} href="/user/manage/orders">{t('today.return')}</Button>
         </div>
     }
 
