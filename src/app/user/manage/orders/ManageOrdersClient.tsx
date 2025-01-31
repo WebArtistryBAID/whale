@@ -90,7 +90,7 @@ export default function ManageOrdersClient({ init }: { init: Paginated<Order> })
                             </TableCell>
                             <TableCell>
                                 <Button pill color="warning" size="xs" as={Link}
-                                        href={`/manage/orders/${order.id}`}>{t('orders.view')}</Button>
+                                        href={`/user/manage/orders/${order.id}`}>{t('orders.view')}</Button>
                             </TableCell>
                         </TableRow>
                     )}

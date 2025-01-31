@@ -4,6 +4,7 @@
   "close": "Close",
   "cancel": "Cancel",
   "edit": "Edit",
+  "selected": " (Selected)",
   "nav": {
     "sidebar": "Open Navigation",
     "dashboard": "Dashboard",
@@ -117,6 +118,7 @@
   },
   "inbox": {
     "title": "Inbox",
+    "view": "View Details",
     "empty": "No notifications yet. You've reached inbox zero!",
     "types": {
       "orderCreated": "Order {{order}} successfully created.",
@@ -186,5 +188,33 @@
         "minimum": "Must be at least 0."
       }
     }
+  },
+  "today": {
+    "orderNumber": "(Order Number)",
+    "info": "Order Information",
+    "items": "Order Items",
+    "status": "Order Status",
+    "actions": "Order Actions",
+    "waiting": "Waiting",
+    "done": "Done",
+    "none": "Anonymous",
+    "user": "Ordered By",
+    "createdAt": "Created At",
+    "price": "Total Price",
+    "current": "Current Status",
+    "payment": "Payment Status",
+    "notPaid": "Not Paid",
+    "paid": "Paid",
+    "refunded": "Refunded",
+    "paymentMethod": "Payment Method",
+    "wxPay": "Weixin Pay",
+    "balance": "Balance",
+    "cash": "Cash",
+    "payLater": "Pay Later",
+    "payForMe": "Weixin Pay",
+    "wxPayID": "Weixin Pay Transaction No.",
+    "deliveryRoom": "Delivery Room",
+    "refund": "Refund",
+    "refundInfo": "Do not refund over 5 orders per week. That may cause issues with Weixin Pay."
   }
 }

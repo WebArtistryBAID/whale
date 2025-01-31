@@ -42,6 +42,7 @@ export interface HydratedOrder {
     userId: number | null
     paymentStatus: PaymentStatus
     paymentMethod: PaymentMethod
+    wxPayId: string | null
 }
 
 export interface EstimatedWaitTimeResponse {

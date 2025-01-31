@@ -4,6 +4,7 @@
   "close": "关闭",
   "cancel": "取消",
   "edit": "编辑",
+  "selected": " (已选中)",
   "nav": {
     "sidebar": "打开导航栏",
     "dashboard": "主页",
@@ -117,6 +118,7 @@
   },
   "inbox": {
     "title": "收件箱",
+    "view": "查看详情",
     "empty": "暂时没有通知。",
     "types": {
       "orderCreated": "订单 {{order}} 下单成功。",

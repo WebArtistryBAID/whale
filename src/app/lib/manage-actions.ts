@@ -1,11 +1,12 @@
 'use server'
 
 import Paginated from '@/app/lib/Paginated'
-import { Order, PrismaClient, UserAuditLogType } from '@prisma/client'
+import { NotificationType, Order, OrderStatus, PrismaClient, UserAuditLogType } from '@prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedUserAuditLog } from '@/app/lib/user-actions'
 import Decimal from 'decimal.js'
 import { HydratedOrder } from '@/app/lib/ordering-actions'
+import { sendNotification } from '@/app/lib/notification-actions'
 
 const prisma = new PrismaClient()
 
@@ -122,4 +123,41 @@ export async function getTodayOrders(): Promise<HydratedOrder[]> {
             user: true
         }
     })
+}
+
+export async function markOrderDone(id: number): Promise<void> {
+    const me = await requireUserPermission('admin.manage')
+    const order = await prisma.order.update({
+        where: {
+            id
+        },
+        data: {
+            status: OrderStatus.done
+        },
+        include: {
+            user: true
+        }
+    })
+    if (order == null) {
+        return
+    }
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.orderSetStatus,
+            user: {
+                connect: {
+                    id: me.id
+                }
+            },
+            order: {
+                connect: {
+                    id
+                }
+            },
+            values: [ 'done' ]
+        }
+    })
+    if (order.user != null) {
+        await sendNotification(order.user, NotificationType.pickupReminder, [], order.id)
+    }
 }
