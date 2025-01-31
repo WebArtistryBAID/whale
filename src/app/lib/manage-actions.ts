@@ -284,3 +284,38 @@ async function refundBalance(order: HydratedOrder): Promise<void> {
         }
     })
 }
+
+export async function getWaitingOrders(): Promise<{ [id: number]: HydratedOrder }> {
+    await requireUserPermission('admin.manage')
+    const orders = await prisma.order.findMany({
+        where: {
+            status: OrderStatus.waiting,
+            OR: [
+                {
+                    paymentStatus: PaymentStatus.paid
+                },
+                {
+                    paymentStatus: PaymentStatus.notPaid,
+                    paymentMethod: PaymentMethod.payLater
+                }
+            ]
+        },
+        orderBy: {
+            createdAt: 'desc'
+        },
+        include: {
+            items: {
+                include: {
+                    itemType: true,
+                    appliedOptions: true
+                }
+            },
+            user: true
+        }
+    })
+    const result: { [id: number]: HydratedOrder } = {}
+    for (const order of orders) {
+        result[order.id] = order
+    }
+    return result
+}

@@ -222,6 +222,10 @@
       "messageCash": "Refunding cash requires manual operation. Please confirm with the user before proceeding.",
       "messageBalance": "The refund will enter the user's balance immediately.",
       "messageWeChat": "The refund will return to the user's Weixin Pay account in up to 14 working days."
-    }
+    },
+    "empty": "No orders yet.",
+    "return": "Return to Order Management",
+    "ordersPane": "Waiting Orders",
+    "detailsPane": "Order Detail"
   }
 }
