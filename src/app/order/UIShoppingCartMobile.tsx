@@ -13,7 +13,7 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     const router = useRouter()
-    const [ showAll, setShowAll ] = useState(true)
+    const [ showAll, setShowAll ] = useState(false)
     const detailsRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {

@@ -1,6 +1,5 @@
 'use client'
 
-import { HydratedOrder } from '@/app/lib/ordering-actions'
 import { useSearchParams } from 'next/navigation'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
@@ -9,13 +8,12 @@ import { useEffect, useState } from 'react'
 import {
     getExternalPaymentRedirect,
     getOAPaymentPackage,
-    getOrderPaymentStatus,
     getPaymentQRCode,
-    getWeChatOAuthRedirect
-} from '@/app/lib/wx-pay-actions'
-import { PaymentMethod, PaymentStatus } from '@prisma/client'
+    getWeChatOAuthRedirect,
+    isTransactionFinished
+} from '@/app/lib/balance-actions'
+import { UserAuditLog } from '@prisma/client'
 import QRCode from 'react-qr-code'
-import { useShoppingCart } from '@/app/lib/shopping-cart'
 
 function isDesktop(): boolean {
     return !isMobileOriPad()
@@ -32,23 +30,21 @@ function isWeChat(): boolean {
 // If using "payForMe" or desktop device (not iPad) or on site order, show QR code
 // If using (mobile device or iPad) AND inside WeChat, use official account payment
 // If using (mobile device or iPad) AND outside WeChat, use external payment
-export default function OrderPayClient({ order }: { order: HydratedOrder }) {
+export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
     const { t } = useTranslationClient('order')
     const searchParams = useSearchParams()
     const [ canRestart, setCanRestart ] = useState(false)
     const [ error, setError ] = useState(false)
     const [ qrCode, setQRCode ] = useState<string | null>(null)
     const [ qrCodeShowProcessing, setQRCodeShowProcessing ] = useState(false)
-    const [ shareCopied, setShareCopied ] = useState(false)
-    const shoppingCart = useShoppingCart()
 
     useEffect(() => {
-        if (isMobileOriPad() && order.paymentMethod !== PaymentMethod.payForMe && !shoppingCart.onSiteOrderMode) {
+        if (isMobileOriPad()) {
             void launchWeChat()
         }
-        if (isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode) {
+        if (isDesktop()) {
             (async () => {
-                const qr = await getPaymentQRCode(order.id)
+                const qr = await getPaymentQRCode(trans.id)
                 if (qr == null) {
                     setError(true)
                     return
@@ -70,33 +66,9 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    async function share() {
-        if (navigator.canShare()) {
-            try {
-                await navigator.share({
-                    title: t('wechatPay.shareTitle'),
-                    text: t('wechatPay.shareText'),
-                    url: location.href
-                })
-            } catch {
-                await navigator.clipboard.writeText(location.href)
-                setShareCopied(true)
-                setTimeout(() => {
-                    setShareCopied(false)
-                }, 3000)
-            }
-        } else {
-            await navigator.clipboard.writeText(location.href)
-            setShareCopied(true)
-            setTimeout(() => {
-                setShareCopied(false)
-            }, 3000)
-        }
-    }
-
     async function pollPaymentStatus() {
-        if (await getOrderPaymentStatus(order.id) === PaymentStatus.paid) {
-            location.href = `/order/details/${order.id}`
+        if (await isTransactionFinished(trans.id)) {
+            location.href = `/user`
         }
     }
 
@@ -112,7 +84,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                     return
                 }
                 // We have authorized with WeChat, can continue
-                const paymentPackage = await getOAPaymentPackage(order.id, searchParams.get('openid')!)
+                const paymentPackage = await getOAPaymentPackage(trans.id, searchParams.get('openid')!)
                 if (paymentPackage == null) {
                     setError(true)
                     return
@@ -147,7 +119,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                 }
             } else {
                 // We haven't authorized with WeChat yet, redirect to authorize
-                const redir = await getWeChatOAuthRedirect(order.id)
+                const redir = await getWeChatOAuthRedirect(trans.id)
                 if (redir == null) {
                     setError(true)
                     return
@@ -156,7 +128,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
             }
         } else {
             // Use WAP payment
-            const redir = await getExternalPaymentRedirect(order.id)
+            const redir = await getExternalPaymentRedirect(trans.id)
             if (redir == null) {
                 setError(true)
                 return
@@ -167,13 +139,13 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
 
     return <div id="primary-content" className="container">
         <h1 className="mb-5">{t('wechatPay.title')}</h1>
-        <p className="mb-3 text-lg">{t('checkout.total')} ¥{order.totalPrice}</p>
+        <p className="mb-3 text-lg">{t('checkout.total')} ¥{trans.values[0]}</p>
         <If condition={error}>
             <p className="mb-3">{t('wechatPay.error')}</p>
             <Button onClick={() => location.reload()} pill color="warning">{t('wechatPay.restart')}</Button>
         </If>
         <If condition={!error}>
-            <If condition={isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode}>
+            <If condition={isDesktop()}>
                 <If condition={qrCode == null}>
                     <Spinner color="warning"/>
                 </If>
@@ -195,16 +167,12 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                         <Button disabled={!canRestart} onClick={() => location.reload()} pill
                                 color="warning">{t('wechatPay.restart')}</Button>
                     </If>
-                    <Button className="mt-3" pill color="warning"
-                            onClick={share}>{shareCopied ? t('copied') : t('wechatPay.share')}</Button>
                 </If>
             </If>
-            <If condition={isMobileOriPad() && order.paymentMethod !== PaymentMethod.payForMe && !shoppingCart.onSiteOrderMode}>
+            <If condition={isMobileOriPad()}>
                 <p className="mb-3">{t('wechatPay.processing')}</p>
                 <Button disabled={!canRestart} onClick={launchWeChat} pill
                         color="warning">{t('wechatPay.restart')}</Button>
-                <Button className="mt-3" pill color="warning"
-                        onClick={share}>{shareCopied ? t('copied') : t('wechatPay.share')}</Button>
             </If>
         </If>
     </div>

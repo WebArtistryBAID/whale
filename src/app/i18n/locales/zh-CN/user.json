@@ -1,6 +1,7 @@
 {
   "brand": "白鲸咖啡",
   "close": "关闭",
+  "cancel": "取消",
   "nav": {
     "sidebar": "打开导航栏",
     "dashboard": "主页",
@@ -35,6 +36,14 @@
       "title": "余额",
       "recharge": "充值",
       "balanceInfo": "余额不可退还，最多能持有 ¥{{max}}。"
+    },
+    "rechargeModal": {
+      "title": "充值",
+      "message": "请输入您要充值的金额。余额不可退还。",
+      "placeholder": "金额...",
+      "minimum": "最低充值金额是 ¥{{value}}。",
+      "maximum": "最高充值金额是 ¥{{value}}。",
+      "cta": "微信支付付款"
     },
     "points": {
       "title": "积分",

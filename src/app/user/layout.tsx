@@ -90,7 +90,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                 </If>
             </SidebarItemGroup>
         </SidebarItems>
-        <div className="mr-3 mb-3 absolute bottom-0">
+        <div className="mr-3 mb-3 absolute bottom-0 hidden lg:block">
             <button onClick={() => {
                 deleteCookie('access_token', { path: '/' })
                 router.push('/')

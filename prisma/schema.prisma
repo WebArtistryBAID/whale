@@ -69,6 +69,7 @@ model Notification {
   createdAt DateTime         @default(now())
   type      NotificationType
   values    String[]
+  toasted Boolean @default(false)
 
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  Int
@@ -193,6 +194,7 @@ enum UserAuditLogType {
   blocked
   unblocked
   permissionsUpdated
+  balanceTransaction
   balanceUpdated
   pointsUpdated
 

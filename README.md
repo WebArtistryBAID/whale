@@ -38,9 +38,10 @@ To run in development:
 
 For each task, you need to pass the query parameter `key={CRON_KEY}`.
 
-| Path           | Time             | Description           |
-|----------------|------------------|-----------------------|
-| `/order/prune` | Every 30 minutes | Delete unpaid orders. |
+| Path             | Time             | Description                         |
+|------------------|------------------|-------------------------------------|
+| `/order/prune`   | Every 30 minutes | Delete unpaid orders.               |
+| `/balance/prune` | Every 30 minutes | Delete unpaid balance transactions. |
 
 ## Settings
 

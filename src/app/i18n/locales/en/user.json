@@ -1,6 +1,7 @@
 {
   "brand": "Whale Cafe",
   "close": "Close",
+  "cancel": "Cancel",
   "nav": {
     "sidebar": "Open Navigation",
     "dashboard": "Dashboard",
@@ -35,6 +36,14 @@
       "title": "Balance",
       "recharge": "Recharge",
       "balanceInfo": "Balance is non-refundable. You can hold up to ¥{{max}} at a time."
+    },
+    "rechargeModal": {
+      "title": "Recharge",
+      "message": "Please enter the amount you would like to recharge. Balance is non-refundable.",
+      "placeholder": "Amount...",
+      "minimum": "Minimum recharge amount is ¥{{value}}.",
+      "maximum": "Maximum recharge amount is ¥{{value}}.",
+      "cta": "Pay with Weixin Pay"
     },
     "points": {
       "title": "Points",

@@ -34,6 +34,20 @@
     "title": "登录以使用更多功能",
     "message": "登录后即可使用「先喝后付」、查看订单历史记录并获得积分! 北中国际学生与教职工可用。"
   },
+  "storeClosedModal": {
+    "title": "店铺已关闭",
+    "simple": "店铺目前已关闭。",
+    "message": "店铺目前已关闭。您可以查看菜单，但无法下单。",
+    "messageScheduledA": "店铺目前已关闭。您可以查看菜单，但无法下单。店铺将于 {{time}} 重新开放。",
+    "messageScheduledB": "店铺目前已关闭。您可以查看菜单，但无法下单。店铺将于下一个工作日 {{time}} 重新开放。"
+  },
+  "maximumCupsModal": {
+    "title": "店铺已满额",
+    "simple": "店铺已达到订单最大额度。",
+    "message": "店铺已达到订单最大额度。您可以查看菜单，但无法下单。"
+  },
+  "maximumCupsPerOrder_one": "一单只能购买 {{count}} 杯。",
+  "maximumCupsPerOrder_other": "一单只能购买 {{count}} 杯。",
   "addItem": "选规格",
   "itemDetails": {
     "sale": "{{sale}} 降价!",
@@ -97,6 +111,7 @@
     },
     "onSiteContinue": "继续现场点单",
     "orderNumberPrompt": "请记住您的订单号，您在取餐时会用到。",
+    "paymentTitle": "支付",
     "paymentPromptPayLater": "此「先喝后付」订单尚未支付。",
     "paymentPrompt": "此订单尚未支付。支付后，订单才会开始准备。",
     "payNow": "立即支付",
