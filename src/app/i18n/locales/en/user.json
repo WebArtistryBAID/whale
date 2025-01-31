@@ -106,5 +106,15 @@
       "orderPaymentFailed": "Order {{order}} (¥{{v1}}) payment failed by user {{user}} with {{v0}}.",
       "orderRefunded": "Order {{order}} (¥{{v0}}) is refunded by user {{user}}."
     }
+  },
+  "inbox": {
+    "types": {
+      "orderCreated": "Order {{order}} successfully created.",
+      "pickupReminder": "Order {{order}} is ready.",
+      "orderRefunded": "Order {{order}} (¥{{v0}}) has been refunded.",
+      "balanceToppedUp": "Balance recharge (¥{{v0}}) succeeded.",
+      "pointsEarned": "You have earned {{v0}} points.",
+      "payLaterReminder": "Your Pay Later order {{order}} hasn't been paid for yet."
+    }
   }
 }

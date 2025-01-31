@@ -379,6 +379,7 @@ export async function createOrder(items: OrderedItemTemplate[],
             }
         }
     })
+    // Send notification
 
     // Add points to user
     if (me != null && order.paymentStatus === PaymentStatus.paid) {
