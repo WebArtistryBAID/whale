@@ -108,6 +108,8 @@
     }
   },
   "inbox": {
+    "title": "Inbox",
+    "empty": "No notifications yet. You've reached inbox zero!",
     "types": {
       "orderCreated": "Order {{order}} successfully created.",
       "pickupReminder": "Order {{order}} is ready.",

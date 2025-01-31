@@ -15,13 +15,13 @@ import {
 import { HiUser } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
-import { toggleInboxNotification, toggleSMSNotification } from '@/app/login/login-actions'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { getConfigValue } from '@/app/lib/settings-actions'
 import Decimal from 'decimal.js'
 import { beginTransaction } from '@/app/lib/balance-actions'
+import { toggleInboxNotification, toggleSMSNotification } from '@/app/lib/notification-actions'
 
 export default function UserDashboardClient({ user }: { user: User }) {
     const { t } = useTranslationClient('user')

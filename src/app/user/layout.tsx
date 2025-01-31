@@ -33,6 +33,7 @@ import { User } from '@prisma/client'
 import { getMyUser } from '@/app/login/login-actions'
 import { useCookies } from 'react-cookie'
 import { useRouter } from 'next/navigation'
+import { getMyNotificationsCount } from '@/app/lib/notification-actions'
 
 export default function UserLayout({ children }: { children: ReactNode }) {
     const { t } = useTranslationClient('user')
@@ -40,12 +41,17 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     const deleteCookie = useCookies()[2]
     const router = useRouter()
     const [ drawerOpen, setDrawerOpen ] = useState(false)
+    const [ notifications, setNotifications ] = useState(0)
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         (async () => {
             setMyUser((await getMyUser())!)
         })()
+
+        setInterval(async () => {
+            setNotifications(await getMyNotificationsCount())
+        }, 10000)
     }, [])
 
     const sidebar = <Sidebar className="h-screen w-full lg:w-64 relative">
@@ -63,7 +69,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                     {t('nav.auditLogs')}
                 </SidebarItem>
                 <SidebarItem as={Link} href="/user/inbox" icon={HiInbox}
-                             label="1">
+                             label={notifications > 0 ? notifications.toString() : undefined}>
                     {t('nav.inbox')}
                 </SidebarItem>
                 <If condition={myUser?.permissions.includes('admin.manage')}>

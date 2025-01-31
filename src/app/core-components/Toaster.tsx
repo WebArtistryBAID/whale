@@ -14,7 +14,7 @@ export default function Toaster() {
             (async () => {
                 const notifications = await getUntoastedNotifications()
                 for (const notification of notifications) {
-                    toast(t(`inbox.types.${notification.type}`, getNotificationMessageParams(notification)))
+                    toast.info(t(`inbox.types.${notification.type}`, getNotificationMessageParams(notification)))
                 }
             })()
         }, 10000, 0)
