@@ -5,22 +5,28 @@ import { requireUserPermission } from '@/app/login/login-actions'
 
 const prisma = new PrismaClient()
 
+void initialize()
+
 async function initialize() {
-    if (await getConfigValue('initialized') != null) {
+    if (await prisma.settingsItem.findUnique({
+        where: {
+            key: 'initialized'
+        }
+    })) {
         return
     }
 
     // Set default values for settings
-    await setConfigValue('initialized', new Date().getTime().toString())
-    await setConfigValue('enable-scheduled-availability', 'true')
-    await setConfigValue('weekdays-only', 'true')
-    await setConfigValue('open-time', '10:00')
-    await setConfigValue('close-time', '15:00')
-    await setConfigValue('store-open', 'true')
-    await setConfigValue('maximum-cups-per-order', '2')
-    await setConfigValue('maximum-cups-per-day', '14')
-    await setConfigValue('maximum-balance', '500')
-    await setConfigValue('balance-recharge-minimum', '20')
+    await setConfigValueInternal('initialized', new Date().getTime().toString())
+    await setConfigValueInternal('enable-scheduled-availability', 'true')
+    await setConfigValueInternal('weekdays-only', 'true')
+    await setConfigValueInternal('open-time', '10:00')
+    await setConfigValueInternal('close-time', '15:00')
+    await setConfigValueInternal('store-open', 'true')
+    await setConfigValueInternal('maximum-cups-per-order', '2')
+    await setConfigValueInternal('maximum-cups-per-day', '14')
+    await setConfigValueInternal('maximum-balance', '500')
+    await setConfigValueInternal('balance-recharge-minimum', '20')
 }
 
 export async function getConfigValue(key: string): Promise<string> {
@@ -44,6 +50,10 @@ export async function getConfigValueAsNumber(key: string): Promise<number> {
 
 export async function setConfigValue(key: string, value: string | null): Promise<void> {
     await requireUserPermission('admin.manage')
+    await setConfigValueInternal(key, value)
+}
+
+async function setConfigValueInternal(key: string, value: string | null): Promise<void> {
     if (value == null) {
         await prisma.settingsItem.delete({
             where: {

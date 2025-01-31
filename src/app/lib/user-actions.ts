@@ -1,12 +1,22 @@
 'use server'
 
 import Paginated from '@/app/lib/Paginated'
-import { Order, PrismaClient } from '@prisma/client'
+import { Order, PrismaClient, User, UserAuditLogType } from '@prisma/client'
 import { requireUser } from '@/app/login/login-actions'
 
 const prisma = new PrismaClient()
 
-export default async function getMyOrders(page: number): Promise<Paginated<Order>> {
+export interface HydratedUserAuditLog {
+    id: number
+    time: Date
+    type: UserAuditLogType
+    user: User | null
+    userId: number | null
+    orderId: number | null
+    values: string[]
+}
+
+export async function getMyOrders(page: number): Promise<Paginated<Order>> {
     const me = await requireUser()
     const pages = Math.ceil(await prisma.order.count({
         where: {
@@ -25,6 +35,33 @@ export default async function getMyOrders(page: number): Promise<Paginated<Order
     })
     return {
         items: orders,
+        page,
+        pages
+    }
+}
+
+export async function getMyAuditLogs(page: number): Promise<Paginated<HydratedUserAuditLog>> {
+    const me = await requireUser()
+    const pages = Math.ceil(await prisma.userAuditLog.count({
+        where: {
+            userId: me.id
+        }
+    }) / 10)
+    const logs = await prisma.userAuditLog.findMany({
+        where: {
+            userId: me.id
+        },
+        orderBy: {
+            time: 'desc'
+        },
+        include: {
+            user: true
+        },
+        skip: page * 10,
+        take: 10
+    })
+    return {
+        items: logs,
         page,
         pages
     }

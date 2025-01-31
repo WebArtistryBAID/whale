@@ -85,5 +85,26 @@
     "view": "View",
     "empty": "You have no orders yet. Fancy a drink?",
     "cta": "Order Now"
+  },
+  "logs": {
+    "title": "Transactions",
+    "empty": "No transactions yet.",
+    "id": "ID",
+    "time": "Time",
+    "message": "Message",
+    "types": {
+      "login": "{{user}} logged in with OneLogin.",
+      "blocked": "{{user}} blocked {{v0}}.",
+      "unblocked": "{{user}} unblocked {{v0}}.",
+      "permissionsUpdated": "{{user}} updated {{v0}}'s permissions: {{values}}.",
+      "balanceTransaction": "{{user}} recharged their balance with ¥{{v0}}. Weixin Pay transaction ID: {{v1}}.",
+      "balanceUsed": "{{user}} used balance ¥{{v0}} to pay for order {{order}}. New balance: ¥{{v1}}.",
+      "pointsUpdated": "{{user}}'s points is updated by {{v0}}. New points: {{v1}}.",
+      "orderCreated": "Order {{order}} is created by user {{user}}.",
+      "orderSetStatus": "{{user}} set order {{order}}'s status to {{v0}}.",
+      "orderPaymentSuccess": "Order {{order}} (¥{{v1}}) is paid successfully by user {{user}} with {{v0}}.",
+      "orderPaymentFailed": "Order {{order}} (¥{{v1}}) payment failed by user {{user}} with {{v0}}.",
+      "orderRefunded": "Order {{order}} (¥{{v0}}) is refunded by user {{user}}."
+    }
   }
 }

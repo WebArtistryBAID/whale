@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Order } from '@prisma/client'
 import Paginated from '@/app/lib/Paginated'
-import getMyOrders from '@/app/lib/user-actions'
+import { getMyOrders } from '@/app/lib/user-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 import {
     Badge,
