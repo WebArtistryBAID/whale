@@ -5,6 +5,7 @@
   "cancel": "Cancel",
   "edit": "Edit",
   "selected": " (Selected)",
+  "error": "Error",
   "nav": {
     "sidebar": "Open Navigation",
     "dashboard": "Dashboard",
@@ -89,7 +90,7 @@
     "view": "View",
     "empty": "You have no orders yet. Fancy a drink?",
     "cta": "Order Now",
-    "today": "Process Today's Orders",
+    "today": "Process Waiting Orders",
     "onSite": "On-Site Ordering",
     "onSiteExit": "Exit On-Site"
   },
@@ -123,7 +124,7 @@
     "types": {
       "orderCreated": "Order {{order}} successfully created.",
       "pickupReminder": "Order {{order}} is ready.",
-      "orderRefunded": "Order {{order}} (¥{{v0}}) has been refunded.",
+      "orderRefunded": "Order {{order}} (¥{{v0}}) has been refunded. You will receive the refund within 14 working days from your payment method.",
       "balanceToppedUp": "Balance recharge (¥{{v0}}) succeeded.",
       "pointsEarned": "You have earned {{v0}} points.",
       "payLaterReminder": "Your Pay Later order {{order}} hasn't been paid for yet."
@@ -197,7 +198,6 @@
     "actions": "Order Actions",
     "waiting": "Waiting",
     "done": "Done",
-    "none": "Anonymous",
     "user": "Ordered By",
     "createdAt": "Created At",
     "price": "Total Price",
@@ -215,6 +215,13 @@
     "wxPayID": "Weixin Pay Transaction No.",
     "deliveryRoom": "Delivery Room",
     "refund": "Refund",
-    "refundInfo": "Do not refund over 5 orders per week. That may cause issues with Weixin Pay."
+    "refundInfo": "Do not refund over 5 orders per week. That may cause issues with Weixin Pay.",
+    "refundModal": {
+      "title": "Are you sure?",
+      "message": "Do not refund over 5 orders per week. That may cause issues with Weixin Pay.",
+      "messageCash": "Refunding cash requires manual operation. Please confirm with the user before proceeding.",
+      "messageBalance": "The refund will enter the user's balance immediately.",
+      "messageWeChat": "The refund will return to the user's Weixin Pay account in up to 14 working days."
+    }
   }
 }

@@ -5,6 +5,7 @@
   "cancel": "取消",
   "edit": "编辑",
   "selected": " (已选中)",
+  "error": "错误",
   "nav": {
     "sidebar": "打开导航栏",
     "dashboard": "主页",
@@ -85,7 +86,7 @@
     "createdAt": "创建时间",
     "action": "操作",
     "waiting": "等待中",
-    "done": "完成",
+    "done": "已完成",
     "view": "查看",
     "empty": "您还没有任何订单。想喝点什么吗?",
     "cta": "现在点单",
@@ -123,7 +124,7 @@
     "types": {
       "orderCreated": "订单 {{order}} 下单成功。",
       "pickupReminder": "订单 {{order}} 已准备好。",
-      "orderRefunded": "订单 {{order}} (¥{{v0}}) 已经退款。",
+      "orderRefunded": "订单 {{order}} (¥{{v0}}) 已经退款。您会在 14 个工作日内通过原通道收到退款。",
       "balanceToppedUp": "充值成功 (¥{{v0}})。",
       "pointsEarned": "您获得了 {{v0}} 个积分。",
       "payLaterReminder": "您的「先喝后付」订单 {{order}} 尚未付款。"
@@ -187,6 +188,40 @@
         "placeholder": "积分...",
         "minimum": "必须至少为 0。"
       }
+    }
+  },
+  "today": {
+    "orderNumber": "(订单号)",
+    "info": "订单信息",
+    "items": "订单内容",
+    "status": "订单状态",
+    "actions": "订单操作",
+    "waiting": "等待中",
+    "done": "已完成",
+    "user": "点单用户",
+    "createdAt": "创建时间",
+    "price": "总价",
+    "current": "目前状态",
+    "payment": "支付状态",
+    "notPaid": "未支付",
+    "paid": "已支付",
+    "refunded": "已退款",
+    "paymentMethod": "支付方式",
+    "wxPay": "微信支付",
+    "balance": "余额",
+    "cash": "现金",
+    "payLater": "先喝后付",
+    "payForMe": "微信支付",
+    "wxPayID": "微信支付交易号",
+    "deliveryRoom": "外送房间",
+    "refund": "退款",
+    "refundInfo": "一周内不要退款超过 5 单，否则容易造成微信支付问题。",
+    "refundModal": {
+      "title": "是否确认?",
+      "message": "一周内不要退款超过 5 单，否则容易造成微信支付问题。",
+      "messageCash": "现金退款需要人工操作，请与用户确认。",
+      "messageBalance": "退款会立即进入用户余额。",
+      "messageWeChat": "退款会在 14 个工作日内进入用户的微信支付账号。"
     }
   }
 }

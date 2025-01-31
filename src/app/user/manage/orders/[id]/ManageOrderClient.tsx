@@ -3,9 +3,9 @@
 import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 import { HiCheck, HiClock, HiHashtag } from 'react-icons/hi'
-import { Badge, Button } from 'flowbite-react'
-import { OrderStatus, OrderType, PaymentStatus } from '@prisma/client'
-import { markOrderDone } from '@/app/lib/manage-actions'
+import { Badge, Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react'
+import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@prisma/client'
+import { markOrderDone, refundOrder } from '@/app/lib/manage-actions'
 import { useEffect, useState } from 'react'
 import If from '@/app/lib/If'
 import { useRouter } from 'next/navigation'
@@ -16,7 +16,9 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
     const { t } = useTranslationClient('user')
     const router = useRouter()
     const [ order, setOrder ] = useState(init)
+    const [ refundModal, setRefundModal ] = useState(false)
     const [ loading, setLoading ] = useState(false)
+    const [ refundError, setRefundError ] = useState(false)
 
     useEffect(() => {
         setInterval(async () => {
@@ -30,6 +32,38 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
     }, [])
 
     return <>
+        <Modal show={refundModal} onClose={() => setRefundModal(false)}>
+            <ModalHeader>{t('today.refundModal.title')}</ModalHeader>
+            <ModalBody>
+                <p className="mb-1">{t('today.refundModal.message')}</p>
+                <If condition={order.paymentMethod === PaymentMethod.cash}>
+                    <p>{t('today.refundModal.messageCash')}</p>
+                </If>
+                <If condition={order.paymentMethod === PaymentMethod.balance || (order.paymentMethod === PaymentMethod.payLater && order.wxPayId == null)}>
+                    <p>{t('today.refundModal.messageBalance')}</p>
+                </If>
+                <If condition={order.paymentMethod === PaymentMethod.wxPay || order.paymentMethod === PaymentMethod.payForMe}>
+                    <p>{t('today.refundModal.messageWeChat')}</p>
+                </If>
+            </ModalBody>
+            <ModalFooter>
+                <Button pill color="warning" disabled={loading || refundError} onClick={async () => {
+                    setLoading(true)
+                    setRefundError(!(await refundOrder(order.id)))
+                    setLoading(false)
+                    setRefundModal(false)
+
+                    const o = await getOrder(order.id)
+                    if (o == null) {
+                        location.href = '/'
+                        return
+                    }
+                    setOrder(o)
+                }}>{refundError ? t('error') : t('confirm')}</Button>
+                <Button pill color="gray" onClick={() => setRefundModal(false)}>{t('cancel')}</Button>
+            </ModalFooter>
+        </Modal>
+
         <h1 className="flex items-center mb-5">
             <Badge className="mr-3 rounded-full h-8 w-8 flex justify-center items-center" color="warning">
                 <HiHashtag className="text-xl"/>
@@ -111,10 +145,11 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
                     <p className="text-xl mb-3">{order.wxPayId}</p>
                 </If>
 
-                <If condition={order.paymentStatus === PaymentStatus.paid}>
-                    <Button className="mb-3" color="failure" pill>{t('today.refund')}</Button>
-                    <p className="text-sm secondary">{t('today.refundInfo')}</p>
+                <If condition={order.paymentStatus === PaymentStatus.paid && new Date().getTime() - order.createdAt.getTime() <= 90 * 24 * 60 * 60 * 1000}>
+                    <Button className="mb-3" color="failure" pill
+                            onClick={() => setRefundModal(true)}>{t('today.refund')}</Button>
                 </If>
+                <p className="text-sm secondary">{t('today.refundInfo')}</p>
             </div>
         </div>
     </>

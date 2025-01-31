@@ -1,6 +1,6 @@
 import { getOrder } from '@/app/lib/ordering-actions'
 import { redirect } from 'next/navigation'
-import { OrderStatus, PaymentStatus } from '@prisma/client'
+import { PaymentStatus } from '@prisma/client'
 import { getMyUser } from '@/app/login/login-actions'
 import OrderPayClient from '@/app/order/checkout/wechat/[id]/OrderPayClient'
 
@@ -11,7 +11,7 @@ export default async function OrderPayBase({ params }: { params: Promise<{ id: s
     if (order == null) {
         redirect('/')
     }
-    if (order.paymentStatus !== PaymentStatus.notPaid || order.status === OrderStatus.done) {
+    if (order.paymentStatus !== PaymentStatus.notPaid) {
         redirect('/')
     }
     if (order.userId != null && order.userId !== me?.id) {
