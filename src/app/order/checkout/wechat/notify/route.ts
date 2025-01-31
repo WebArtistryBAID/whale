@@ -1,4 +1,4 @@
-import { PaymentStatus, PrismaClient } from '@prisma/client'
+import { PaymentStatus, PrismaClient, UserAuditLogType } from '@prisma/client'
 import md5 from 'md5'
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrder } from '@/app/lib/ordering-actions'
@@ -51,6 +51,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
     })
 
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.orderPaymentSuccess,
+            user: order.userId == null ? undefined : {
+                connect: {
+                    id: order.userId
+                }
+            },
+            order: {
+                connect: {
+                    id: order.id
+                }
+            },
+            values: [ 'wxpay', order.totalPrice ]
+        }
+    })
+
     // Add points upon payment
     if (order.userId != null) {
         const user = await prisma.user.findUnique({
@@ -69,6 +86,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             },
             data: {
                 points: Decimal(user.points).add(order.totalPriceRaw).toString()
+            }
+        })
+
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.pointsUpdated,
+                user: {
+                    connect: {
+                        id: user.id
+                    }
+                },
+                order: {
+                    connect: {
+                        id: order.id
+                    }
+                },
+                values: [ order.totalPriceRaw, Decimal(user.points).add(order.totalPriceRaw).toString() ]
             }
         })
     }

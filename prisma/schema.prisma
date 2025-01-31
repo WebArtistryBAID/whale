@@ -205,12 +205,13 @@ enum UserAuditLogType {
   orderRefunded
 }
 
+// Not actually just UserAuditLog, but general-purpose. It's named for legacy reasons.
 model UserAuditLog {
   id      Int              @id @default(autoincrement())
   time    DateTime         @default(now())
   type    UserAuditLogType
-  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  Int
+  user    User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int?
   order   Order?           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId Int?
   values  String[]

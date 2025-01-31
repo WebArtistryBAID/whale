@@ -9,7 +9,8 @@ import {
     PaymentMethod,
     PaymentStatus,
     PrismaClient,
-    User
+    User,
+    UserAuditLogType
 } from '@prisma/client'
 import { OrderedItemTemplate } from '@/app/lib/shopping-cart'
 import { getMyUser } from '@/app/login/login-actions'
@@ -135,12 +136,56 @@ export async function payLaterBalance(id: number): Promise<boolean> {
             balance: Decimal(me.balance).minus(order.totalPrice).toString()
         }
     })
+
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.balanceUsed,
+            user: {
+                connect: {
+                    id: me.id
+                }
+            },
+            order: {
+                connect: {
+                    id: order.id
+                }
+            },
+            values: [ order.totalPrice, Decimal(me.balance).minus(order.totalPrice).toString() ]
+        }
+    })
+
     await prisma.order.update({
         where: {
             id
         },
         data: {
             paymentStatus: PaymentStatus.paid
+        }
+    })
+
+    await prisma.user.update({
+        where: {
+            id: me.id
+        },
+        data: {
+            points: Decimal(me.points).add(order.totalPriceRaw).toString()
+        }
+    })
+
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.pointsUpdated,
+            user: {
+                connect: {
+                    id: me.id
+                }
+            },
+            order: {
+                connect: {
+                    id: order.id
+                }
+            },
+            values: [ order.totalPriceRaw, Decimal(me.points).add(order.totalPriceRaw).toString() ]
         }
     })
     return true
@@ -319,6 +364,22 @@ export async function createOrder(items: OrderedItemTemplate[],
         }
     })
 
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.orderCreated,
+            user: me == null ? undefined : {
+                connect: {
+                    id: me.id
+                }
+            },
+            order: {
+                connect: {
+                    id: order.id
+                }
+            }
+        }
+    })
+
     // Add points to user
     if (me != null && order.paymentStatus === PaymentStatus.paid) {
         await prisma.user.update({
@@ -327,6 +388,72 @@ export async function createOrder(items: OrderedItemTemplate[],
             },
             data: {
                 points: Decimal(me.points).add(totalPriceNoCoupon).toString()
+            }
+        })
+
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.pointsUpdated,
+                user: {
+                    connect: {
+                        id: me.id
+                    }
+                },
+                order: {
+                    connect: {
+                        id: order.id
+                    }
+                },
+                values: [ totalPriceNoCoupon.toString(), Decimal(me.points).add(totalPriceNoCoupon).toString() ]
+            }
+        })
+    }
+
+    if (order.paymentMethod === PaymentMethod.cash) {
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.orderPaymentSuccess,
+                order: {
+                    connect: {
+                        id: order.id
+                    }
+                },
+                values: [ 'cash', totalPrice.toString() ]
+            }
+        })
+    }
+
+    if (me != null && order.paymentMethod === PaymentMethod.balance) {
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.balanceUsed,
+                user: {
+                    connect: {
+                        id: me.id
+                    }
+                },
+                order: {
+                    connect: {
+                        id: order.id
+                    }
+                },
+                values: [ totalPrice.toString(), Decimal(me.balance).minus(totalPrice).toString() ]
+            }
+        })
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.orderPaymentSuccess,
+                user: {
+                    connect: {
+                        id: me.id
+                    }
+                },
+                order: {
+                    connect: {
+                        id: order.id
+                    }
+                },
+                values: [ 'balance', totalPrice.toString() ]
             }
         })
     }
