@@ -23,8 +23,8 @@ model User {
   balance            String             @default("0")
   oaTokens           OATokens?
   orders             Order[]
-  inboxNotifications NotificationType[] @default([])
-  smsNotifications   NotificationType[] @default([])
+  inboxNotifications NotificationType[] @default([orderCreated, pickupReminder, orderRefunded, balanceToppedUp, payLaterReminder])
+  smsNotifications   NotificationType[] @default([orderRefunded, balanceToppedUp, payLaterReminder])
   notifications      Notification[]
 }
 
@@ -69,7 +69,7 @@ model Notification {
   createdAt DateTime         @default(now())
   type      NotificationType
   values    String[]
-  toasted Boolean @default(false)
+  toasted   Boolean          @default(false)
 
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  Int

@@ -19,6 +19,9 @@
     "beta": "Beta",
     "betaDetails": "Project Whale 正在测试。如遇问题，请联系 Lin。"
   },
+  "a11y": {
+    "page": "第 {{page}} 页，共 {{pages}} 页。分页导航在页面底部。"
+  },
   "breadcrumb": {
     "bc": "导航",
     "user": "用户"
@@ -69,5 +72,18 @@
       "logOut": "退出登录",
       "credits": "Project Whale 由 WebArtistry 和白鲸咖啡馆合作开发。感谢所有贡献者。"
     }
+  },
+  "orders": {
+    "title": "订单",
+    "id": "订单号",
+    "status": "状态",
+    "totalPrice": "总价",
+    "createdAt": "创建时间",
+    "action": "操作",
+    "waiting": "等待中",
+    "done": "完成",
+    "view": "查看",
+    "empty": "您还没有任何订单。想喝点什么吗?",
+    "cta": "现在点单"
   }
 }

@@ -19,6 +19,9 @@
     "beta": "Beta",
     "betaDetails": "Project Whale is in beta. Contact Lin with any issues."
   },
+  "a11y": {
+    "page": "Page {{page}} of {{pages}}. Page navigation on bottom of page."
+  },
   "breadcrumb": {
     "bc": "Breadcrumb",
     "user": "User"
@@ -69,5 +72,18 @@
       "logOut": "Log Out",
       "credits": "Project Whale is developed with a collaboration between WebArtistry and Whale Cafe. Thank you to all contributors."
     }
+  },
+  "orders": {
+    "title": "Orders",
+    "id": "ID",
+    "status": "Status",
+    "totalPrice": "Total Price",
+    "createdAt": "Created At",
+    "action": "Action",
+    "waiting": "Waiting",
+    "done": "Done",
+    "view": "View",
+    "empty": "You have no orders yet. Fancy a drink?",
+    "cta": "Order Now"
   }
 }

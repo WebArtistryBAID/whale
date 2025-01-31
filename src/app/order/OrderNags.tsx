@@ -85,8 +85,12 @@ export default function OrderNags() {
             <ModalHeader>{t('loginCta.title')}</ModalHeader>
             <ModalBody>
                 <p className="mb-5">{t('loginCta.message')}</p>
-                <div className="w-full flex justify-center">
-                    <Image src="/assets/illustrations/login-nag.svg" alt="" width={943} height={796} className="w-72"/>
+                <div className="w-full flex flex-col justify-center items-center">
+                    <Image width={400} height={260} src="/assets/illustrations/reading-light.png"
+                           className="dark:hidden w-72 mb-3" alt=""/>
+                    <Image width={400} height={260} src="/assets/illustrations/reading-dark.png"
+                           className="hidden dark:block w-72 mb-3"
+                           alt=""/>
                 </div>
             </ModalBody>
             <ModalFooter>

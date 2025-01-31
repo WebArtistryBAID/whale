@@ -30,7 +30,7 @@ async function requireUnpaidOrder(order: number): Promise<HydratedOrder> {
 }
 
 function getOrderTransactionNo(order: HydratedOrder): string {
-    return `${order.id}-WECHAT${order.createdAt.getTime()}`
+    return `${order.id}-ORDER${order.createdAt.getTime()}`
 }
 
 export async function getOrderPaymentStatus(id: number): Promise<PaymentStatus> {

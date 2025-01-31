@@ -33,9 +33,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return new NextResponse('FAILURE')
     }
 
-    const id = parseInt(body.outTradeNo.split('-WECHAT')[0])
+    const id = parseInt(body.outTradeNo.split('-ORDER')[0])
     const order = await getOrder(id)
-    if (order == null || order.createdAt.getTime().toString() !== body.outTradeNo.split('-WECHAT')[1]) {
+    if (order == null || order.createdAt.getTime().toString() !== body.outTradeNo.split('-ORDER')[1]) {
         return new NextResponse('FAILURE')
     }
     if (order.paymentStatus === PaymentStatus.paid) {
