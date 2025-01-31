@@ -52,80 +52,78 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
         </If>
         <If condition={page.pages >= 1}>
             <p className="sr-only">{t('a11y.page', { page: page.page + 1, pages: page.pages })}</p>
-            <div className="w-full overflow-x-auto">
-                <Table className="mb-5">
-                    <TableHead>
-                        <TableHeadCell>{t('logs.id')}</TableHeadCell>
-                        <TableHeadCell>{t('logs.user')}</TableHeadCell>
-                        <TableHeadCell>{t('logs.order')}</TableHeadCell>
-                        <TableHeadCell>{t('logs.time')}</TableHeadCell>
-                        <TableHeadCell>{t('logs.message')}</TableHeadCell>
-                    </TableHead>
-                    <TableBody className="divide-y mb-3">
-                        {page.items.map(log => {
-                            const messageData: { [key: string]: string } = Object()
-                            if (log.userId != null) {
-                                messageData.user = log.user!.name
-                            }
-                            if (log.orderId != null) {
-                                messageData.order = log.orderId.toString()
-                            }
-                            if (([
-                                UserAuditLogType.blocked,
-                                UserAuditLogType.unblocked,
-                                UserAuditLogType.permissionsUpdated,
-                                UserAuditLogType.balanceTransaction,
-                                UserAuditLogType.balanceUsed,
-                                UserAuditLogType.orderSetStatus,
-                                UserAuditLogType.orderPaymentSuccess,
-                                UserAuditLogType.orderPaymentFailed,
-                                UserAuditLogType.orderRefunded
-                            ] as UserAuditLogType[]).includes(log.type)) {
-                                messageData.v0 = log.values[0]
-                            }
-                            if (([
-                                UserAuditLogType.balanceTransaction,
-                                UserAuditLogType.balanceUsed,
-                                UserAuditLogType.pointsUpdated,
-                                UserAuditLogType.orderPaymentSuccess,
-                                UserAuditLogType.orderPaymentFailed
-                            ] as UserAuditLogType[]).includes(log.type)) {
-                                messageData.v1 = log.values[1]
-                            }
-                            return <TableRow className="tr" key={log.id}>
-                                <TableCell className="flex items-center th">
-                                    {log.id}
-                                </TableCell>
-                                <TableCell>
-                                    <If condition={log.userId == null}>
-                                        N/A
-                                    </If>
-                                    <If condition={log.userId != null}>
-                                        <Link href={`/manage/users/${log.userId}`}
-                                              className="inline">{log.user?.name}</Link>
-                                    </If>
-                                </TableCell>
+            <Table className="mb-5">
+                <TableHead>
+                    <TableHeadCell>{t('logs.id')}</TableHeadCell>
+                    <TableHeadCell>{t('logs.user')}</TableHeadCell>
+                    <TableHeadCell>{t('logs.order')}</TableHeadCell>
+                    <TableHeadCell>{t('logs.time')}</TableHeadCell>
+                    <TableHeadCell>{t('logs.message')}</TableHeadCell>
+                </TableHead>
+                <TableBody className="divide-y mb-3">
+                    {page.items.map(log => {
+                        const messageData: { [key: string]: string } = Object()
+                        if (log.userId != null) {
+                            messageData.user = log.user!.name
+                        }
+                        if (log.orderId != null) {
+                            messageData.order = log.orderId.toString()
+                        }
+                        if (([
+                            UserAuditLogType.blocked,
+                            UserAuditLogType.unblocked,
+                            UserAuditLogType.permissionsUpdated,
+                            UserAuditLogType.balanceTransaction,
+                            UserAuditLogType.balanceUsed,
+                            UserAuditLogType.orderSetStatus,
+                            UserAuditLogType.orderPaymentSuccess,
+                            UserAuditLogType.orderPaymentFailed,
+                            UserAuditLogType.orderRefunded
+                        ] as UserAuditLogType[]).includes(log.type)) {
+                            messageData.v0 = log.values[0]
+                        }
+                        if (([
+                            UserAuditLogType.balanceTransaction,
+                            UserAuditLogType.balanceUsed,
+                            UserAuditLogType.pointsUpdated,
+                            UserAuditLogType.orderPaymentSuccess,
+                            UserAuditLogType.orderPaymentFailed
+                        ] as UserAuditLogType[]).includes(log.type)) {
+                            messageData.v1 = log.values[1]
+                        }
+                        return <TableRow className="tr" key={log.id}>
+                            <TableCell className="flex items-center th">
+                                {log.id}
+                            </TableCell>
+                            <TableCell>
+                                <If condition={log.userId == null}>
+                                    N/A
+                                </If>
+                                <If condition={log.userId != null}>
+                                    <Link href={`/manage/users/${log.userId}`}
+                                          className="inline">{log.user?.name}</Link>
+                                </If>
+                            </TableCell>
 
-                                <TableCell>
-                                    <If condition={log.orderId == null}>
-                                        N/A
-                                    </If>
-                                    <If condition={log.orderId != null}>
-                                        <Link href={`/order/details/${log.orderId}`}
-                                              className="inline">{log.orderId}</Link>
-                                    </If>
-                                </TableCell>
-                                <TableCell>
-                                    {log.time.toLocaleString()}
-                                </TableCell>
-                                <TableCell>
-                                    {t(`logs.types.${log.type}`, messageData)}
-                                </TableCell>
-                            </TableRow>
-                        })}
-                    </TableBody>
-                </Table>
-            </div>
+                            <TableCell>
+                                <If condition={log.orderId == null}>
+                                    N/A
+                                </If>
+                                <If condition={log.orderId != null}>
+                                    <Link href={`/order/details/${log.orderId}`}
+                                          className="inline">{log.orderId}</Link>
+                                </If>
+                            </TableCell>
+                            <TableCell>
+                                {log.time.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                                {t(`logs.types.${log.type}`, messageData)}
+                            </TableCell>
+                        </TableRow>
+                    })}
+                </TableBody>
+            </Table>
             <div className="flex overflow-x-auto sm:justify-center">
                 <If condition={page.pages > 0}>
                     <Pagination currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}

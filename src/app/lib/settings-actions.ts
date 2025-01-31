@@ -29,6 +29,16 @@ async function initialize() {
     await setConfigValueInternal('balance-recharge-minimum', '20')
 }
 
+export async function getConfigValues(): Promise<{ [key: string]: string }> {
+    await initialize()
+    const items = await prisma.settingsItem.findMany()
+    const result: { [key: string]: string } = {}
+    for (const item of items) {
+        result[item.key] = item.value
+    }
+    return result
+}
+
 export async function getConfigValue(key: string): Promise<string> {
     if (key !== 'initialized') {
         await initialize()

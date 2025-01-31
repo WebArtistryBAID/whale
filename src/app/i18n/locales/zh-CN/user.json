@@ -24,7 +24,8 @@
   },
   "breadcrumb": {
     "bc": "导航",
-    "user": "用户"
+    "user": "用户",
+    "manage": "管理"
   },
   "settings": {
     "title": "主页",
@@ -85,5 +86,75 @@
     "view": "查看",
     "empty": "您还没有任何订单。想喝点什么吗?",
     "cta": "现在点单"
+  },
+  "logs": {
+    "title": "交易记录",
+    "empty": "暂时没有交易记录。",
+    "id": "ID",
+    "user": "用户",
+    "order": "订单",
+    "time": "时间",
+    "message": "消息",
+    "types": {
+      "login": "{{user}} 透过 OneLogin 登录。",
+      "blocked": "{{user}} 屏蔽了 {{v0}}。",
+      "unblocked": "{{user}} 解除屏蔽了 {{v0}}。",
+      "permissionsUpdated": "{{user}} 更新了 {{v0}} 的权限: {{values}}。",
+      "balanceTransaction": "{{user}} 充值了余额 ¥{{v0}}。微信支付交易号: {{v1}}。",
+      "balanceUsed": "{{user}} 使用了余额 ¥{{v0}} 支付订单 {{order}}。新余额: ¥{{v1}}。",
+      "pointsUpdated": "{{user}} 的积分增加了 {{v0}}。新积分: {{v1}}。",
+      "orderCreated": "{{user}} 创建了订单 {{order}}。",
+      "orderSetStatus": "{{user}} 将订单 {{order}} 的状态设置为了 {{v0}}。",
+      "orderPaymentSuccess": "{{user}} 成功使用 {{v0}} 支付了订单 {{order}} (¥{{v1}})。",
+      "orderPaymentFailed": "{{user}} 使用 {{v0}} 支付订单 {{order}} (¥{{v1}}) 失败。",
+      "orderRefunded": "{{user}} 退款了订单 {{order}} (¥{{v0}})。"
+    }
+  },
+  "inbox": {
+    "title": "收件箱",
+    "empty": "暂时没有通知。",
+    "types": {
+      "orderCreated": "订单 {{order}} 下单成功。",
+      "pickupReminder": "订单 {{order}} 已准备好。",
+      "orderRefunded": "订单 {{order}} (¥{{v0}}) 已经退款。",
+      "balanceToppedUp": "充值成功 (¥{{v0}})。",
+      "pointsEarned": "您获得了 {{v0}} 个积分。",
+      "payLaterReminder": "您的「先喝后付」订单 {{order}} 尚未付款。"
+    }
+  },
+  "manage": {
+    "settings": {
+      "title": "设置",
+      "invalidNumber": "请输入数字。",
+      "minValue": "数值最小为 {{min}}。",
+      "maxValue": "数值最大为 {{max}}。",
+      "unsaved": "您有未保存的更改。",
+      "unsavedAccessibility": "您可以在页面底部保存更改。",
+      "hasErrors": "您必须更改错误后才能保存。",
+      "save": "保存",
+      "revert": "回退",
+      "types": {
+        "enable-scheduled-availability": "自动开店",
+        "weekdays-only": "仅工作日开店",
+        "open-time": "开店时间",
+        "close-time": "关店时间",
+        "store-open": "开店",
+        "maximum-cups-per-order": "每单最大杯数",
+        "maximum-cups-per-day": "每日最大杯数",
+        "maximum-balance": "最大余额",
+        "balance-recharge-minimum": "余额充值下限"
+      },
+      "descriptions": {
+        "enable-scheduled-availability": "当启用本设置时，店铺会自动开关，无需手动操作。",
+        "weekdays-only": "只从星期一至星期五开店。不考虑调休。",
+        "open-time": "开店时间，格式为 HH:mm。",
+        "close-time": "关店时间，格式为 HH:mm。",
+        "store-open": "当启用本设置时，用户可以点单。",
+        "maximum-cups-per-order": "用户在一单内最多可以添加的杯数。",
+        "maximum-cups-per-day": "一天内最多能处理的杯数。当达到本数量时，用户将无法点单。当「每单最大杯数」不是 1 时，可能会略微超出本限额。",
+        "maximum-balance": "用户最多能够持有的余额，单位为 CN¥。",
+        "balance-recharge-minimum": "用户充值的最低金额，单位为 CN¥。"
+      }
+    }
   }
 }
