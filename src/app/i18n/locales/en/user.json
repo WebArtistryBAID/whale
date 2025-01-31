@@ -24,7 +24,8 @@
   },
   "breadcrumb": {
     "bc": "Breadcrumb",
-    "user": "User"
+    "user": "User",
+    "manage": "Management"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -90,6 +91,8 @@
     "title": "Transactions",
     "empty": "No transactions yet.",
     "id": "ID",
+    "user": "User",
+    "order": "Order",
     "time": "Time",
     "message": "Message",
     "types": {
