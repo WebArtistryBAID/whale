@@ -1,7 +1,9 @@
 {
   "brand": "Whale Cafe",
+  "confirm": "Confirm",
   "close": "Close",
   "cancel": "Cancel",
+  "edit": "Edit",
   "nav": {
     "sidebar": "Open Navigation",
     "dashboard": "Dashboard",
@@ -154,6 +156,31 @@
         "maximum-cups-per-day": "The maximum amount of cups that can be processed in a day. The user will be unable to place orders when this amount is reached. There may be a slight overflow when Maximum Cups Per Order is not 1.",
         "maximum-balance": "The maximum balance users can hold, in CN¥.",
         "balance-recharge-minimum": "The minimum amount users can recharge, in CN¥."
+      }
+    },
+    "users": {
+      "title": "Users",
+      "search": "Search by name...",
+      "profile": "User Profile",
+      "view": "View",
+      "name": "Name",
+      "pinyin": "Pinyin",
+      "phone": "Phone Number",
+      "type": "Type",
+      "none": "None",
+      "student": "Student",
+      "teacher": "Teacher",
+      "points": "Points",
+      "balance": "Balance",
+      "permissions": "Permissions",
+      "admin": "Management Access",
+      "permissionsOwn": "You can't change your own permissions.",
+      "orders": "User Orders",
+      "pointsModal": {
+        "title": "Edit Points",
+        "message": "Please enter the new points value.",
+        "placeholder": "Points...",
+        "minimum": "Must be at least 0."
       }
     }
   }

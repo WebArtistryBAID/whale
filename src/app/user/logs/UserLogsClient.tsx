@@ -70,6 +70,7 @@ export default function UserLogsClient({ init }: { init: Paginated<HydratedUserA
                             UserAuditLogType.unblocked,
                             UserAuditLogType.permissionsUpdated,
                             UserAuditLogType.balanceTransaction,
+                            UserAuditLogType.pointsUpdated,
                             UserAuditLogType.balanceUsed,
                             UserAuditLogType.orderSetStatus,
                             UserAuditLogType.orderPaymentSuccess,
@@ -83,7 +84,8 @@ export default function UserLogsClient({ init }: { init: Paginated<HydratedUserA
                             UserAuditLogType.balanceUsed,
                             UserAuditLogType.pointsUpdated,
                             UserAuditLogType.orderPaymentSuccess,
-                            UserAuditLogType.orderPaymentFailed
+                            UserAuditLogType.orderPaymentFailed,
+                            UserAuditLogType.permissionsUpdated
                         ] as UserAuditLogType[]).includes(log.type)) {
                             messageData.v1 = log.values[1]
                         }

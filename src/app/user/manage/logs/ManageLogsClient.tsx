@@ -19,7 +19,7 @@ import { HiCollection } from 'react-icons/hi'
 import If from '@/app/lib/If'
 import Image from 'next/image'
 import { UserAuditLogType } from '@prisma/client'
-import getAuditLogs from '@/app/lib/manage-actions'
+import { getAuditLogs } from '@/app/lib/manage-actions'
 import Link from 'next/link'
 
 export default function ManageLogsClient({ init }: { init: Paginated<HydratedUserAuditLog> }) {
@@ -75,6 +75,7 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
                             UserAuditLogType.permissionsUpdated,
                             UserAuditLogType.balanceTransaction,
                             UserAuditLogType.balanceUsed,
+                            UserAuditLogType.pointsUpdated,
                             UserAuditLogType.orderSetStatus,
                             UserAuditLogType.orderPaymentSuccess,
                             UserAuditLogType.orderPaymentFailed,
@@ -87,7 +88,8 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
                             UserAuditLogType.balanceUsed,
                             UserAuditLogType.pointsUpdated,
                             UserAuditLogType.orderPaymentSuccess,
-                            UserAuditLogType.orderPaymentFailed
+                            UserAuditLogType.orderPaymentFailed,
+                            UserAuditLogType.permissionsUpdated
                         ] as UserAuditLogType[]).includes(log.type)) {
                             messageData.v1 = log.values[1]
                         }
@@ -100,7 +102,7 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
                                     N/A
                                 </If>
                                 <If condition={log.userId != null}>
-                                    <Link href={`/manage/users/${log.userId}`}
+                                    <Link href={`/user/manage/users/${log.userId}`}
                                           className="inline">{log.user?.name}</Link>
                                 </If>
                             </TableCell>
@@ -110,7 +112,7 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
                                     N/A
                                 </If>
                                 <If condition={log.orderId != null}>
-                                    <Link href={`/order/details/${log.orderId}`}
+                                    <Link href={`/user/manage/orders/${log.orderId}`}
                                           className="inline">{log.orderId}</Link>
                                 </If>
                             </TableCell>

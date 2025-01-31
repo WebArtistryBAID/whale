@@ -1,7 +1,9 @@
 {
   "brand": "白鲸咖啡",
+  "confirm": "确认",
   "close": "关闭",
   "cancel": "取消",
+  "edit": "编辑",
   "nav": {
     "sidebar": "打开导航栏",
     "dashboard": "主页",
@@ -154,6 +156,31 @@
         "maximum-cups-per-day": "一天内最多能处理的杯数。当达到本数量时，用户将无法点单。当「每单最大杯数」不是 1 时，可能会略微超出本限额。",
         "maximum-balance": "用户最多能够持有的余额，单位为 CN¥。",
         "balance-recharge-minimum": "用户充值的最低金额，单位为 CN¥。"
+      }
+    },
+    "users": {
+      "title": "用户",
+      "search": "按姓名搜索...",
+      "profile": "用户资料",
+      "view": "查看",
+      "name": "姓名",
+      "pinyin": "拼音",
+      "phone": "手机号码",
+      "type": "类型",
+      "none": "无",
+      "student": "学生",
+      "teacher": "教职工",
+      "points": "积分",
+      "balance": "余额",
+      "permissions": "权限",
+      "admin": "管理权限",
+      "permissionsOwn": "您无法更改自己的权限。",
+      "orders": "用户订单",
+      "pointsModal": {
+        "title": "更改积分",
+        "message": "请输入新的积分值。",
+        "placeholder": "积分...",
+        "minimum": "必须至少为 0。"
       }
     }
   }

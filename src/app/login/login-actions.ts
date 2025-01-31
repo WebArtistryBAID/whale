@@ -1,6 +1,6 @@
 'use server'
 
-import { PrismaClient, User } from '@prisma/client'
+import { PrismaClient, User, UserAuditLogType } from '@prisma/client'
 import { me } from '@/app/login/login'
 import { decodeJwt } from 'jose'
 import Paginated from '@/app/lib/Paginated'
@@ -42,7 +42,7 @@ export async function getUser(id: number): Promise<User | null> {
 }
 
 export async function toggleUserPermission(id: number, permission: string): Promise<void> {
-    await requireUserPermission('admin.manage')
+    const me = await requireUserPermission('admin.manage')
     const user = await prisma.user.findUnique({
         where: { id }
     })
@@ -58,6 +58,17 @@ export async function toggleUserPermission(id: number, permission: string): Prom
                 }
             }
         })
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.permissionsUpdated,
+                user: {
+                    connect: {
+                        id: me.id
+                    }
+                },
+                values: [ user.id.toString(), `-${permission}` ]
+            }
+        })
     } else {
         await prisma.user.update({
             where: { id },
@@ -65,6 +76,17 @@ export async function toggleUserPermission(id: number, permission: string): Prom
                 permissions: {
                     set: [ ...user.permissions, permission ]
                 }
+            }
+        })
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.permissionsUpdated,
+                user: {
+                    connect: {
+                        id: me.id
+                    }
+                },
+                values: [ user.id.toString(), `+${permission}` ]
             }
         })
     }
@@ -75,17 +97,20 @@ export async function getUsers(page: number, keyword: string): Promise<Paginated
     const pages = Math.ceil(await prisma.user.count({
         where: {
             OR: [
-                { name: { contains: keyword } },
-                { pinyin: { contains: keyword } }
+                { name: { contains: keyword, mode: 'insensitive' } },
+                { pinyin: { contains: keyword, mode: 'insensitive' } }
             ]
         }
     }) / 10)
     const users = await prisma.user.findMany({
         where: {
             OR: [
-                { name: { contains: keyword } },
-                { pinyin: { contains: keyword } }
+                { name: { contains: keyword, mode: 'insensitive' } },
+                { pinyin: { contains: keyword, mode: 'insensitive' } }
             ]
+        },
+        orderBy: {
+            pinyin: 'asc'
         },
         skip: page * 10,
         take: 10

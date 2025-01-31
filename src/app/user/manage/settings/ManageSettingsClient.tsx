@@ -51,7 +51,7 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
     function BooleanValue(key: string) {
         return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
             <ToggleSwitch checked={tmpValues[key] === 'true'} onChange={v => setBooleanValue(key, v)}
-                          label={t(`manage.settings.types.${key}`)}/>
+                          label={t(`manage.settings.types.${key}`)} color="yellow"/>
             <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.${key}`)}</p>
         </div>
     }
