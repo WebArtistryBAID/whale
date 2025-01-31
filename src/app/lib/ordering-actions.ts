@@ -236,15 +236,6 @@ export async function createOrder(items: OrderedItemTemplate[],
                                   onSiteOrderMode: boolean,
                                   deliveryRoom: string | null,
                                   paymentMethod: PaymentMethod): Promise<HydratedOrder | null> {
-    if (!(await isStoreOpen()) || await isMaximumCupsReached()) {
-        return null
-    }
-
-    const totalAmount = items.reduce((acc, item) => acc + item.amount, 0)
-    if (totalAmount < 0 || totalAmount > await getConfigValueAsNumber('maximum-cups-per-order')) {
-        return null
-    }
-
     const me = await getMyUser()
 
     // We didn't perform atomization - for a small use case like this, we should be fine.
@@ -253,6 +244,24 @@ export async function createOrder(items: OrderedItemTemplate[],
     // On site order mode require administrative permissions
     if (onSiteOrderMode && (me == null || !me.permissions.includes('admin.manage'))) {
         return null
+    }
+
+    // Ensure store is open and we aren't at capacity
+    if (!(await isStoreOpen()) || await isMaximumCupsReached()) {
+        return null
+    }
+
+    // Ensure we didn't go over maximum cups per order
+    const totalAmount = items.reduce((acc, item) => acc + item.amount, 0)
+    if (totalAmount < 0 || totalAmount > await getConfigValueAsNumber('maximum-cups-per-order')) {
+        return null
+    }
+
+    // Ensure items aren't sold out
+    for (const item of items) {
+        if (item.item.soldOut) {
+            return null
+        }
     }
 
     // Calculate total price

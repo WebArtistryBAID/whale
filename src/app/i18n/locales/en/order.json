@@ -51,6 +51,7 @@
   "maximumCupsPerOrder_other": "You can only order {{count}} cups at a time.",
   "addItem": "Add",
   "itemDetails": {
+    "soldOut": "Sold Out",
     "sale": "{{sale}}% off!",
     "add": "Add One",
     "minus": "Remove One",

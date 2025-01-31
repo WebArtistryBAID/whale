@@ -51,6 +51,7 @@
   "maximumCupsPerOrder_other": "一单只能购买 {{count}} 杯。",
   "addItem": "选规格",
   "itemDetails": {
+    "soldOut": "售罄",
     "sale": "{{sale}} 降价!",
     "add": "加一杯",
     "minus": "减一杯",
