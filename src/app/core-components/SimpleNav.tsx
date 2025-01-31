@@ -3,6 +3,7 @@ import { Button, Navbar, NavbarBrand } from 'flowbite-react'
 import Link from 'next/link'
 import { serverTranslation } from '@/app/i18n'
 import If from '@/app/lib/If'
+import OnSiteOrder from '@/app/core-components/OnSiteOrder'
 
 export default async function SimpleNav() {
     const me = await getMyUser()
@@ -16,6 +17,10 @@ export default async function SimpleNav() {
         </NavbarBrand>
 
         <div className="flex gap-3">
+            <If condition={me != null && me.permissions.includes('admin.manage')}>
+                <OnSiteOrder/>
+                <Button as={Link} href="/today" pill color="yellow" className="hidden lg:block">{t('today')}</Button>
+            </If>
             <If condition={me == null}>
                 <Button as={Link} href="/login" pill color="warning">{t('login')}</Button>
             </If>

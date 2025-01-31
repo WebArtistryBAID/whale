@@ -4,7 +4,8 @@ import { jwtVerify } from 'jose'
 import { getLoginTarget } from '@/app/login/login-actions'
 
 const protectedRoutes = [
-    '/login'
+    '/login',
+    '/today-quick'
 ]
 
 const protectedRoutesPartial = [

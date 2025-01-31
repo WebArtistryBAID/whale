@@ -87,7 +87,10 @@
     "done": "Done",
     "view": "View",
     "empty": "You have no orders yet. Fancy a drink?",
-    "cta": "Order Now"
+    "cta": "Order Now",
+    "today": "Process Today's Orders",
+    "onSite": "On-Site Ordering",
+    "onSiteExit": "Exit On-Site"
   },
   "logs": {
     "title": "Transactions",
