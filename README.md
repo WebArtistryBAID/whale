@@ -7,19 +7,17 @@ The ordering management platform of Whale Cafe. Built with Next.js.
 To run in production:
 
 * Using `pm2` allows for proper deployment in production.
+* Remember to set the environment variables.
 * Set up scheduled tasks.
-
-For each task, you need to pass the query parameter `key={CRON_KEY}`.
-
-| Path           | Unit Time  | Description           |
-|----------------|------------|-----------------------|
-| `/order/prune` | 30 minutes | Delete unpaid orders. |
 
 To run in development:
 
 * Ensure that you have node.js and npm available.
 * Run `npm install`.
-* Copy `.env.example` to `.env` and fill the following environment variables:
+* Copy `.env.example` to `.env` and fill the environment variables.
+* Run `npm run dev`.
+
+## Environment Variables
 
 | Name                     | Description                                                                                                     |
 |--------------------------|-----------------------------------------------------------------------------------------------------------------|
@@ -36,7 +34,27 @@ To run in development:
 | `WXPAY_MCH_KEY`          | Weixin Pay signature key.                                                                                       |
 | `CRON_KEY`               | Cron task verification key.                                                                                     |
 
-* Run `npm run dev`.
+## Cron Tasks
+
+For each task, you need to pass the query parameter `key={CRON_KEY}`.
+
+| Path           | Time             | Description           |
+|----------------|------------------|-----------------------|
+| `/order/prune` | Every 30 minutes | Delete unpaid orders. |
+
+## Settings
+
+| Key                             | Type    | Description                                                                                       |
+|---------------------------------|---------|---------------------------------------------------------------------------------------------------|
+| `enable-scheduled-availability` | boolean | Whether or not to use a schedule for making the store available.                                  |
+| `weekdays-only`                 | boolean | When `enable-scheduled-availability` is on, whether to only make the store available on weekdays. |
+| `open-time`                     | HH:mm   | When `enable-scheduled-availability` is on, the time when the store opens.                        |
+| `close-time`                    | HH:mm   | When `enable-scheduled-availability` is on, the time when the store closes.                       |
+| `store-open`                    | boolean | When `enable-scheduled-availability` is off, whether the store is currently open.                 |
+| `maximum-cups-per-order`        | number  | The maximum number of cups that can be ordered in a single order.                                 |
+| `maximum-cups-per-day`          | number  | The maximum number of cups that can be ordered in a single day.                                   |
+| `maximum-balance`               | Decimal | The maximum balance that a user can have.                                                         |
+| `balance-recharge-minimum`      | Decimal | The minimum amount that can be recharged.                                                         |
 
 ## Contribution
 

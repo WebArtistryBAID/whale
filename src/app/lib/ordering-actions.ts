@@ -14,6 +14,7 @@ import {
 import { OrderedItemTemplate } from '@/app/lib/shopping-cart'
 import { getMyUser } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
+import { getConfigValue, getConfigValueAsBoolean, getConfigValueAsNumber } from '@/app/lib/settings-actions'
 
 const prisma = new PrismaClient()
 
@@ -145,11 +146,59 @@ export async function payLaterBalance(id: number): Promise<boolean> {
     return true
 }
 
+export async function isStoreOpen(): Promise<boolean> {
+    if (await getConfigValueAsBoolean('enable-scheduled-availability')) {
+        const now = new Date()
+        const openTime = await getConfigValue('open-time')
+        const closeTime = await getConfigValue('close-time')
+        if (now.getHours() < parseInt(openTime.split(':')[0]) || now.getHours() > parseInt(closeTime.split(':')[0])) {
+            return false
+        }
+        if (now.getHours() === parseInt(openTime.split(':')[0]) && now.getMinutes() < parseInt(openTime.split(':')[1])) {
+            return false
+        }
+        if (now.getHours() === parseInt(closeTime.split(':')[0]) && now.getMinutes() > parseInt(closeTime.split(':')[1])) {
+            return false
+        }
+        return !(await getConfigValueAsBoolean('weekdays-only') && (now.getDay() === 0 || now.getDay() === 6))
+    }
+    return await getConfigValueAsBoolean('store-open')
+}
+
+export async function isMaximumCupsReached(): Promise<boolean> {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    return ((await prisma.orderedItem.aggregate({
+        _sum: {
+            amount: true
+        },
+        where: {
+            order: {
+                createdAt: {
+                    gte: today,
+                    lt: tomorrow
+                }
+            }
+        }
+    }))._sum.amount ?? 0) >= await getConfigValueAsNumber('maximum-cups-per-day')
+}
+
 export async function createOrder(items: OrderedItemTemplate[],
                                   coupon: string | null,
                                   onSiteOrderMode: boolean,
                                   deliveryRoom: string | null,
                                   paymentMethod: PaymentMethod): Promise<HydratedOrder | null> {
+    if (!(await isStoreOpen()) || await isMaximumCupsReached()) {
+        return null
+    }
+
+    const totalAmount = items.reduce((acc, item) => acc + item.amount, 0)
+    if (totalAmount < 0 || totalAmount > await getConfigValueAsNumber('maximum-cups-per-order')) {
+        return null
+    }
+
     const me = await getMyUser()
 
     // We didn't perform atomization - for a small use case like this, we should be fine.

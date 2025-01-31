@@ -34,6 +34,20 @@
     "title": "Log in to unlock more features!",
     "message": "Log in to use Pay Later, view your order history, and earn points! Currently only available to BAID students and faculty."
   },
+  "storeClosedModal": {
+    "title": "Store Closed",
+    "simple": "The store is currently closed.",
+    "message": "The store is currently closed. You can still view the menu, but you cannot place an order.",
+    "messageScheduledA": "The store is currently closed. You can still view the menu, but you cannot place an order. The store will reopen at {{time}}.",
+    "messageScheduledB": "The store is currently closed. You can still view the menu, but you cannot place an order. The store will reopen on the next weekday at {{time}}."
+  },
+  "maximumCupsModal": {
+    "title": "Capacity Reached",
+    "simple": "The store has reached its maximum capacity for orders.",
+    "message": "The store has reached its maximum capacity for orders. You can still view the menu, but you cannot place an order."
+  },
+  "maximumCupsPerOrder_one": "You can only order {{count}} cup at a time.",
+  "maximumCupsPerOrder_other": "You can only order {{count}} cups at a time.",
   "addItem": "Add",
   "itemDetails": {
     "sale": "{{sale}}% off!",

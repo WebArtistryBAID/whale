@@ -34,7 +34,7 @@
     "balance": {
       "title": "Balance",
       "recharge": "Recharge",
-      "balanceInfo": "Balance is non-refundable. You can hold up to ¥500 at a time."
+      "balanceInfo": "Balance is non-refundable. You can hold up to ¥{{max}} at a time."
     },
     "points": {
       "title": "Points",

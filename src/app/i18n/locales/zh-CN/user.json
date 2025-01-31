@@ -34,7 +34,7 @@
     "balance": {
       "title": "余额",
       "recharge": "充值",
-      "balanceInfo": "余额不可退还，最多能持有 ¥500。"
+      "balanceInfo": "余额不可退还，最多能持有 ¥{{max}}。"
     },
     "points": {
       "title": "积分",

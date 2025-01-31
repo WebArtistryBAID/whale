@@ -7,14 +7,25 @@ import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { toggleInboxNotification, toggleSMSNotification } from '@/app/login/login-actions'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
+import { getConfigValue } from '@/app/lib/settings-actions'
+import Decimal from 'decimal.js'
 
 export default function UserDashboardClient({ user }: { user: User }) {
     const { t } = useTranslationClient('user')
     const router = useRouter()
     const [ loading, setLoading ] = useState(false)
+    const [ balanceMax, setBalanceMax ] = useState(Decimal(-1))
+    const [ rechargeMin, setRechargeMin ] = useState(Decimal(-1))
     const removeCookie = useCookies()[2]
+
+    useEffect(() => {
+        (async () => {
+            setBalanceMax(Decimal((await getConfigValue('maximum-balance'))!))
+            setRechargeMin(Decimal((await getConfigValue('balance-recharge-minimum'))!))
+        })()
+    }, [])
 
     return <div className="container">
         <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-3">
@@ -54,10 +65,12 @@ export default function UserDashboardClient({ user }: { user: User }) {
                 <h2 aria-hidden className="text-sm font-normal mb-3">{t('dashboard.balance.title')}</h2>
                 <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
                     <p className="text-xl mb-3">¥{user.balance}</p>
-                    <Button color="warning" pill className="mb-3" onClick={() => {
-                        // TODO Implement balance recharge
-                    }}>{t('dashboard.balance.recharge')}</Button>
-                    <p className="text-sm secondary">{t('dashboard.balance.balanceInfo')}</p>
+                    <If condition={Decimal(user.balance).lte(balanceMax.minus(rechargeMin))}>
+                        <Button color="warning" pill className="mb-3" onClick={() => {
+                            // TODO Implement balance recharge
+                        }}>{t('dashboard.balance.recharge')}</Button>
+                    </If>
+                    <p className="text-sm secondary">{t('dashboard.balance.balanceInfo', { max: balanceMax.toString() })}</p>
                 </div>
             </div>
 
