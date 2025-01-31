@@ -123,6 +123,12 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                     {t('details.orderNumberPrompt')}
                 </Alert>
 
+                <If condition={order.paymentStatus === PaymentStatus.refunded}>
+                    <Alert color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
+                        {t('details.refundedPrompt')}
+                    </Alert>
+                </If>
+
                 <If condition={order.paymentStatus === PaymentStatus.notPaid}>
                     <If condition={order.paymentMethod === PaymentMethod.payLater}>
                         <Alert additionalContent={<div className="text-left">
