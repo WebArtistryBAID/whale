@@ -195,7 +195,7 @@ enum UserAuditLogType {
   unblocked
   permissionsUpdated
   balanceTransaction
-  balanceUpdated
+  balanceUsed
   pointsUpdated
 
   orderCreated
