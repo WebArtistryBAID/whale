@@ -36,6 +36,17 @@ function daysInMonths(year: number): number[] {
     return [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ]
 }
 
+function theme() {
+    return {
+        mode: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+        monochrome: {
+            enabled: true,
+            color: '#F86624',
+            shadeTo: 'dark'
+        }
+    }
+}
+
 export default function ManageStatsClient({ stats }: { stats: StatsAggregates }) {
     const { t } = useTranslationClient('user')
     const current = new Date()
@@ -185,7 +196,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                 </Block>
                                 <Block title={t('manage.stats.revenueByGender')} center aria-hidden>
                                     <ReactApexChart width={380} type="pie" options={{
-                                        labels: [ t('manage.stats.male'), t('manage.stats.female'), t('manage.stats.others'), t('manage.stats.anonymous') ]
+                                        labels: [ t('manage.stats.male'), t('manage.stats.female'), t('manage.stats.others'), t('manage.stats.anonymous') ],
+                                        theme: theme() as never
                                     }} series={[
                                         parseFloat(item.revenueGenderDistribution['male']),
                                         parseFloat(item.revenueGenderDistribution['female']),
@@ -194,7 +206,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                 </Block>
                                 <Block title={t('manage.stats.cupsByGender')} center aria-hidden>
                                     <ReactApexChart width={380} type="pie" options={{
-                                        labels: [ t('manage.stats.male'), t('manage.stats.female'), t('manage.stats.others'), t('manage.stats.anonymous') ]
+                                        labels: [ t('manage.stats.male'), t('manage.stats.female'), t('manage.stats.others'), t('manage.stats.anonymous') ],
+                                        theme: theme() as never
                                     }} series={[
                                         item.cupsGenderDistribution['male'],
                                         item.cupsGenderDistribution['female'],
@@ -225,7 +238,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                     x: {
                                         format: 'dd/MM/yy'
                                     }
-                                }
+                                },
+                                theme: theme() as never
                             }} series={[
                                 {
                                     name: t('manage.stats.orders'),
@@ -254,7 +268,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                     x: {
                                         format: 'dd/MM/yy'
                                     }
-                                }
+                                },
+                                theme: theme() as never
                             }} series={[
                                 {
                                     name: t('manage.stats.revenue'),
@@ -315,7 +330,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                             text: `¥${data.averageOrderValuePerUnit[i]}`
                                         }
                                     }))
-                                }
+                                },
+                                theme: theme() as never
                             }} series={[ {
                                 data: Array.from({ length: days.length }).map((_, i) => ({
                                     x: days[i].slice(0, 10),
@@ -364,7 +380,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                             text: data.averageOrderCupsPerUnit[i].toString()
                                         }
                                     }))
-                                }
+                                },
+                                theme: theme() as never
                             }} series={[ {
                                 data: Array.from({ length: days.length }).map((_, i) => ({
                                     x: days[i].slice(0, 10),
@@ -382,7 +399,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             <ReactApexChart width={380} type="pie" options={{
                                 labels: Object.entries(data.categoryRevenueDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                                    .map(([ k ]) => data.mentionedCategories[parseInt(k)])
+                                    .map(([ k ]) => data.mentionedCategories[parseInt(k)]),
+                                theme: theme() as never
                             }} series={
                                 Object.entries(data.categoryRevenueDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
@@ -393,7 +411,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             <ReactApexChart width={380} type="pie" options={{
                                 labels: Object.entries(data.categoryCupsDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                                    .map(([ k ]) => data.mentionedCategories[parseInt(k)])
+                                    .map(([ k ]) => data.mentionedCategories[parseInt(k)]),
+                                theme: theme() as never
                             }} series={
                                 Object.entries(data.categoryCupsDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
@@ -404,7 +423,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             <ReactApexChart width={380} type="pie" options={{
                                 labels: Object.entries(data.itemRevenueDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                                    .map(([ k ]) => data.mentionedItems[parseInt(k)])
+                                    .map(([ k ]) => data.mentionedItems[parseInt(k)]),
+                                theme: theme() as never
                             }} series={
                                 Object.entries(data.itemRevenueDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
@@ -415,7 +435,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             <ReactApexChart width={380} type="pie" options={{
                                 labels: Object.entries(data.itemCupsDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                                    .map(([ k ]) => data.mentionedItems[parseInt(k)])
+                                    .map(([ k ]) => data.mentionedItems[parseInt(k)]),
+                                theme: theme() as never
                             }} series={
                                 Object.entries(data.itemCupsDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
@@ -432,7 +453,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             <ReactApexChart width={380} type="pie" options={{
                                 labels: Object.entries(data.userRevenueDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                                    .map(([ k ]) => k === '-1' ? t('manage.stats.anonymous') : data.mentionedUsers[parseInt(k)])
+                                    .map(([ k ]) => k === '-1' ? t('manage.stats.anonymous') : data.mentionedUsers[parseInt(k)]),
+                                theme: theme() as never
                             }} series={
                                 Object.entries(data.userRevenueDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
@@ -443,7 +465,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             <ReactApexChart width={380} type="pie" options={{
                                 labels: Object.entries(data.userCupsDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                                    .map(([ k ]) => k === '-1' ? t('manage.stats.anonymous') : data.mentionedUsers[parseInt(k)])
+                                    .map(([ k ]) => k === '-1' ? t('manage.stats.anonymous') : data.mentionedUsers[parseInt(k)]),
+                                theme: theme() as never
                             }} series={
                                 Object.entries(data.userCupsDistribution)
                                     .toSorted((a, b) => parseInt(a[0]) - parseInt(b[0]))
@@ -452,7 +475,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                         </Block>
                         <Block title={t('manage.stats.revenueByGender')} center aria-hidden>
                             <ReactApexChart width={380} type="pie" options={{
-                                labels: [ t('manage.stats.male'), t('manage.stats.female'), t('manage.stats.others'), t('manage.stats.anonymous') ]
+                                labels: [ t('manage.stats.male'), t('manage.stats.female'), t('manage.stats.others'), t('manage.stats.anonymous') ],
+                                theme: theme() as never
                             }} series={[
                                 parseFloat(data.genderRevenueDistribution['male']),
                                 parseFloat(data.genderRevenueDistribution['female']),
@@ -461,7 +485,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                         </Block>
                         <Block title={t('manage.stats.cupsByGender')} center aria-hidden>
                             <ReactApexChart width={380} type="pie" options={{
-                                labels: [ t('manage.stats.male'), t('manage.stats.female'), t('manage.stats.others'), t('manage.stats.anonymous') ]
+                                labels: [ t('manage.stats.male'), t('manage.stats.female'), t('manage.stats.others'), t('manage.stats.anonymous') ],
+                                theme: theme() as never
                             }} series={[
                                 data.genderCupsDistribution['male'],
                                 data.genderCupsDistribution['female'],
@@ -476,7 +501,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                     <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <Block title={t('manage.stats.paymentMethod')} center aria-hidden>
                             <ReactApexChart width={380} type="pie" options={{
-                                labels: [ t('manage.stats.wxPay'), t('manage.stats.balance'), t('manage.stats.cash'), t('manage.stats.payLater'), t('manage.stats.payForMe') ]
+                                labels: [ t('manage.stats.wxPay'), t('manage.stats.balance'), t('manage.stats.cash'), t('manage.stats.payLater'), t('manage.stats.payForMe') ],
+                                theme: theme() as never
                             }} series={[
                                 data.paymentMethodDistribution.wxPay ?? 0,
                                 data.paymentMethodDistribution.balance ?? 0,
@@ -487,7 +513,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                         </Block>
                         <Block title={t('manage.stats.paymentStatus')} center aria-hidden>
                             <ReactApexChart width={380} type="pie" options={{
-                                labels: [ t('manage.stats.paid'), t('manage.stats.notPaid'), t('manage.stats.refunded') ]
+                                labels: [ t('manage.stats.paid'), t('manage.stats.notPaid'), t('manage.stats.refunded') ],
+                                theme: theme() as never
                             }} series={[
                                 data.paymentStatusDistribution.paid ?? 0,
                                 data.paymentStatusDistribution.notPaid ?? 0,
