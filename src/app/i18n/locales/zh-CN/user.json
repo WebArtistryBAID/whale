@@ -257,7 +257,8 @@
       "name": "名称",
       "value": "价值",
       "view": "查看",
-      "actions": "操作"
+      "actions": "操作",
+      "empty": "暂时没有任何内容。"
     }
   },
   "today": {

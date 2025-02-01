@@ -257,7 +257,8 @@
       "name": "Name",
       "value": "Value",
       "view": "View",
-      "actions": "Actions"
+      "actions": "Actions",
+      "empty": "No items."
     }
   },
   "today": {

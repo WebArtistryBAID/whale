@@ -17,6 +17,8 @@ import {
 import { HiCash, HiCog, HiCollection, HiGift, HiTag } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
+import If from '@/app/lib/If'
+import Image from 'next/image'
 
 export default function ManageStorefrontClient({ categories, optionTypes, couponCodes, tags, ads }: {
     categories: Category[],
@@ -37,102 +39,177 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
         <Tabs aria-label={t('manage.storefront.tabs')} className="mb-5" variant="underline">
             <TabItem title={t('manage.storefront.categories')} color="warning" className="inline-block"
                      icon={HiCollection}>
-                <Table className="mb-5">
-                    <TableHead>
-                        <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                        <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
-                        <TableHeadCell><span className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                    </TableHead>
-                    <TableBody className="divide-y mb-3">
-                        {categories.map(category => <TableRow className="tr" key={category.id}>
-                            <TableCell className="th">{category.id}</TableCell>
-                            <TableCell>{category.name}</TableCell>
-                            <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                               href={`/user/manage/storefront/categories/${category.id}`}>
-                                {t('manage.storefront.view')}</Button></TableCell>
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-                <Button color="warning" pill as={Link} href="/user/manage/storefront/categories/create"
-                        className="inline-block">{t('manage.storefront.create')}</Button>
+                <If condition={categories.length > 0}>
+                    <Button color="warning" pill as={Link} href="/user/manage/storefront/categories/create"
+                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Table className="mb-5">
+                        <TableHead>
+                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
+                            <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
+                            <TableHeadCell><span
+                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
+                        </TableHead>
+                        <TableBody className="divide-y mb-3">
+                            {categories.map(category => <TableRow className="tr" key={category.id}>
+                                <TableCell className="th">{category.id}</TableCell>
+                                <TableCell>{category.name}</TableCell>
+                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
+                                                   href={`/user/manage/storefront/categories/${category.id}`}>
+                                    {t('manage.storefront.view')}</Button></TableCell>
+                            </TableRow>)}
+                        </TableBody>
+                    </Table>
+                </If>
+                <If condition={categories.length < 1}>
+                    <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                               className="dark:hidden w-72" alt=""/>
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                               className="hidden dark:block w-72" alt=""/>
+                        <p className="mb-3">{t('manage.storefront.empty')}</p>
+                        <Button color="warning" pill as={Link} href="/user/manage/storefront/categories/create"
+                                className="inline-block">{t('manage.storefront.create')}</Button>
+                    </div>
+                </If>
+
             </TabItem>
             <TabItem title={t('manage.storefront.optionTypes')} icon={HiCog}>
-                <Table className="mb-5">
-                    <TableHead>
-                        <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                        <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
-                        <TableHeadCell><span className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                    </TableHead>
-                    <TableBody className="divide-y mb-3">
-                        {optionTypes.map(option => <TableRow className="tr" key={option.id}>
-                            <TableCell className="th">{option.id}</TableCell>
-                            <TableCell>{option.name}</TableCell>
-                            <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                               href={`/user/manage/storefront/option-types/${option.id}`}>
-                                {t('manage.storefront.view')}</Button></TableCell>
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-                <Button color="warning" pill as={Link} href="/user/manage/storefront/option-types/create"
-                        className="inline-block">{t('manage.storefront.create')}</Button>
+                <If condition={optionTypes.length > 0}>
+                    <Button color="warning" pill as={Link} href="/user/manage/storefront/option-types/create"
+                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Table className="mb-5">
+                        <TableHead>
+                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
+                            <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
+                            <TableHeadCell><span
+                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
+                        </TableHead>
+                        <TableBody className="divide-y mb-3">
+                            {optionTypes.map(option => <TableRow className="tr" key={option.id}>
+                                <TableCell className="th">{option.id}</TableCell>
+                                <TableCell>{option.name}</TableCell>
+                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
+                                                   href={`/user/manage/storefront/option-types/${option.id}`}>
+                                    {t('manage.storefront.view')}</Button></TableCell>
+                            </TableRow>)}
+                        </TableBody>
+                    </Table>
+                </If>
+
+                <If condition={optionTypes.length < 1}>
+                    <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                               className="dark:hidden w-72" alt=""/>
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                               className="hidden dark:block w-72" alt=""/>
+                        <p className="mb-3">{t('manage.storefront.empty')}</p>
+                        <Button color="warning" pill as={Link} href="/user/manage/storefront/option-types/create"
+                                className="inline-block">{t('manage.storefront.create')}</Button>
+                    </div>
+                </If>
             </TabItem>
             <TabItem title={t('manage.storefront.couponCodes')} icon={HiCash}>
-                <Table className="mb-5">
-                    <TableHead>
-                        <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                        <TableHeadCell>{t('manage.storefront.value')}</TableHeadCell>
-                        <TableHeadCell><span className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                    </TableHead>
-                    <TableBody className="divide-y mb-3">
-                        {couponCodes.map(coupon => <TableRow className="tr" key={coupon.id}>
-                            <TableCell className="th">{coupon.id}</TableCell>
-                            <TableCell>¥{coupon.value}</TableCell>
-                            <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                               href={`/user/manage/storefront/coupons/${coupon.id}`}>
-                                {t('manage.storefront.view')}</Button></TableCell>
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-                <Button color="warning" pill as={Link} href="/user/manage/storefront/coupons/create"
-                        className="inline-block">{t('manage.storefront.create')}</Button>
+                <If condition={couponCodes.length > 0}>
+                    <Button color="warning" pill as={Link} href="/user/manage/storefront/coupons/create"
+                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Table className="mb-5">
+                        <TableHead>
+                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
+                            <TableHeadCell>{t('manage.storefront.value')}</TableHeadCell>
+                            <TableHeadCell><span
+                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
+                        </TableHead>
+                        <TableBody className="divide-y mb-3">
+                            {couponCodes.map(coupon => <TableRow className="tr" key={coupon.id}>
+                                <TableCell className="th">{coupon.id}</TableCell>
+                                <TableCell>¥{coupon.value}</TableCell>
+                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
+                                                   href={`/user/manage/storefront/coupons/${coupon.id}`}>
+                                    {t('manage.storefront.view')}</Button></TableCell>
+                            </TableRow>)}
+                        </TableBody>
+                    </Table>
+                </If>
+
+                <If condition={couponCodes.length < 1}>
+                    <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                               className="dark:hidden w-72" alt=""/>
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                               className="hidden dark:block w-72" alt=""/>
+                        <p className="mb-3">{t('manage.storefront.empty')}</p>
+                        <Button color="warning" pill as={Link} href="/user/manage/storefront/coupons/create"
+                                className="inline-block">{t('manage.storefront.create')}</Button>
+                    </div>
+                </If>
             </TabItem>
             <TabItem title={t('manage.storefront.tags')} icon={HiTag}>
-                <Table className="mb-5">
-                    <TableHead>
-                        <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                        <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
-                        <TableHeadCell><span className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                    </TableHead>
-                    <TableBody className="divide-y mb-3">
-                        {tags.map(tag => <TableRow className="tr" key={tag.id}>
-                            <TableCell className="th">{tag.id}</TableCell>
-                            <TableCell>{tag.name}</TableCell>
-                            <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                               href={`/user/manage/storefront/tags/${tag.id}`}>
-                                {t('manage.storefront.view')}</Button></TableCell>
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-                <Button color="warning" pill as={Link} href="/user/manage/storefront/tags/create"
-                        className="inline-block">{t('manage.storefront.create')}</Button>
+                <If condition={tags.length > 0}>
+                    <Button color="warning" pill as={Link} href="/user/manage/storefront/tags/create"
+                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Table className="mb-5">
+                        <TableHead>
+                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
+                            <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
+                            <TableHeadCell><span
+                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
+                        </TableHead>
+                        <TableBody className="divide-y mb-3">
+                            {tags.map(tag => <TableRow className="tr" key={tag.id}>
+                                <TableCell className="th">{tag.id}</TableCell>
+                                <TableCell>{tag.name}</TableCell>
+                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
+                                                   href={`/user/manage/storefront/tags/${tag.id}`}>
+                                    {t('manage.storefront.view')}</Button></TableCell>
+                            </TableRow>)}
+                        </TableBody>
+                    </Table>
+                </If>
+
+                <If condition={tags.length < 1}>
+                    <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                               className="dark:hidden w-72" alt=""/>
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                               className="hidden dark:block w-72" alt=""/>
+                        <p className="mb-3">{t('manage.storefront.empty')}</p>
+                        <Button color="warning" pill as={Link} href="/user/manage/storefront/tags/create"
+                                className="inline-block">{t('manage.storefront.create')}</Button>
+                    </div>
+                </If>
             </TabItem>
             <TabItem title={t('manage.storefront.ads')} icon={HiGift}>
-                <Table className="mb-5">
-                    <TableHead>
-                        <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                        <TableHeadCell><span className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                    </TableHead>
-                    <TableBody className="divide-y mb-3">
-                        {ads.map(ad => <TableRow className="tr" key={ad.id}>
-                            <TableCell className="th">{ad.id}</TableCell>
-                            <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                               href={`/user/manage/storefront/ads/${ad.id}`}>
-                                {t('manage.storefront.view')}</Button></TableCell>
-                        </TableRow>)}
-                    </TableBody>
-                </Table>
-                <Button color="warning" pill as={Link} href="/user/manage/storefront/ads/create"
-                        className="inline-block">{t('manage.storefront.create')}</Button>
+                <If condition={ads.length > 0}>
+                    <Button color="warning" pill as={Link} href="/user/manage/storefront/ads/create"
+                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Table className="mb-5">
+                        <TableHead>
+                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
+                            <TableHeadCell><span
+                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
+                        </TableHead>
+                        <TableBody className="divide-y mb-3">
+                            {ads.map(ad => <TableRow className="tr" key={ad.id}>
+                                <TableCell className="th">{ad.id}</TableCell>
+                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
+                                                   href={`/user/manage/storefront/ads/${ad.id}`}>
+                                    {t('manage.storefront.view')}</Button></TableCell>
+                            </TableRow>)}
+                        </TableBody>
+                    </Table>
+                </If>
+
+                <If condition={ads.length < 1}>
+                    <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                               className="dark:hidden w-72" alt=""/>
+                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                               className="hidden dark:block w-72" alt=""/>
+                        <p className="mb-3">{t('manage.storefront.empty')}</p>
+                        <Button color="warning" pill as={Link} href="/user/manage/storefront/ads/create"
+                                className="inline-block">{t('manage.storefront.create')}</Button>
+                    </div>
+                </If>
             </TabItem>
         </Tabs>
     </div>
