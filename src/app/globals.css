@@ -38,11 +38,11 @@ h1 {
 }
 
 h2 {
-    @apply font-display text-2xl font-bold;
+    @apply font-display text-2xl;
 }
 
 h3 {
-    @apply font-display text-xl font-bold;
+    @apply font-display text-xl;
 }
 
 .secondary {

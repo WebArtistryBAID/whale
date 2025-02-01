@@ -138,7 +138,8 @@ export default function UserLayout({ children }: { children: ReactNode }) {
             <div className="h-screen hidden lg:block">
                 {sidebar}
             </div>
-            <div className="flex-grow h-screen max-h-screen overflow-y-auto" style={{ overflowY: 'auto' }}>
+            <div className="flex-grow h-screen max-h-screen overflow-y-auto" aria-label={t('a11y.mainContent')}
+                 style={{ overflowY: 'auto' }}>
                 {children}
             </div>
         </div>

@@ -24,7 +24,8 @@
     "betaDetails": "Project Whale 正在测试。如遇问题，请联系 Lin。"
   },
   "a11y": {
-    "page": "第 {{page}} 页，共 {{pages}} 页。分页导航在页面底部。"
+    "page": "第 {{page}} 页，共 {{pages}} 页。分页导航在页面底部。",
+    "mainContent": "主内容"
   },
   "breadcrumb": {
     "bc": "导航",

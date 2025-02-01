@@ -45,41 +45,26 @@ export interface StatsAggregates {
 }
 
 export interface NewItemStats {
+    id: number
     cups: number
     revenue: string
     cupsGenderDistribution: { [gender: string]: number }
     revenueGenderDistribution: { [gender: string]: string }
 }
 
-export enum RangeType {
-    day = 'day',
-    week = 'week',
-    month = 'month',
-}
-
 function days(year: number): number[] {
     if ((year & 3) == 0 && ((year % 25) != 0 || (year & 15) == 0)) {
-        return [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        return [ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ]
     }
-    return [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    return [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ]
 }
 
-// Simple memory cache
-const cached: { [key: string]: { data: StatsAggregates, time: number } } = {}
-
-export default async function getStats(range: RangeType, start: Date): Promise<StatsAggregates> {
-    await requireUserPermission('admin.manage')
-    const key = range + start.getTime()
-    if (key in cached && (new Date().getTime()) - cached[key].time < 30 * 60 * 1000) {
-        return cached[key].data
-    }
-    cached[key].data = await getRawStats(range, start)
-    cached[key].time = new Date().getTime()
-    return cached[key].data
+function mod(n: number, m: number): number {
+    return ((n % m) + m) % m
 }
 
 // One big, ugly function to generate all the stats
-async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregates> {
+async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promise<StatsAggregates> {
     const mentionedItems: { [item: number]: string } = {}
     const mentionedUsers: { [userId: number]: string } = {}
     const mentionedCategories: { [category: number]: string } = {}
@@ -96,7 +81,7 @@ async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregat
     const lastStart = new Date(start.getTime() - {
         day: 24 * 60 * 60 * 1000,
         week: 7 * 24 * 60 * 60 * 1000,
-        month: days(start.getMonth() === 0 ? start.getFullYear() - 1 : start.getFullYear())[(start.getMonth() - 1) % 12] * 24 * 60 * 60 * 1000
+        month: days(start.getMonth() === 0 ? start.getFullYear() - 1 : start.getFullYear())[mod(start.getMonth() - 1, 12)] * 24 * 60 * 60 * 1000
     }[range])
 
     // 1. Fill new item stats
@@ -147,6 +132,7 @@ async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregat
             revenueGender[orderedItem.order.user?.gender ?? 'anonymous'] = revenueGender[orderedItem.order.user?.gender ?? 'anonymous'].add(orderedItem.price)
         }
         newItems.push({
+            id: item.id,
             cups,
             revenue: revenue.toString(),
             cupsGenderDistribution: cupsGender,
@@ -241,7 +227,7 @@ async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregat
             maxOrderValuePerUnit[thisOrderIndex] = order.totalPrice
         }
         if (Decimal(order.totalPrice).lt(minOrderValuePerUnit[thisOrderIndex])) {
-            minOrderValuePerUnit[thisOrderIndex] = order.totalPrice
+            minOrderValuePerUnit[thisOrderIndex] = Decimal(order.totalPrice)
         }
 
         totalOrders++
@@ -262,12 +248,18 @@ async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregat
         }
     }
 
-    avgOrderValue = avgOrderValue.div(totalOrders)
-    avgOrderCups = avgOrderCups / totalOrders
+    avgOrderValue = avgOrderValue.div(Math.max(totalOrders, 1))
+    avgOrderCups = avgOrderCups / Math.max(totalOrders, 1)
 
     for (let i = 0; i < revenuePerUnit.length; i++) {
-        avgOrderValuePerUnit[i] = avgOrderValuePerUnit[i].div(ordersPerUnit[i])
-        avgOrderCupsPerUnit[i] = avgOrderCupsPerUnit[i] / ordersPerUnit[i]
+        avgOrderValuePerUnit[i] = avgOrderValuePerUnit[i].div(Math.max(ordersPerUnit[i], 1))
+        avgOrderCupsPerUnit[i] = avgOrderCupsPerUnit[i] / Math.max(ordersPerUnit[i], 1)
+        if (minOrderValuePerUnit[i].eq(1e9)) {
+            minOrderValuePerUnit[i] = Decimal(0)
+        }
+        if (minOrderCupsPerUnit[i] === 1e9) {
+            minOrderCupsPerUnit[i] = 0
+        }
     }
 
     // 3. Fill total revenue, orders, and cups from last unit
@@ -296,7 +288,7 @@ async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregat
             lastTotalCups += orderedItem.amount
         }
     }
-    if (lastTotalRevenue === Decimal(0)) {
+    if (lastTotalRevenue.eq(0)) {
         lastTotalRevenue = null
     }
     if (lastTotalOrders === 0) {
@@ -356,10 +348,11 @@ async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregat
 
     return {
         newItems: newItems.map(item => ({
+            id: item.id,
             cups: item.cups,
             revenue: item.revenue,
             cupsGenderDistribution: item.cupsGenderDistribution,
-            revenueGenderDistribution: Object.fromEntries(Object.entries(item.revenueGenderDistribution).map(([k, v]) => [k, v.toString()]))
+            revenueGenderDistribution: Object.fromEntries(Object.entries(item.revenueGenderDistribution).map(([ k, v ]) => [ k, v.toString() ]))
         })),
         totalRevenue: totalRevenue.toString(),
         totalOrders,
@@ -371,13 +364,13 @@ async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregat
         cupsPerUnit,
         revenuePerUnit: revenuePerUnit.map(x => x.toString()),
         categoryCupsDistribution,
-        categoryRevenueDistribution: Object.fromEntries(Object.entries(categoryRevenueDistribution).map(([k, v]) => [k, v.toString()])),
+        categoryRevenueDistribution: Object.fromEntries(Object.entries(categoryRevenueDistribution).map(([ k, v ]) => [ k, v.toString() ])),
         itemCupsDistribution,
-        itemRevenueDistribution: Object.fromEntries(Object.entries(itemRevenueDistribution).map(([k, v]) => [k, v.toString()])),
+        itemRevenueDistribution: Object.fromEntries(Object.entries(itemRevenueDistribution).map(([ k, v ]) => [ k, v.toString() ])),
         genderCupsDistribution,
-        genderRevenueDistribution: Object.fromEntries(Object.entries(genderRevenueDistribution).map(([k, v]) => [k, v.toString()])),
+        genderRevenueDistribution: Object.fromEntries(Object.entries(genderRevenueDistribution).map(([ k, v ]) => [ k, v.toString() ])),
         userCupsDistribution,
-        userRevenueDistribution: Object.fromEntries(Object.entries(userRevenueDistribution).map(([k, v]) => [k, v.toString()])),
+        userRevenueDistribution: Object.fromEntries(Object.entries(userRevenueDistribution).map(([ k, v ]) => [ k, v.toString() ])),
         paymentMethodDistribution,
         paymentStatusDistribution,
         averageOrderValue: avgOrderValue.toString(),
@@ -392,4 +385,26 @@ async function getRawStats(range: RangeType, start: Date): Promise<StatsAggregat
         mentionedUsers,
         mentionedItems
     }
+}
+
+// Simple memory cache
+const cached: { [key: string]: { data: StatsAggregates, time: number } } = {}
+
+export async function getStats(range: 'week' | 'month' | 'day', start: Date): Promise<StatsAggregates> {
+    await requireUserPermission('admin.manage')
+    if (range === 'week') {
+        start.setDate(start.getDate() - start.getDay() + 1)
+    }
+    if (range === 'month') {
+        start.setDate(1)
+    }
+    const key = range + start.getTime()
+    if (key in cached && (new Date().getTime()) - cached[key].time < 30 * 60 * 1000) {
+        return cached[key].data
+    }
+    cached[key] = {
+        data: await getRawStats(range, start),
+        time: new Date().getTime()
+    }
+    return cached[key].data
 }
