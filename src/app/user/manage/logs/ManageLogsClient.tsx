@@ -19,7 +19,7 @@ import { HiCollection } from 'react-icons/hi'
 import If from '@/app/lib/If'
 import Image from 'next/image'
 import { UserAuditLogType } from '@prisma/client'
-import { getAuditLogs } from '@/app/lib/manage-actions'
+import { getAuditLogs } from '@/app/lib/order-manage-actions'
 import Link from 'next/link'
 
 export default function ManageLogsClient({ init }: { init: Paginated<HydratedUserAuditLog> }) {

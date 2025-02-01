@@ -21,7 +21,7 @@ import { HiCollection, HiHashtag } from 'react-icons/hi'
 import If from '@/app/lib/If'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getOrders } from '@/app/lib/manage-actions'
+import { getOrders } from '@/app/lib/order-manage-actions'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { useRouter } from 'next/navigation'
 

@@ -3,7 +3,7 @@
 import { HydratedOrder } from '@/app/lib/ordering-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 import { useEffect, useState } from 'react'
-import { getWaitingOrders } from '@/app/lib/manage-actions'
+import { getWaitingOrders } from '@/app/lib/order-manage-actions'
 import ManageOrderClient from '@/app/user/manage/orders/[id]/ManageOrderClient'
 import Image from 'next/image'
 import { Button } from 'flowbite-react'

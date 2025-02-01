@@ -30,7 +30,7 @@ import Paginated from '@/app/lib/Paginated'
 import { getMyOrders } from '@/app/lib/user-actions'
 import Link from 'next/link'
 import Decimal from 'decimal.js'
-import { setUserPoints } from '@/app/lib/manage-actions'
+import { setUserPoints } from '@/app/lib/order-manage-actions'
 
 export default function ManageUserClient({ user, init }: { user: User, init: Paginated<Order> }) {
     const { t } = useTranslationClient('user')

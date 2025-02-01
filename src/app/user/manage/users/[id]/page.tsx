@@ -1,6 +1,6 @@
 import { getUser } from '@/app/login/login-actions'
 import ManageUserClient from '@/app/user/manage/users/[id]/ManageUserClient'
-import { getUserOrders } from '@/app/lib/manage-actions'
+import { getUserOrders } from '@/app/lib/order-manage-actions'
 
 export default async function StudioUserBase({ params }: { params: Promise<{ id: string }> }) {
     const id = (await params).id

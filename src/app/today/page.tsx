@@ -1,4 +1,4 @@
-import { getWaitingOrders } from '@/app/lib/manage-actions'
+import { getWaitingOrders } from '@/app/lib/order-manage-actions'
 import { getMyUser } from '@/app/login/login-actions'
 import { redirect } from 'next/navigation'
 import WaitingOrdersClient from '@/app/today/WaitingOrdersClient'

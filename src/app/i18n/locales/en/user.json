@@ -13,7 +13,7 @@
     "inbox": "Inbox",
     "auditLogs": "Transactions",
     "manageCategory": "Management",
-    "manageStore": "Store",
+    "manageStore": "Storefront",
     "manageAuditLogs": "Transactions",
     "manageStats": "Statistics",
     "manageSettings": "Settings",
@@ -242,8 +242,22 @@
       "notPaid": "Not Paid",
       "refunded": "Refunded",
       "paymentMethod": "Orders by Payment Method",
-      "paymentStatus": "Orders by Payment Status",
-      "export": "Export Report"
+      "paymentStatus": "Orders by Payment Status"
+    },
+    "storefront": {
+      "title": "Storefront",
+      "categories": "Categories and Items",
+      "optionTypes": "Option Types",
+      "couponCodes": "Coupon Codes",
+      "tags": "Tags",
+      "ads": "Ads",
+      "create": "Create",
+      "tabs": "Tabs",
+      "id": "ID",
+      "name": "Name",
+      "value": "Value",
+      "view": "View",
+      "actions": "Actions"
     }
   },
   "today": {

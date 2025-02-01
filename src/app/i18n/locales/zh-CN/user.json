@@ -13,7 +13,7 @@
     "inbox": "收件箱",
     "auditLogs": "交易记录",
     "manageCategory": "管理",
-    "manageStore": "商店",
+    "manageStore": "店面",
     "manageAuditLogs": "交易记录",
     "manageStats": "统计数据",
     "manageSettings": "设置",
@@ -225,10 +225,10 @@
       "averageCups": "每单平均杯数",
       "averageRevenuePerDay": "每日收入",
       "averageCupsPerDay": "每日杯数",
-      "revenueByCategories": "分类收入",
-      "cupsByCategories": "分类杯数",
-      "revenueByItems": "产品收入",
-      "cupsByItems": "产品杯数",
+      "revenueByCategories": "按类目收入",
+      "cupsByCategories": "按类目杯数",
+      "revenueByItems": "按产品收入",
+      "cupsByItems": "按产品杯数",
       "revenueByUsers": "按用户收入",
       "cupsByUsers": "按用户杯数",
       "revenueByGender": "按性别收入",
@@ -242,8 +242,22 @@
       "notPaid": "未支付",
       "refunded": "已退款",
       "paymentMethod": "按支付方式订单数",
-      "paymentStatus": "按支付状态订单数",
-      "export": "导出报告"
+      "paymentStatus": "按支付状态订单数"
+    },
+    "storefront": {
+      "title": "店面",
+      "categories": "类目与产品",
+      "optionTypes": "选项类型",
+      "couponCodes": "代金券",
+      "tags": "标签",
+      "ads": "广告",
+      "create": "创建",
+      "tabs": "标签页",
+      "id": "ID",
+      "name": "名称",
+      "value": "价值",
+      "view": "查看",
+      "actions": "操作"
     }
   },
   "today": {

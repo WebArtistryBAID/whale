@@ -32,6 +32,21 @@ const customTheme: CustomFlowbiteTheme = {
                 }
             }
         }
+    },
+    tabs: {
+        tablist: {
+            tabitem: {
+                base: 'flex items-center justify-center rounded-t-lg p-4 text-sm font-medium first:ml-0 focus:outline-none focus:ring-4 focus:ring-yellow-200 disabled:cursor-not-allowed disabled:text-gray-400 disabled:dark:text-gray-500',
+                variant: {
+                    underline: {
+                        base: 'rounded-t-lg',
+                        active: {
+                            on: 'active rounded-t-lg border-b-2 border-yellow-500 text-yellow-500 dark:border-yellow-400 dark:text-yellow-400'
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
