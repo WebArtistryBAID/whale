@@ -257,10 +257,15 @@ export async function createOrder(items: OrderedItemTemplate[],
         return null
     }
 
-    // Ensure items aren't sold out
+    // Ensure items and options aren't sold out
     for (const item of items) {
         if (item.item.soldOut) {
             return null
+        }
+        for (const option of item.options) {
+            if (option.soldOut) {
+                return null
+            }
         }
     }
 
