@@ -90,7 +90,7 @@
     "view": "查看",
     "empty": "您还没有任何订单。想喝点什么吗?",
     "cta": "现在点单",
-    "today": "处理今日订单",
+    "today": "等待中订单",
     "onSite": "现场点单模式",
     "onSiteExit": "退出现场点单"
   },
@@ -222,6 +222,10 @@
       "messageCash": "现金退款需要人工操作，请与用户确认。",
       "messageBalance": "退款会立即进入用户余额。",
       "messageWeChat": "退款会在 14 个工作日内进入用户的微信支付账号。"
-    }
+    },
+    "empty": "暂时没有订单。",
+    "return": "返回订单管理",
+    "ordersPane": "等待中订单",
+    "detailsPane": "订单详情"
   }
 }

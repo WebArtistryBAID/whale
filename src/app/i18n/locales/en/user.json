@@ -226,6 +226,6 @@
     "empty": "No orders yet.",
     "return": "Return to Order Management",
     "ordersPane": "Waiting Orders",
-    "detailsPane": "Order Detail"
+    "detailsPane": "Order Details"
   }
 }
