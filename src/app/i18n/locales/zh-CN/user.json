@@ -242,7 +242,8 @@
       "notPaid": "未支付",
       "refunded": "已退款",
       "paymentMethod": "按支付方式订单数",
-      "paymentStatus": "按支付状态订单数"
+      "paymentStatus": "按支付状态订单数",
+      "export": "导出报告"
     }
   },
   "today": {

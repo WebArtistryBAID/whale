@@ -85,31 +85,31 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
         setActualEndDate(end)
     }, [ start, range ])
 
-    return <div className="container">
+    return <div className="container" id="export-target">
         <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-3">
             <BreadcrumbItem icon={HiCollection} href="/user">{t('breadcrumb.manage')}</BreadcrumbItem>
             <BreadcrumbItem>{t('manage.stats.title')}</BreadcrumbItem>
         </Breadcrumb>
         <h1 className="mb-3">{t('manage.stats.title')}</h1>
         <div className="mb-5" aria-label={t('manage.stats.viewOptions')}>
+            <p className="mb-3">{t('manage.stats.showing', {
+                start: actualStartDate.toLocaleDateString(),
+                end: actualEndDate.toLocaleDateString(),
+                interpolation: { escapeValue: false }
+            })}</p>
+
             <Datepicker aria-label={t('manage.stats.date')} value={start} onChange={e => {
                 if (e != null) {
                     setStart(e)
                 }
             }} className="lg:max-w-sm mb-3" weekStart={1} autoHide/>
 
-            <Select aria-label={t('manage.stats.range')} value={range} className="mb-3 lg:max-w-sm"
+            <Select aria-label={t('manage.stats.range')} value={range} className="lg:max-w-sm"
                     onChange={e => setRange(e.currentTarget.value as 'week' | 'month' | 'day')}>
                 <option value="day">{t('manage.stats.day')}</option>
                 <option value="week">{t('manage.stats.week')}</option>
                 <option value="month">{t('manage.stats.month')}</option>
             </Select>
-
-            <p>{t('manage.stats.showing', {
-                start: actualStartDate.toLocaleDateString(),
-                end: actualEndDate.toLocaleDateString(),
-                interpolation: { escapeValue: false }
-            })}</p>
         </div>
         {loading ?
             <div className="w-full h-[60dvh] flex flex-col justify-center items-center">

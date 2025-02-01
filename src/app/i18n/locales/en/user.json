@@ -242,7 +242,8 @@
       "notPaid": "Not Paid",
       "refunded": "Refunded",
       "paymentMethod": "Orders by Payment Method",
-      "paymentStatus": "Orders by Payment Status"
+      "paymentStatus": "Orders by Payment Status",
+      "export": "Export Report"
     }
   },
   "today": {
