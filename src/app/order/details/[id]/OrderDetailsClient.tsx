@@ -173,7 +173,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                             item: item.itemType,
                             amount: item.amount,
                             options: item.appliedOptions
-                        }} index={-1} uploadPrefix={uploadPrefix}/>)}
+                        }} index={-1} uploadPrefix={uploadPrefix} price={item.price}/>)}
                 </div>
             </div>
         </div>

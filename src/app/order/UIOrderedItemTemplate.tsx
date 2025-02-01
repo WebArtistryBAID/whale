@@ -4,10 +4,11 @@ import Image from 'next/image'
 import { Button } from 'flowbite-react'
 import If from '@/app/lib/If'
 
-export default function UIOrderedItemTemplate({ item, index, uploadPrefix }: {
+export default function UIOrderedItemTemplate({ item, index, uploadPrefix, price }: {
     item: OrderedItemTemplate,
     index: number,
-    uploadPrefix: string
+    uploadPrefix: string,
+    price: string | undefined
 }) {
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
@@ -23,11 +24,11 @@ export default function UIOrderedItemTemplate({ item, index, uploadPrefix }: {
             <div className="flex w-full items-center">
                 <p aria-hidden className="mr-auto">
                     x<span className="mr-3">{item.amount}</span>
-                    ¥{calculatePrice(item).toString()}
+                    ¥{price ?? calculatePrice(item).toString()}
                 </p>
                 <span className="sr-only">{t('a11y.priceAmountShoppingCart', {
                     item: item.amount,
-                    price: calculatePrice(item).toString()
+                    price: price ?? calculatePrice(item).toString()
                 })}</span>
                 <If condition={index !== -1}>
                     <Button pill size="xs" color="warning"
@@ -36,4 +37,8 @@ export default function UIOrderedItemTemplate({ item, index, uploadPrefix }: {
             </div>
         </div>
     </div>
+}
+
+UIOrderedItemTemplate.defaultProps = {
+    price: undefined
 }

@@ -26,6 +26,7 @@ export interface HydratedOrderedItem {
     itemTypeId: number
     appliedOptions: OptionItem[]
     amount: number
+    price: string
 }
 
 export interface HydratedOrder {
@@ -361,7 +362,8 @@ export async function createOrder(items: OrderedItemTemplate[],
                             id: option.id
                         }))
                     },
-                    amount: item.amount
+                    amount: item.amount,
+                    price: calculatePrice(item).toString()
                 }))
             },
             totalPrice: totalPrice.toString(),

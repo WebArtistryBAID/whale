@@ -116,26 +116,6 @@ export async function getOrders(page: number): Promise<Paginated<Order>> {
     }
 }
 
-export async function getTodayOrders(): Promise<HydratedOrder[]> {
-    await requireUserPermission('admin.manage')
-    return prisma.order.findMany({
-        where: {
-            createdAt: {
-                gte: new Date(new Date().setHours(0, 0, 0, 0))
-            }
-        },
-        include: {
-            items: {
-                include: {
-                    itemType: true,
-                    appliedOptions: true
-                }
-            },
-            user: true
-        }
-    })
-}
-
 export async function markOrderDone(id: number): Promise<void> {
     const me = await requireUserPermission('admin.manage')
     const order = await prisma.order.update({

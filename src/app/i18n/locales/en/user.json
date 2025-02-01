@@ -188,6 +188,9 @@
         "placeholder": "Points...",
         "minimum": "Must be at least 0."
       }
+    },
+    "stats": {
+      "title": "Statistics"
     }
   },
   "today": {

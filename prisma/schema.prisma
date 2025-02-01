@@ -117,6 +117,7 @@ model OptionItem {
 
 model ItemType {
   id               Int           @id @default(autoincrement())
+  createdAt        DateTime      @default(now())
   category         Category      @relation(fields: [categoryId], references: [id])
   categoryId       Int
   name             String
@@ -133,12 +134,14 @@ model ItemType {
 
 model OrderedItem {
   id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
   order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId        Int
   itemType       ItemType     @relation(fields: [itemTypeId], references: [id], onDelete: Cascade)
   itemTypeId     Int
   appliedOptions OptionItem[]
   amount         Int
+  price          String // This is not used in the total price calculation - for stats only
 }
 
 enum OrderStatus {
