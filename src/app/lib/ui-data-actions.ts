@@ -19,6 +19,7 @@ export interface HydratedOptionType {
 export interface HydratedItemType {
     id: number
     categoryId: number
+    createdAt: Date
     name: string
     image: string | null
     tags: Tag[]

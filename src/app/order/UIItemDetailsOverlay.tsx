@@ -38,9 +38,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
 
         for (const optionType of item.options) {
             const defaultOption = optionType.items.find(o => o.default)
-            if (defaultOption) {
-                options[optionType.id.toString()] = defaultOption.id
-            }
+            options[optionType.id.toString()] = defaultOption?.id ?? optionType.items[0].id
         }
 
         setSelectedOptions(options)
