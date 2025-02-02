@@ -88,7 +88,7 @@ export default function UploadAreaClient({ uploadPrefix, onDone }: {
         </button>
         <If condition={done}>
             <Image width={500} height={200} src={uploadPrefix + path} alt={t('manage.storefront.upload.alt')}
-                   className="mt-3 rounded-xl max-w-sm object-cover"/>
+                   className="mt-3 rounded-xl w-full lg:max-w-sm object-cover"/>
         </If>
     </div>
 }

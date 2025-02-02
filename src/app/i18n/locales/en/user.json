@@ -291,7 +291,27 @@
       },
       "itemD": {
         "create": "New Item",
-        "edit": "Edit Item"
+        "edit": "Edit Item",
+        "id": "ID",
+        "category": "Category",
+        "name": "Name",
+        "image": "Image",
+        "alt": "Item Image",
+        "description": "Description",
+        "shortDescription": "Short Description",
+        "basePrice": "Base Price (¥)",
+        "salePercent": "Sale (Price Multiplier)",
+        "soldOut": "Sold Out",
+        "tags": "Associated Tags",
+        "options": "Associated Option Types",
+        "back": "Back to Category",
+        "nameError": "Enter a valid name.",
+        "categoryError": "Choose a valid category.",
+        "imageError": "Please wait for the image to finish uploading.",
+        "descriptionError": "Enter a valid description.",
+        "shortDescriptionError": "Enter a valid short description.",
+        "basePriceError": "Enter a valid base price.",
+        "salePercentError": "Enter a valid price multiplier."
       },
       "tagD": {
         "create": "New Tag",

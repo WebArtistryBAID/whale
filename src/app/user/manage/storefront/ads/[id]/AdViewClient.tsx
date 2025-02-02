@@ -59,7 +59,8 @@ export default function AdViewClient({ object, uploadPrefix }: { object: Ad, upl
 
                     <p className="secondary text-sm font-display mb-1">{t('manage.storefront.adD.image')}</p>
                     <Image src={uploadPrefix + object.image} width={500} height={500}
-                           alt={t('manage.storefront.adD.alt')} className="max-w-sm object-cover mb-3 rounded-xl"/>
+                           alt={t('manage.storefront.adD.alt')}
+                           className="w-full lg:max-w-sm object-cover mb-3 rounded-xl"/>
 
                     <p className="secondary text-sm font-display">{t('manage.storefront.adD.url')}</p>
                     <p className="text-xl"><a href={object.url}

@@ -114,11 +114,11 @@ export default function OptionItemCreateClient({ editMode, existing, currentType
             </div>
             <div className="w-full">
                 <ToggleSwitch checked={soldOut} label={t('manage.storefront.optionItemD.soldOut')}
-                              onChange={setSoldOut}/>
+                              onChange={setSoldOut} color="yellow"/>
             </div>
             <div className="w-full">
                 <ToggleSwitch checked={isDefault} label={t('manage.storefront.optionItemD.default')}
-                              onChange={setDefault}/>
+                              onChange={setDefault} color="yellow"/>
             </div>
             <Button color="warning" pill disabled={loading} className="w-full" onClick={submit}
                     fullSized>{t('confirm')}</Button>

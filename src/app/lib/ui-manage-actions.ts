@@ -52,9 +52,29 @@ export async function getItemTypes(category: number): Promise<HydratedItemType[]
     })
 }
 
+export async function getItemType(id: number): Promise<HydratedItemType | null> {
+    await requireUserPermission('admin.manage')
+    return prisma.itemType.findUnique({
+        where: { id },
+        include: {
+            tags: true,
+            options: {
+                include: {
+                    items: true
+                }
+            }
+        }
+    })
+}
+
 export async function getOptionTypes(): Promise<OptionType[]> {
     await requireUserPermission('admin.manage')
     return prisma.optionType.findMany()
+}
+
+export async function getOptionTypesHydrated(): Promise<HydratedOptionType[]> {
+    await requireUserPermission('admin.manage')
+    return prisma.optionType.findMany({ include: { items: true } })
 }
 
 export async function getOptionType(id: number): Promise<HydratedOptionType | null> {
