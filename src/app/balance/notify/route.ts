@@ -58,10 +58,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     await prisma.user.update({
         where: {
-            id: trans.userId
+            id: trans.userId!
         },
         data: {
-            balance: Decimal(trans.user.balance).add(trans.values[0]).toString()
+            balance: Decimal(trans.user!.balance).add(trans.values[0]).toString()
         }
     })
     return new NextResponse('SUCCESS')

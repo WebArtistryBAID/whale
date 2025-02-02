@@ -27,7 +27,7 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
             }
             setOrder(o)
         }, 10000)
-    }, [])
+    }, [ order.id ])
 
     return <>
         <Modal show={refundModal} onClose={() => setRefundModal(false)}>

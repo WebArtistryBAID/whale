@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { serverTranslation } from '@/app/i18n'
 import If from '@/app/lib/If'
 import OnSiteOrder from '@/app/core-components/OnSiteOrder'
+import Image from 'next/image'
 
 export default async function SimpleNav() {
     const me = await getMyUser()
@@ -12,7 +13,7 @@ export default async function SimpleNav() {
     return <Navbar fluid rounded className="bg-yellow-100 dark:bg-yellow-900">
         <a href="#primary-content" className="sr-only">{t('a11y.skip')}</a>
         <NavbarBrand as={Link} href="/">
-            <img src="/assets/logo.png" className="mr-3 h-8 lg:h-10" alt="Whale Logo"/>
+            <Image width={512} height={512} src="/assets/logo.png" className="mr-3 h-8 lg:h-10" alt="Whale Logo"/>
             <span className="font-bold font-display text-xl hidden lg:block">{t('brand')}</span>
         </NavbarBrand>
 
