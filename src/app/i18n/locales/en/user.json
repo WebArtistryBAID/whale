@@ -317,7 +317,16 @@
       },
       "adD": {
         "create": "New Ad",
-        "edit": "Edit Ad"
+        "edit": "Edit Ad",
+        "id": "ID",
+        "name": "Message",
+        "image": "Image",
+        "alt": "Advertisement Image",
+        "url": "Link",
+        "redirect": "Click to View",
+        "nameError": "Enter a valid message.",
+        "urlError": "Enter a valid link.",
+        "imageError": "Please wait for the image to finish uploading."
       },
       "optionItemD": {
         "create": "New Option Item",
@@ -338,7 +347,8 @@
         "cta": "Drag and drop or tap to upload",
         "uploadProgress": "Upload Progress: ",
         "error": "Try again",
-        "done": "Upload completed"
+        "done": "Upload completed",
+        "alt": "Uploaded image"
       }
     }
   },

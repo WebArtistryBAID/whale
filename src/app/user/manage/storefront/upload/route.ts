@@ -32,5 +32,5 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     await fs.writeFile(outputPath, webpBuffer)
 
-    return NextResponse.json({ path: outputPath })
+    return NextResponse.json({ path: hash + '.webp' })
 }
