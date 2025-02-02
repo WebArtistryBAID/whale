@@ -5,13 +5,13 @@ import { Breadcrumb, BreadcrumbItem, Button, Label, TextInput } from 'flowbite-r
 import { HiCollection } from 'react-icons/hi'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { upsertCategory } from '@/app/lib/ui-manage-actions'
+import { upsertOptionType } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
-import { Category } from '@prisma/client'
+import { OptionType } from '@prisma/client'
 
-export default function CategoryCreateClient({ editMode, existing }: {
+export default function OptionTypeCreateClient({ editMode, existing }: {
     editMode: boolean,
-    existing: Category | null
+    existing: OptionType | null
 }) {
     const { t } = useTranslationClient('user')
     const [ loading, setLoading ] = useState(false)
@@ -30,13 +30,13 @@ export default function CategoryCreateClient({ editMode, existing }: {
             return
         }
         setLoading(true)
-        const result = await upsertCategory(
+        const result = await upsertOptionType(
             existing?.id,
             {
                 name
             }
         )
-        router.push(`/user/manage/storefront/categories/${result.id}`)
+        router.push(`/user/manage/storefront/option-types/${result.id}`)
         setLoading(false)
     }
 
@@ -44,7 +44,7 @@ export default function CategoryCreateClient({ editMode, existing }: {
         <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-3">
             <BreadcrumbItem icon={HiCollection} href="/user">{t('breadcrumb.manage')}</BreadcrumbItem>
             <BreadcrumbItem href="/user/manage/storefront">{t('manage.storefront.title')}</BreadcrumbItem>
-            <BreadcrumbItem href="/user/manage/storefront">{t('manage.storefront.categoriesO')}</BreadcrumbItem>
+            <BreadcrumbItem href="/user/manage/storefront">{t('manage.storefront.optionTypes')}</BreadcrumbItem>
             <If condition={editMode}>
                 <BreadcrumbItem>{existing?.name}</BreadcrumbItem>
             </If>
@@ -52,17 +52,17 @@ export default function CategoryCreateClient({ editMode, existing }: {
                 <BreadcrumbItem>{t('manage.storefront.create')}</BreadcrumbItem>
             </If>
         </Breadcrumb>
-        <h1 className="mb-5">{editMode ? t('manage.storefront.categoryD.edit') : t('manage.storefront.categoryD.create')}</h1>
+        <h1 className="mb-5">{editMode ? t('manage.storefront.optionTypeD.edit') : t('manage.storefront.optionTypeD.create')}</h1>
 
         <div className="2xl:w-1/2 flex flex-col gap-4">
             <div className="w-full">
                 <div className="mb-2">
-                    <Label htmlFor="name" value={t('manage.storefront.categoryD.name')}/>
+                    <Label htmlFor="name" value={t('manage.storefront.optionTypeD.name')}/>
                 </div>
-                <TextInput id="name" type="text" required placeholder={t('manage.storefront.categoryD.name') + '...'}
+                <TextInput id="name" type="text" required placeholder={t('manage.storefront.optionTypeD.name') + '...'}
                            color={nameError ? 'failure' : undefined}
                            value={name} onChange={e => setName(e.currentTarget.value)}
-                           helperText={nameError ? t('manage.storefront.categoryD.nameError') : null}/>
+                           helperText={nameError ? t('manage.storefront.optionTypeD.nameError') : null}/>
             </div>
             <Button color="warning" pill disabled={loading} className="w-full" onClick={submit}
                     fullSized>{t('confirm')}</Button>
@@ -70,7 +70,7 @@ export default function CategoryCreateClient({ editMode, existing }: {
     </div>
 }
 
-CategoryCreateClient.defaultProps = {
+OptionTypeCreateClient.defaultProps = {
     editMode: false,
     existing: null
 }

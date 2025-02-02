@@ -304,7 +304,14 @@
       },
       "optionTypeD": {
         "create": "New Option Type",
-        "edit": "Edit Option Type"
+        "edit": "Edit Option Type",
+        "deleteMessage": "This action cannot be undone. This will remove the option type from all associated items and delete all associated option items.",
+        "id": "ID",
+        "name": "Name",
+        "items": "Associated Items",
+        "optionItems": "Associated Option Items",
+        "createOptionItem": "Create Option Item",
+        "nameError": "Enter a valid name."
       },
       "adD": {
         "create": "New Ad",
