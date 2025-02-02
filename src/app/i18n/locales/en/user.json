@@ -332,6 +332,13 @@
         "nameError": "Enter a valid name.",
         "typeError": "Choose a valid option type.",
         "priceChangeError": "Enter a valid price change."
+      },
+      "upload": {
+        "label": "Image Upload",
+        "cta": "Drag and drop or tap to upload",
+        "uploadProgress": "Upload Progress: ",
+        "error": "Try again",
+        "done": "Upload completed"
       }
     }
   },
