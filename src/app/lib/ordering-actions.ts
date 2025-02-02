@@ -271,6 +271,7 @@ export async function createOrder(items: OrderedItemTemplate[],
     }
 
     // Calculate total price
+    let usedCoupon = false
     const totalPriceNoCoupon = items.reduce((acc, item) => acc.add(calculatePrice(item)), new Decimal(0))
     let totalPrice = totalPriceNoCoupon
     if (coupon != null) {
@@ -289,6 +290,7 @@ export async function createOrder(items: OrderedItemTemplate[],
                 }
             }
         })
+        usedCoupon = true
     }
 
     // Cash payment is only available with on-site
@@ -396,7 +398,24 @@ export async function createOrder(items: OrderedItemTemplate[],
             }
         }
     })
-    // Send notification
+    if (usedCoupon) {
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.couponUsed,
+                user: me == null ? undefined : {
+                    connect: {
+                        id: me.id
+                    }
+                },
+                order: {
+                    connect: {
+                        id: order.id
+                    }
+                },
+                values: [ coupon! ]
+            }
+        })
+    }
 
     // Add points to user
     if (me != null && order.paymentStatus === PaymentStatus.paid) {

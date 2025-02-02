@@ -1,6 +1,17 @@
 'use server'
 
-import { Ad, Category, CouponCode, ItemType, OptionItem, OptionType, Prisma, PrismaClient, Tag } from '@prisma/client'
+import {
+    Ad,
+    Category,
+    CouponCode,
+    ItemType,
+    OptionItem,
+    OptionType,
+    Prisma,
+    PrismaClient,
+    Tag,
+    UserAuditLogType
+} from '@prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedCategory, HydratedItemType, HydratedOptionType } from '@/app/lib/ui-data-actions'
 import Decimal from 'decimal.js'
@@ -149,7 +160,14 @@ export async function getAd(id: number): Promise<Ad | null> {
 }
 
 export async function upsertCategory(id: number | undefined, data: CategoryCreateInput): Promise<Category> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.upsertCategory,
+            userId: user.id,
+            values: [ data.name ]
+        }
+    })
     if (id == null) {
         return prisma.category.create({ data })
     }
@@ -157,7 +175,14 @@ export async function upsertCategory(id: number | undefined, data: CategoryCreat
 }
 
 export async function upsertOptionType(id: number | undefined, data: OptionTypeCreateInput): Promise<OptionType> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.upsertOptionType,
+            userId: user.id,
+            values: [ data.name ]
+        }
+    })
     if (id == null) {
         return prisma.optionType.create({ data })
     }
@@ -165,7 +190,14 @@ export async function upsertOptionType(id: number | undefined, data: OptionTypeC
 }
 
 export async function upsertOptionItem(id: number | undefined, data: OptionItemCreateInput): Promise<OptionItem> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.upsertOptionItem,
+            userId: user.id,
+            values: [ data.name ]
+        }
+    })
     if (id == null) {
         return prisma.optionItem.create({ data })
     }
@@ -184,7 +216,14 @@ export async function upsertOptionItem(id: number | undefined, data: OptionItemC
 }
 
 export async function upsertTag(id: number | undefined, data: TagCreateInput): Promise<Tag> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.upsertTag,
+            userId: user.id,
+            values: [ data.name ]
+        }
+    })
     if (id == null) {
         return prisma.tag.create({ data })
     }
@@ -192,20 +231,49 @@ export async function upsertTag(id: number | undefined, data: TagCreateInput): P
 }
 
 export async function upsertCouponCode(data: CouponCodeCreateInput): Promise<CouponCode> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.upsertCouponCode,
+            userId: user.id,
+            values: [ data.id ]
+        }
+    })
     return prisma.couponCode.upsert({ where: { id: data.id }, update: data, create: data })
 }
 
 export async function upsertAd(id: number | undefined, data: AdCreateInput): Promise<Ad> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
     if (id == null) {
-        return prisma.ad.create({ data })
+        const ad = await prisma.ad.create({ data })
+        await prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.upsertAd,
+                userId: user.id,
+                values: [ ad.id.toString() ]
+            }
+        })
+        return ad
     }
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.upsertAd,
+            userId: user.id,
+            values: [ id.toString() ]
+        }
+    })
     return prisma.ad.upsert({ where: { id }, update: data, create: data })
 }
 
 export async function upsertItemType(id: number | undefined, data: HydratedItemType): Promise<HydratedItemType> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.upsertItemType,
+            userId: user.id,
+            values: [ data.name ]
+        }
+    })
     await prisma.itemType.upsert({
         where: {
             id
@@ -259,12 +327,26 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
 }
 
 export async function deleteCategory(id: number): Promise<Category> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.deleteCategory,
+            userId: user.id,
+            values: [ id.toString() ]
+        }
+    })
     return prisma.category.delete({ where: { id } })
 }
 
 export async function deleteItemType(id: number): Promise<HydratedItemType> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.deleteItemType,
+            userId: user.id,
+            values: [ id.toString() ]
+        }
+    })
     return prisma.itemType.delete({
         where: {
             id
@@ -281,26 +363,61 @@ export async function deleteItemType(id: number): Promise<HydratedItemType> {
 }
 
 export async function deleteOptionType(id: number): Promise<OptionType> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.deleteOptionType,
+            userId: user.id,
+            values: [ id.toString() ]
+        }
+    })
     return prisma.optionType.delete({ where: { id } })
 }
 
 export async function deleteOptionItem(id: number): Promise<OptionItem> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.deleteOptionItem,
+            userId: user.id,
+            values: [ id.toString() ]
+        }
+    })
     return prisma.optionItem.delete({ where: { id } })
 }
 
 export async function deleteTag(id: number): Promise<Tag> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.deleteTag,
+            userId: user.id,
+            values: [ id.toString() ]
+        }
+    })
     return prisma.tag.delete({ where: { id } })
 }
 
 export async function deleteCouponCode(id: string): Promise<CouponCode> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.deleteCouponCode,
+            userId: user.id,
+            values: [ id ]
+        }
+    })
     return prisma.couponCode.delete({ where: { id } })
 }
 
 export async function deleteAd(id: number): Promise<Ad> {
-    await requireUserPermission('admin.manage')
+    const user = await requireUserPermission('admin.manage')
+    await prisma.userAuditLog.create({
+        data: {
+            type: UserAuditLogType.deleteAd,
+            userId: user.id,
+            values: [ id.toString() ]
+        }
+    })
     return prisma.ad.delete({ where: { id } })
 }

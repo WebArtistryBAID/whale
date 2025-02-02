@@ -206,6 +206,22 @@ enum UserAuditLogType {
   orderPaymentSuccess
   orderPaymentFailed
   orderRefunded
+  couponUsed
+
+  upsertCategory
+  upsertOptionType
+  upsertOptionItem
+  upsertTag
+  upsertCouponCode
+  upsertAd
+  upsertItemType
+  deleteCategory
+  deleteOptionType
+  deleteOptionItem
+  deleteTag
+  deleteCouponCode
+  deleteAd
+  deleteItemType
 }
 
 // Not actually just UserAuditLog, but general-purpose. It's named for legacy reasons.

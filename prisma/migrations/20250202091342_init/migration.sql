@@ -20,7 +20,7 @@ CREATE TYPE "OrderType" AS ENUM ('pickUp', 'delivery');
 CREATE TYPE "PaymentStatus" AS ENUM ('notPaid', 'paid', 'refunded');
 
 -- CreateEnum
-CREATE TYPE "UserAuditLogType" AS ENUM ('login', 'blocked', 'unblocked', 'permissionsUpdated', 'balanceTransaction', 'balanceUsed', 'pointsUpdated', 'orderCreated', 'orderSetStatus', 'orderPaymentSuccess', 'orderPaymentFailed', 'orderRefunded');
+CREATE TYPE "UserAuditLogType" AS ENUM ('login', 'blocked', 'unblocked', 'permissionsUpdated', 'balanceTransaction', 'balanceUsed', 'pointsUpdated', 'orderCreated', 'orderSetStatus', 'orderPaymentSuccess', 'orderPaymentFailed', 'orderRefunded', 'couponUsed', 'upsertCategory', 'upsertOptionType', 'upsertOptionItem', 'upsertTag', 'upsertCouponCode', 'upsertAd', 'upsertItemType', 'deleteCategory', 'deleteOptionType', 'deleteOptionItem', 'deleteTag', 'deleteCouponCode', 'deleteAd', 'deleteItemType');
 
 -- CreateTable
 CREATE TABLE "User"
@@ -147,10 +147,12 @@ CREATE TABLE "ItemType"
 -- CreateTable
 CREATE TABLE "OrderedItem"
 (
-    "id"         SERIAL  NOT NULL,
-    "orderId"    INTEGER NOT NULL,
-    "itemTypeId" INTEGER NOT NULL,
-    "amount"     INTEGER NOT NULL,
+    "id"         SERIAL       NOT NULL,
+    "createdAt"  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "orderId"    INTEGER      NOT NULL,
+    "itemTypeId" INTEGER      NOT NULL,
+    "amount"     INTEGER      NOT NULL,
+    "price"      TEXT         NOT NULL,
 
     CONSTRAINT "OrderedItem_pkey" PRIMARY KEY ("id")
 );

@@ -75,7 +75,22 @@ export default function UserLogsClient({ init }: { init: Paginated<HydratedUserA
                             UserAuditLogType.orderSetStatus,
                             UserAuditLogType.orderPaymentSuccess,
                             UserAuditLogType.orderPaymentFailed,
-                            UserAuditLogType.orderRefunded
+                            UserAuditLogType.orderRefunded,
+                            UserAuditLogType.couponUsed,
+                            UserAuditLogType.upsertCategory,
+                            UserAuditLogType.deleteCategory,
+                            UserAuditLogType.upsertOptionType,
+                            UserAuditLogType.deleteOptionType,
+                            UserAuditLogType.upsertOptionItem,
+                            UserAuditLogType.deleteOptionItem,
+                            UserAuditLogType.upsertTag,
+                            UserAuditLogType.deleteTag,
+                            UserAuditLogType.upsertCouponCode,
+                            UserAuditLogType.deleteCouponCode,
+                            UserAuditLogType.upsertAd,
+                            UserAuditLogType.deleteAd,
+                            UserAuditLogType.upsertItemType,
+                            UserAuditLogType.deleteItemType
                         ] as UserAuditLogType[]).includes(log.type)) {
                             messageData.v0 = log.values[0]
                         }

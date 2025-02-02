@@ -74,12 +74,27 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
                             UserAuditLogType.unblocked,
                             UserAuditLogType.permissionsUpdated,
                             UserAuditLogType.balanceTransaction,
-                            UserAuditLogType.balanceUsed,
                             UserAuditLogType.pointsUpdated,
+                            UserAuditLogType.balanceUsed,
                             UserAuditLogType.orderSetStatus,
                             UserAuditLogType.orderPaymentSuccess,
                             UserAuditLogType.orderPaymentFailed,
-                            UserAuditLogType.orderRefunded
+                            UserAuditLogType.orderRefunded,
+                            UserAuditLogType.couponUsed,
+                            UserAuditLogType.upsertCategory,
+                            UserAuditLogType.deleteCategory,
+                            UserAuditLogType.upsertOptionType,
+                            UserAuditLogType.deleteOptionType,
+                            UserAuditLogType.upsertOptionItem,
+                            UserAuditLogType.deleteOptionItem,
+                            UserAuditLogType.upsertTag,
+                            UserAuditLogType.deleteTag,
+                            UserAuditLogType.upsertCouponCode,
+                            UserAuditLogType.deleteCouponCode,
+                            UserAuditLogType.upsertAd,
+                            UserAuditLogType.deleteAd,
+                            UserAuditLogType.upsertItemType,
+                            UserAuditLogType.deleteItemType
                         ] as UserAuditLogType[]).includes(log.type)) {
                             messageData.v0 = log.values[0]
                         }

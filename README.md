@@ -80,5 +80,3 @@ To contribute, simply open a pull request.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
-
-TODO: Add audit logs for USAGE of coupon codes and storefront updates.

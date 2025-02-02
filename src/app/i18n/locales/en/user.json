@@ -115,9 +115,24 @@
       "pointsUpdated": "{{user}}'s points is updated by {{v0}}. New points: {{v1}}.",
       "orderCreated": "Order {{order}} is created by user {{user}}.",
       "orderSetStatus": "{{user}} set order {{order}}'s status to {{v0}}.",
-      "orderPaymentSuccess": "Order {{order}} (¥{{v1}}) is paid successfully by user {{user}} with {{v0}}.",
-      "orderPaymentFailed": "Order {{order}} (¥{{v1}}) payment failed by user {{user}} with {{v0}}.",
-      "orderRefunded": "Order {{order}} (¥{{v0}}) is refunded by user {{user}}."
+      "orderPaymentSuccess": "Order {{order}} (¥{{v1}}) is paid successfully by {{user}} with {{v0}}.",
+      "orderPaymentFailed": "Order {{order}} (¥{{v1}}) payment failed by {{user}} with {{v0}}.",
+      "orderRefunded": "Order {{order}} (¥{{v0}}) is refunded by {{user}}.",
+      "couponUsed": "{{user}} used coupon {{v0}} on order {{order}}.",
+      "upsertCategory": "{{user}} updated category {{v0}}.",
+      "deleteCategory": "{{user}} deleted category {{v0}}.",
+      "upsertOptionType": "{{user}} updated option type {{v0}}.",
+      "deleteOptionType": "{{user}} deleted option type {{v0}}.",
+      "upsertOptionItem": "{{user}} updated option item {{v0}}.",
+      "deleteOptionItem": "{{user}} deleted option item {{v0}}.",
+      "upsertTag": "{{user}} updated tag {{v0}}.",
+      "deleteTag": "{{user}} deleted tag {{v0}}.",
+      "upsertCouponCode": "{{user}} updated coupon code {{v0}}.",
+      "deleteCouponCode": "{{user}} deleted coupon code {{v0}}.",
+      "upsertAd": "{{user}} updated ad {{v0}}.",
+      "deleteAd": "{{user}} deleted ad {{v0}}.",
+      "upsertItemType": "{{user}} updated item type {{v0}}.",
+      "deleteItemType": "{{user}} deleted item type {{v0}}."
     }
   },
   "inbox": {

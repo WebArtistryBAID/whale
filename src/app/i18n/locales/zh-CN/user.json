@@ -117,7 +117,22 @@
       "orderSetStatus": "{{user}} 将订单 {{order}} 的状态设置为了 {{v0}}。",
       "orderPaymentSuccess": "{{user}} 成功使用 {{v0}} 支付了订单 {{order}} (¥{{v1}})。",
       "orderPaymentFailed": "{{user}} 使用 {{v0}} 支付订单 {{order}} (¥{{v1}}) 失败。",
-      "orderRefunded": "{{user}} 退款了订单 {{order}} (¥{{v0}})。"
+      "orderRefunded": "{{user}} 退款了订单 {{order}} (¥{{v0}})。",
+      "couponUsed": "{{user}} 在订单 {{order}} 上使用了代金券 {{v0}}。",
+      "upsertCategory": "{{user}} 更新了类目 {{v0}}。",
+      "deleteCategory": "{{user}} 删除了类目 {{v0}}。",
+      "upsertOptionType": "{{user}} 更新了选项类型 {{v0}}。",
+      "deleteOptionType": "{{user}} 删除了选项类型 {{v0}}。",
+      "upsertOptionItem": "{{user}} 更新了选项 {{v0}}。",
+      "deleteOptionItem": "{{user}} 删除了选项 {{v0}}。",
+      "upsertTag": "{{user}} 更新了标签 {{v0}}。",
+      "deleteTag": "{{user}} 删除了标签 {{v0}}。",
+      "upsertCouponCode": "{{user}} 更新了代金券 {{v0}}。",
+      "deleteCouponCode": "{{user}} 删除了代金券 {{v0}}。",
+      "upsertAd": "{{user}} 更新了广告 {{v0}}。",
+      "deleteAd": "{{user}} 删除了广告 {{v0}}。",
+      "upsertItemType": "{{user}} 更新了产品 {{v0}}。",
+      "deleteItemType": "{{user}} 删除了产品 {{v0}}。"
     }
   },
   "inbox": {
