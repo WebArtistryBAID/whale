@@ -12,7 +12,7 @@ export default function OrderMobile({ categories, uploadPrefix }: {
     const { t } = useTranslationClient('order')
 
     return <>
-        <div className="p-5" aria-label={t('a11y.products')}>
+        <div className="p-5 pb-36" aria-label={t('a11y.products')}>
             {categories.map(category => <UICategory category={category} key={category.id}
                                                     uploadPrefix={uploadPrefix}/>)}
         </div>
