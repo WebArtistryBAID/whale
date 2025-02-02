@@ -120,7 +120,7 @@ export default function OptionTypeViewClient({ object, items }: { object: Hydrat
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
                 <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/option-items/create?option-type=${object.id}`}
+                        href={`/user/manage/storefront/option-items/create?type=${object.id}`}
                         className="inline-block">
                     {t('manage.storefront.optionTypeD.createOptionItem')}
                 </Button>

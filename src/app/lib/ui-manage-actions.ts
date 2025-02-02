@@ -149,6 +149,17 @@ export async function upsertOptionItem(id: number | undefined, data: OptionItemC
     if (id == null) {
         return prisma.optionItem.create({ data })
     }
+    if (data.default) {
+        await prisma.optionItem.updateMany({
+            where: {
+                typeId: data.type.connect!.id,
+                default: true
+            },
+            data: {
+                default: false
+            }
+        })
+    }
     return prisma.optionItem.upsert({ where: { id }, update: data, create: data })
 }
 

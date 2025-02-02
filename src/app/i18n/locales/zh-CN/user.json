@@ -6,6 +6,8 @@
   "edit": "编辑",
   "selected": " (已选中)",
   "error": "错误",
+  "yes": "是",
+  "no": "否",
   "nav": {
     "sidebar": "打开导航栏",
     "dashboard": "主页",

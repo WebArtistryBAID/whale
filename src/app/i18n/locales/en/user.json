@@ -6,6 +6,8 @@
   "edit": "Edit",
   "selected": " (Selected)",
   "error": "Error",
+  "yes": "Yes",
+  "no": "No",
   "nav": {
     "sidebar": "Open Navigation",
     "dashboard": "Dashboard",
@@ -319,7 +321,17 @@
       },
       "optionItemD": {
         "create": "New Option Item",
-        "edit": "Edit Option Item"
+        "edit": "Edit Option Item",
+        "back": "Back to Option Type",
+        "id": "ID",
+        "name": "Name",
+        "type": "Type",
+        "priceChange": "Price Change (¥)",
+        "soldOut": "Sold Out",
+        "default": "Select by Default",
+        "nameError": "Enter a valid name.",
+        "typeError": "Choose a valid option type.",
+        "priceChangeError": "Enter a valid price change."
       }
     }
   },

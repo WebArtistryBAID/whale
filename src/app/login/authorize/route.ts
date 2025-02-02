@@ -104,11 +104,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         .setIssuedAt()
         .setIssuer('https://beijing.academy')
         .setAudience('https://beijing.academy')
-        .setExpirationTime('1 day')
+        .setExpirationTime('30 days')
         .setProtectedHeader({ alg: 'HS256' })
         .sign(secret);
     (await cookies()).set('access_token', token, {
-        expires: new Date(Date.now() + 86400000)
+        expires: new Date(Date.now() + 86400000 * 30)
     })
     return NextResponse.redirect(process.env.HOST! + redirectTarget)
 }
