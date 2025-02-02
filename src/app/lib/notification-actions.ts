@@ -21,13 +21,21 @@ export async function sendNotification(user: User, type: NotificationType, value
 
     if (user.smsNotifications.includes(type)) {
         const template = Object({
-            // TODO Templates
+            orderCreated: 'SMS_478560531',
+            pickupReminder: 'SMS_478570535',
+            orderRefunded: 'SMS_478405523',
+            balanceToppedUp: 'SMS_478460599',
+            pointsEarned: 'SMS_478485567',
+            payLaterReminder: 'SMS_478630531'
         })[type]
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const params: any = {
-            name: values[0]
+        const params: any = {}
+        if (order != null) {
+            params.order = order
         }
-        // TODO Params
+        if (type === NotificationType.balanceToppedUp || type === NotificationType.pointsEarned) {
+            params.value = values[0]
+        }
         await fetch(`${process.env.ONELOGIN_HOST}/api/v1/sms`, {
             method: 'POST',
             headers: {
