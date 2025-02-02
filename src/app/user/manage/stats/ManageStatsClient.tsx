@@ -38,12 +38,7 @@ function daysInMonths(year: number): number[] {
 
 function theme() {
     return {
-        mode: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
-        monochrome: {
-            enabled: true,
-            color: '#F86624',
-            shadeTo: 'dark'
-        }
+        mode: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : undefined
     }
 }
 
@@ -80,17 +75,19 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
         const actualStart = new Date(start)
         actualStart.setHours(0, 0, 0, 0)
         if (range === 'week') {
-            actualStart.setDate(actualStart.getDate() - actualStart.getDay() + 1)
+            actualStart.setDate(actualStart.getDate() - (actualStart.getDay() + 6) % 7)
         }
         if (range === 'month') {
             actualStart.setDate(1)
         }
 
-        const end = new Date(start.getTime() + {
-            day: 24 * 60 * 60 * 1000,
-            week: 7 * 24 * 60 * 60 * 1000,
-            month: daysInMonths(start.getFullYear())[start.getMonth()] * 24 * 60 * 60 * 1000
-        }[range])
+        const end = new Date(actualStart)
+        if (range === 'week') {
+            end.setDate(end.getDate() + 6)
+        }
+        if (range === 'month') {
+            end.setDate(daysInMonths(actualStart.getFullYear())[actualStart.getMonth()])
+        }
         end.setHours(23, 59, 59, 999)
         setActualStartDate(actualStart)
         setActualEndDate(end)
@@ -113,7 +110,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                 if (e != null) {
                     setStart(e)
                 }
-            }} className="lg:max-w-sm mb-3" weekStart={1} autoHide/>
+            }} className="lg:max-w-sm mb-3" weekStart={1} autoHide minDate={new Date(2024, 8, 1)} maxDate={new Date()}/>
 
             <Select aria-label={t('manage.stats.range')} value={range} className="lg:max-w-sm"
                     onChange={e => setRange(e.currentTarget.value as 'week' | 'month' | 'day')}>

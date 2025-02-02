@@ -71,18 +71,23 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
 
     // Start and end of this (unit)
     start.setHours(0, 0, 0, 0)
-    const end = new Date(start.getTime() + {
-        day: 24 * 60 * 60 * 1000,
-        week: 7 * 24 * 60 * 60 * 1000,
-        month: days(start.getFullYear())[start.getMonth()] * 24 * 60 * 60 * 1000
-    }[range])
+    const end = new Date(start)
+    if (range === 'week') {
+        end.setDate(end.getDate() + 6)
+    } else if (range === 'month') {
+        end.setDate(days(start.getFullYear())[start.getMonth()])
+    }
+    end.setHours(23, 59, 59, 999)
 
     // Start of the previous (unit)
-    const lastStart = new Date(start.getTime() - {
-        day: 24 * 60 * 60 * 1000,
-        week: 7 * 24 * 60 * 60 * 1000,
-        month: days(start.getMonth() === 0 ? start.getFullYear() - 1 : start.getFullYear())[mod(start.getMonth() - 1, 12)] * 24 * 60 * 60 * 1000
-    }[range])
+    const lastStart = new Date(start)
+    if (range === 'day') {
+        lastStart.setDate(lastStart.getDate() - 1)
+    } else if (range === 'week') {
+        lastStart.setDate(lastStart.getDate() - 7)
+    } else if (range === 'month') {
+        lastStart.setMonth(mod(lastStart.getMonth() - 1, 12))
+    }
 
     // 1. Fill new item stats
     const newItems = []
@@ -393,11 +398,12 @@ const cached: { [key: string]: { data: StatsAggregates, time: number } } = {}
 export async function getStats(range: 'week' | 'month' | 'day', start: Date): Promise<StatsAggregates> {
     await requireUserPermission('admin.manage')
     if (range === 'week') {
-        start.setDate(start.getDate() - start.getDay() + 1)
+        start.setDate(start.getDate() - (start.getDay() + 6) % 7)
     }
     if (range === 'month') {
         start.setDate(1)
     }
+    start.setHours(0, 0, 0, 0)
     const key = range + start.getTime()
     if (key in cached && (new Date().getTime()) - cached[key].time < 30 * 60 * 1000) {
         return cached[key].data

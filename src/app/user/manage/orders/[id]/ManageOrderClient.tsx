@@ -92,7 +92,7 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
                 </If>
             </div>
 
-            <div className="bg-amber-50 dark:bg-transparent dark:shadow-lg rounded-3xl p-5 col-span-1"
+            <div className="border-amber-50 dark:border-amber-900 border shadow-lg rounded-3xl p-5 col-span-1"
                  aria-label={t('today.status')}>
                 <div className="flex w-full h-full gap-3 justify-center items-center">
                     <button
@@ -102,7 +102,8 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
                     flex flex-col text-center items-center justify-center p-5" disabled={true}>
                         <HiClock
                             className={`${order.status === OrderStatus.waiting ? 'text-red-500 dark:text-red-400' : 'text-yellow-300 dark:text-yellow-400'} text-3xl mb-1`}/>
-                        <p className="font-bold text-lg" aria-hidden>{t('today.waiting')}</p>
+                        <p className={`${order.status === OrderStatus.waiting ? 'font-bold' : ''} text-lg`}
+                           aria-hidden>{t('today.waiting')}</p>
                         <If condition={order.status === OrderStatus.waiting}>
                             <p className="secondary text-xs" aria-hidden>{t('today.current')}</p>
                         </If>
@@ -126,7 +127,8 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
                             }}>
                         <HiCheck
                             className={`${order.status === OrderStatus.done ? 'text-green-400' : 'text-yellow-300 dark:text-yellow-400'} text-3xl mb-1`}/>
-                        <p className="font-bold text-lg" aria-hidden>{t('today.done')}</p>
+                        <p className={`${order.status === OrderStatus.done ? 'font-bold' : ''} text-lg`}
+                           aria-hidden>{t('today.done')}</p>
                         <If condition={order.status === OrderStatus.done}>
                             <p className="secondary text-xs" aria-hidden>{t('today.current')}</p>
                         </If>
