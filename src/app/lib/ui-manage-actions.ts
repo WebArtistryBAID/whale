@@ -1,6 +1,6 @@
 'use server'
 
-import { Ad, Category, CouponCode, OptionItem, OptionType, Prisma, PrismaClient, Tag } from '@prisma/client'
+import { Ad, Category, CouponCode, ItemType, OptionItem, OptionType, Prisma, PrismaClient, Tag } from '@prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedItemType } from '@/app/lib/ui-data-actions'
 import Decimal from 'decimal.js'
@@ -73,6 +73,19 @@ export async function getTag(id: number): Promise<Tag | null> {
     return prisma.tag.findUnique({ where: { id } })
 }
 
+export async function getTagAssociatedItems(id: number): Promise<ItemType[]> {
+    await requireUserPermission('admin.manage')
+    return prisma.itemType.findMany({
+        where: {
+            tags: {
+                some: {
+                    id
+                }
+            }
+        }
+    })
+}
+
 export async function getAds(): Promise<Ad[]> {
     await requireUserPermission('admin.manage')
     return prisma.ad.findMany()
@@ -85,21 +98,33 @@ export async function getAd(id: number): Promise<Ad | null> {
 
 export async function upsertCategory(id: number | undefined, data: CategoryCreateInput): Promise<Category> {
     await requireUserPermission('admin.manage')
+    if (id == null) {
+        return prisma.category.create({ data })
+    }
     return prisma.category.upsert({ where: { id }, update: data, create: data })
 }
 
 export async function upsertOptionType(id: number | undefined, data: OptionTypeCreateInput): Promise<OptionType> {
     await requireUserPermission('admin.manage')
+    if (id == null) {
+        return prisma.optionType.create({ data })
+    }
     return prisma.optionType.upsert({ where: { id }, update: data, create: data })
 }
 
 export async function upsertOptionItem(id: number | undefined, data: OptionItemCreateInput): Promise<OptionItem> {
     await requireUserPermission('admin.manage')
+    if (id == null) {
+        return prisma.optionItem.create({ data })
+    }
     return prisma.optionItem.upsert({ where: { id }, update: data, create: data })
 }
 
 export async function upsertTag(id: number | undefined, data: TagCreateInput): Promise<Tag> {
     await requireUserPermission('admin.manage')
+    if (id == null) {
+        return prisma.tag.create({ data })
+    }
     return prisma.tag.upsert({ where: { id }, update: data, create: data })
 }
 
@@ -110,6 +135,9 @@ export async function upsertCouponCode(data: CouponCodeCreateInput): Promise<Cou
 
 export async function upsertAd(id: number | undefined, data: AdCreateInput): Promise<Ad> {
     await requireUserPermission('admin.manage')
+    if (id == null) {
+        return prisma.ad.create({ data })
+    }
     return prisma.ad.upsert({ where: { id }, update: data, create: data })
 }
 

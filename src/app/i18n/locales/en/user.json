@@ -286,7 +286,14 @@
       },
       "tagD": {
         "create": "New Tag",
-        "edit": "Edit Tag"
+        "edit": "Edit Tag",
+        "id": "ID",
+        "name": "Name",
+        "color": "Color",
+        "items": "Associated Items",
+        "nameError": "Enter a valid name.",
+        "pickColor": "Pick Color",
+        "deleteMessage": "This action cannot be undone. This will remove the tag from all associated items."
       },
       "optionTypeD": {
         "create": "New Option Type",
