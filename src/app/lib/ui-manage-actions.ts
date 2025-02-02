@@ -274,43 +274,48 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
             values: [ data.name ]
         }
     })
-    await prisma.itemType.upsert({
-        where: {
-            id
-        },
-        update: {
-            categoryId: data.categoryId,
-            name: data.name,
-            image: data.image,
-            tags: {
-                set: data.tags.map(tag => ({ id: tag.id }))
+    if (id == null) {
+        await prisma.itemType.create({
+            data: {
+                categoryId: data.categoryId,
+                name: data.name,
+                image: data.image,
+                tags: {
+                    connect: data.tags.map(tag => ({ id: tag.id }))
+                },
+                description: data.description,
+                shortDescription: data.shortDescription,
+                options: {
+                    connect: data.options.map(option => ({ id: option.id }))
+                },
+                basePrice: Decimal(data.basePrice).toString(),
+                salePercent: Decimal(data.salePercent).toString(),
+                soldOut: data.soldOut
+            }
+        })
+    } else {
+        await prisma.itemType.update({
+            where: {
+                id
             },
-            description: data.description,
-            shortDescription: data.shortDescription,
-            options: {
-                set: data.options.map(option => ({ id: option.id }))
-            },
-            basePrice: Decimal(data.basePrice).toString(),
-            salePercent: Decimal(data.salePercent).toString(),
-            soldOut: data.soldOut
-        },
-        create: {
-            categoryId: data.categoryId,
-            name: data.name,
-            image: data.image,
-            tags: {
-                connect: data.tags.map(tag => ({ id: tag.id }))
-            },
-            description: data.description,
-            shortDescription: data.shortDescription,
-            options: {
-                connect: data.options.map(option => ({ id: option.id }))
-            },
-            basePrice: Decimal(data.basePrice).toString(),
-            salePercent: Decimal(data.salePercent).toString(),
-            soldOut: data.soldOut
-        }
-    })
+            data: {
+                categoryId: data.categoryId,
+                name: data.name,
+                image: data.image,
+                tags: {
+                    set: data.tags.map(tag => ({ id: tag.id }))
+                },
+                description: data.description,
+                shortDescription: data.shortDescription,
+                options: {
+                    set: data.options.map(option => ({ id: option.id }))
+                },
+                basePrice: Decimal(data.basePrice).toString(),
+                salePercent: Decimal(data.salePercent).toString(),
+                soldOut: data.soldOut
+            }
+        })
+    }
     return (await prisma.itemType.findUnique({
         where: {
             id
