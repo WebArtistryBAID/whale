@@ -10,7 +10,6 @@ import { Trans } from 'react-i18next/TransWithoutContext'
 import Link from 'next/link'
 import Paginated from '@/app/lib/Paginated'
 import { dismissNotification, getMyNotifications } from '@/app/lib/notification-actions'
-import Image from 'next/image'
 import { getNotificationMessageParams } from '@/app/lib/notification-utils'
 
 export default function UserInboxClient({ notifications }: { notifications: Paginated<Notification> }) {
@@ -35,10 +34,10 @@ export default function UserInboxClient({ notifications }: { notifications: Pagi
         <h1 className="mb-5">{t('inbox.title')}</h1>
         <If condition={page.pages < 1}>
             <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
-                <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
-                       className="dark:hidden w-72" alt=""/>
-                <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
-                       className="hidden dark:block w-72" alt=""/>
+                <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                     className="dark:hidden w-72" alt=""/>
+                <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                     className="hidden dark:block w-72" alt=""/>
                 <p className="mb-3">{t('inbox.empty')}</p>
             </div>
         </If>

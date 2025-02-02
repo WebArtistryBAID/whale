@@ -18,7 +18,6 @@ import { HiCash, HiCog, HiCollection, HiGift, HiTag } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import If from '@/app/lib/If'
-import Image from 'next/image'
 
 export default function ManageStorefrontClient({ categories, optionTypes, couponCodes, tags, ads }: {
     categories: Category[],
@@ -62,10 +61,10 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                 </If>
                 <If condition={categories.length < 1}>
                     <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
-                               className="dark:hidden w-72" alt=""/>
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
-                               className="hidden dark:block w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                             className="dark:hidden w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                             className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
                         <Button color="warning" pill as={Link} href="/user/manage/storefront/categories/create"
                                 className="inline-block">{t('manage.storefront.create')}</Button>
@@ -98,10 +97,10 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
 
                 <If condition={optionTypes.length < 1}>
                     <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
-                               className="dark:hidden w-72" alt=""/>
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
-                               className="hidden dark:block w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                             className="dark:hidden w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                             className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
                         <Button color="warning" pill as={Link} href="/user/manage/storefront/option-types/create"
                                 className="inline-block">{t('manage.storefront.create')}</Button>
@@ -133,10 +132,10 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
 
                 <If condition={couponCodes.length < 1}>
                     <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
-                               className="dark:hidden w-72" alt=""/>
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
-                               className="hidden dark:block w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                             className="dark:hidden w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                             className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
                         <Button color="warning" pill as={Link} href="/user/manage/storefront/coupons/create"
                                 className="inline-block">{t('manage.storefront.create')}</Button>
@@ -168,10 +167,10 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
 
                 <If condition={tags.length < 1}>
                     <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
-                               className="dark:hidden w-72" alt=""/>
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
-                               className="hidden dark:block w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                             className="dark:hidden w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                             className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
                         <Button color="warning" pill as={Link} href="/user/manage/storefront/tags/create"
                                 className="inline-block">{t('manage.storefront.create')}</Button>
@@ -201,10 +200,10 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
 
                 <If condition={ads.length < 1}>
                     <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
-                               className="dark:hidden w-72" alt=""/>
-                        <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
-                               className="hidden dark:block w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                             className="dark:hidden w-72" alt=""/>
+                        <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                             className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
                         <Button color="warning" pill as={Link} href="/user/manage/storefront/ads/create"
                                 className="inline-block">{t('manage.storefront.create')}</Button>

@@ -17,7 +17,6 @@ import {
 } from 'flowbite-react'
 import { HiCollection } from 'react-icons/hi'
 import If from '@/app/lib/If'
-import Image from 'next/image'
 import { UserAuditLogType } from '@prisma/client'
 import { getAuditLogs } from '@/app/lib/order-manage-actions'
 import Link from 'next/link'
@@ -43,10 +42,10 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
         <h1 className="mb-5">{t('logs.title')}</h1>
         <If condition={page.pages < 1}>
             <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
-                <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
-                       className="dark:hidden w-72" alt=""/>
-                <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
-                       className="hidden dark:block w-72" alt=""/>
+                <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                     className="dark:hidden w-72" alt=""/>
+                <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                     className="hidden dark:block w-72" alt=""/>
                 <p>{t('logs.empty')}</p>
             </div>
         </If>

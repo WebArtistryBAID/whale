@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
-import Image from 'next/image'
 import { isMaximumCupsReached, isStoreOpen } from '@/app/lib/ordering-actions'
 import { getConfigValue, getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import If from '@/app/lib/If'
@@ -86,11 +85,11 @@ export default function OrderNags() {
             <ModalBody>
                 <p className="mb-5">{t('loginCta.message')}</p>
                 <div className="w-full flex flex-col justify-center items-center">
-                    <Image width={400} height={260} src="/assets/illustrations/reading-light.png"
-                           className="dark:hidden w-72 mb-3" alt=""/>
-                    <Image width={400} height={260} src="/assets/illustrations/reading-dark.png"
-                           className="hidden dark:block w-72 mb-3"
-                           alt=""/>
+                    <img width={400} height={260} src="/assets/illustrations/reading-light.png"
+                         className="dark:hidden w-72 mb-3" alt=""/>
+                    <img width={400} height={260} src="/assets/illustrations/reading-dark.png"
+                         className="hidden dark:block w-72 mb-3"
+                         alt=""/>
                 </div>
             </ModalBody>
             <ModalFooter>

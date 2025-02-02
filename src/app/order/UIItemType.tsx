@@ -1,7 +1,6 @@
 'use client'
 
 import { HydratedItemType } from '@/app/lib/ui-data-actions'
-import Image from 'next/image'
 import { Button } from 'flowbite-react'
 import { useTranslationClient } from '@/app/i18n/client'
 import { useState } from 'react'
@@ -24,8 +23,8 @@ export default function UIItemType({ item, uploadPrefix }: { item: HydratedItemT
              className="cursor-pointer text-left items-center rounded-3xl p-5 flex
                 gap-5 hover:bg-yellow-400/10 transition-colors duration-100" onClick={() => setSelected(true)}>
             <div className="flex-shrink">
-                <Image src={uploadPrefix + item.image} alt="" width={512} height={512}
-                       className={`w-16 lg:w-24 rounded-full ${item.soldOut ? 'grayscale' : ''}`}/>
+                <img src={uploadPrefix + item.image} alt="" width={512} height={512}
+                     className={`w-16 lg:w-24 rounded-full ${item.soldOut ? 'grayscale' : ''}`}/>
             </div>
             <div className="flex-grow">
                 <p aria-hidden className="font-bold font-display text-lg">{item.name}</p>

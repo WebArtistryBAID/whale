@@ -21,7 +21,6 @@ import {
 import { HiHashtag, HiUser } from 'react-icons/hi'
 import If from '@/app/lib/If'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function UserOrdersClient({ init }: { init: Paginated<Order> }) {
     const { t } = useTranslationClient('user')
@@ -44,10 +43,10 @@ export default function UserOrdersClient({ init }: { init: Paginated<Order> }) {
         <h1 className="mb-5">{t('orders.title')}</h1>
         <If condition={page.pages < 1}>
             <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
-                <Image width={400} height={322} src="/assets/illustrations/unboxing-light.png"
-                       className="dark:hidden w-72" alt=""/>
-                <Image width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
-                       className="hidden dark:block w-72" alt=""/>
+                <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
+                     className="dark:hidden w-72" alt=""/>
+                <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
+                     className="hidden dark:block w-72" alt=""/>
                 <p className="mb-3">{t('orders.empty')}</p>
                 <Button color="warning" as={Link} href="/order">{t('orders.cta')}</Button>
             </div>

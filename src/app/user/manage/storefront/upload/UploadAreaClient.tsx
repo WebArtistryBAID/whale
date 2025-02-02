@@ -4,7 +4,6 @@ import { useTranslationClient } from '@/app/i18n/client'
 import { HiUpload } from 'react-icons/hi'
 import { useRef, useState } from 'react'
 import If from '@/app/lib/If'
-import Image from 'next/image'
 
 export default function UploadAreaClient({ uploadPrefix, onDone }: {
     uploadPrefix: string,
@@ -87,8 +86,8 @@ export default function UploadAreaClient({ uploadPrefix, onDone }: {
             </If>
         </button>
         <If condition={done}>
-            <Image width={500} height={200} src={uploadPrefix + path} alt={t('manage.storefront.upload.alt')}
-                   className="mt-3 rounded-xl w-full lg:max-w-sm object-cover"/>
+            <img width={500} height={200} src={uploadPrefix + path} alt={t('manage.storefront.upload.alt')}
+                 className="mt-3 rounded-xl w-full lg:max-w-sm object-cover"/>
         </If>
     </div>
 }

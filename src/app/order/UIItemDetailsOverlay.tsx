@@ -3,7 +3,6 @@
 import { HydratedItemType } from '@/app/lib/ui-data-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 import { HiMinus, HiPlus, HiX } from 'react-icons/hi'
-import Image from 'next/image'
 import Markdown from 'react-markdown'
 import UIOptionType from '@/app/order/UIOptionType'
 import { useEffect, useRef, useState } from 'react'
@@ -66,8 +65,8 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
 
             <button className="btn-icon-only" onClick={close} aria-label={t('close')}><HiX/></button>
         </div>
-        <Image src={uploadPrefix + item.image} alt="" width={512} height={512}
-               className="object-cover w-full rounded-3xl h-72 mb-3"/>
+        <img src={uploadPrefix + item.image} alt="" width={512} height={512}
+             className="object-cover w-full rounded-3xl h-72 mb-3"/>
 
         <div className="flex gap-3 mb-3 items-center">
             {item.tags.map(tag =>

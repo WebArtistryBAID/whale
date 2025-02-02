@@ -22,7 +22,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteItemType } from '@/app/lib/ui-manage-actions'
 import { HydratedItemType } from '@/app/lib/ui-data-actions'
-import Image from 'next/image'
 import If from '@/app/lib/If'
 
 export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
@@ -78,9 +77,9 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
                     <p className="text-xl mb-3">{categoryName}</p>
 
                     <p className="secondary text-sm font-display mb-1">{t('manage.storefront.itemD.image')}</p>
-                    <Image src={uploadPrefix + object.image} width={500} height={500}
-                           alt={t('manage.storefront.itemD.alt')}
-                           className="w-full lg:max-w-sm object-cover mb-3 rounded-xl"/>
+                    <img src={uploadPrefix + object.image} width={500} height={500}
+                         alt={t('manage.storefront.itemD.alt')}
+                         className="w-full lg:max-w-sm object-cover mb-3 rounded-xl"/>
 
                     <p className="secondary text-sm font-display">{t('manage.storefront.itemD.description')}</p>
                     <p className="mb-3">{object.description}</p>

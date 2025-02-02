@@ -30,7 +30,6 @@ import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
-import Image from 'next/image'
 
 function isMobileOriPad(): boolean {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
@@ -150,7 +149,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             <ModalBody>
                 <p className="mb-5">{t('checkout.loginNagModal.message')}</p>
                 <div className="w-full flex justify-center">
-                    <Image src="/assets/illustrations/login-nag.svg" alt="" width={943} height={796} className="w-72"/>
+                    <img src="/assets/illustrations/login-nag.svg" alt="" width={943} height={796} className="w-72"/>
                 </div>
             </ModalBody>
             <ModalFooter>

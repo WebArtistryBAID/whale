@@ -1,6 +1,5 @@
 import { calculatePrice, OrderedItemTemplate, useShoppingCart } from '@/app/lib/shopping-cart'
 import { useTranslationClient } from '@/app/i18n/client'
-import Image from 'next/image'
 import { Button } from 'flowbite-react'
 import If from '@/app/lib/If'
 
@@ -13,8 +12,8 @@ export default function UIOrderedItemTemplate({ item, index, uploadPrefix, price
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     return <div className="flex items-center gap-5" aria-label={item.item.name + ' ' + t('a11y.shoppingCartItem')}>
-        <Image src={uploadPrefix + item.item.image} alt="" width={512} height={512}
-               className="w-16 lg:w-24 rounded-full flex-shrink"/>
+        <img src={uploadPrefix + item.item.image} alt="" width={512} height={512}
+             className="w-16 lg:w-24 rounded-full flex-shrink"/>
         <div className="flex-grow">
             <p className="font-bold font-display text-lg" aria-hidden>{item.item.name}</p>
             <p className="text-sm secondary mb-2">
