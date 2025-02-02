@@ -2,7 +2,7 @@
 
 import { Ad, Category, CouponCode, ItemType, OptionItem, OptionType, Prisma, PrismaClient, Tag } from '@prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
-import { HydratedItemType } from '@/app/lib/ui-data-actions'
+import { HydratedCategory, HydratedItemType } from '@/app/lib/ui-data-actions'
 import Decimal from 'decimal.js'
 import CategoryCreateInput = Prisma.CategoryCreateInput
 import OptionTypeCreateInput = Prisma.OptionTypeCreateInput
@@ -16,6 +16,25 @@ const prisma = new PrismaClient()
 export async function getCategories(): Promise<Category[]> {
     await requireUserPermission('admin.manage')
     return prisma.category.findMany()
+}
+
+export async function getCategory(id: number): Promise<HydratedCategory | null> {
+    await requireUserPermission('admin.manage')
+    return prisma.category.findUnique({
+        where: { id },
+        include: {
+            items: {
+                include: {
+                    tags: true,
+                    options: {
+                        include: {
+                            items: true
+                        }
+                    }
+                }
+            }
+        }
+    })
 }
 
 export async function getItemTypes(category: number): Promise<HydratedItemType[]> {

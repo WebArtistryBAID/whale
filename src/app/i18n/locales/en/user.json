@@ -247,6 +247,8 @@
     "storefront": {
       "title": "Storefront",
       "categories": "Categories and Items",
+      "categoriesO": "Categories",
+      "items": "Items",
       "optionTypes": "Option Types",
       "couponCodes": "Coupon Codes",
       "tags": "Tags",
@@ -278,7 +280,12 @@
       },
       "categoryD": {
         "create": "New Category",
-        "edit": "Edit Category"
+        "edit": "Edit Category",
+        "name": "Name",
+        "createItem": "Create Item",
+        "items": "Associated Items",
+        "nameError": "Enter a valid name.",
+        "deleteMessage": "This action cannot be undone. <1>All associated items will be deleted.</1>"
       },
       "itemD": {
         "create": "New Item",
