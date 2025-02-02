@@ -252,13 +252,54 @@
       "tags": "Tags",
       "ads": "Ads",
       "create": "Create",
+      "edit": "Edit",
       "tabs": "Tabs",
       "id": "ID",
       "name": "Name",
       "value": "Value",
       "view": "View",
       "actions": "Actions",
-      "empty": "No items."
+      "empty": "No items.",
+      "data": "Data",
+      "delete": "Delete",
+      "deleteModal": {
+        "title": "Are you sure?",
+        "message": "This action cannot be undone."
+      },
+      "couponD": {
+        "create": "New Coupon Code",
+        "edit": "Edit Coupon Code",
+        "id": "Code",
+        "value": "Value (¥)",
+        "remainingUses": "Remaining Uses",
+        "idError": "Enter a valid code with numbers and letters only.",
+        "valueError": "Enter a valid value.",
+        "remainingUsesError": "Enter a valid number."
+      },
+      "categoryD": {
+        "create": "New Category",
+        "edit": "Edit Category"
+      },
+      "itemD": {
+        "create": "New Item",
+        "edit": "Edit Item"
+      },
+      "tagD": {
+        "create": "New Tag",
+        "edit": "Edit Tag"
+      },
+      "optionTypeD": {
+        "create": "New Option Type",
+        "edit": "Edit Option Type"
+      },
+      "adD": {
+        "create": "New Ad",
+        "edit": "Edit Ad"
+      },
+      "optionItemD": {
+        "create": "New Option Item",
+        "edit": "Edit Option Item"
+      }
     }
   },
   "today": {

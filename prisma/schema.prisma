@@ -80,7 +80,7 @@ model Notification {
 model CouponCode {
   id            String @id
   value         String
-  allowedUses   Int
+  allowedUses   Int // Not used
   remainingUses Int
 }
 

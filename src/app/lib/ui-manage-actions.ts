@@ -38,9 +38,19 @@ export async function getOptionTypes(): Promise<OptionType[]> {
     return prisma.optionType.findMany()
 }
 
+export async function getOptionType(id: number): Promise<OptionType | null> {
+    await requireUserPermission('admin.manage')
+    return prisma.optionType.findUnique({ where: { id } })
+}
+
 export async function getOptionItems(type: number): Promise<OptionItem[]> {
     await requireUserPermission('admin.manage')
     return prisma.optionItem.findMany({ where: { typeId: type } })
+}
+
+export async function getOptionItem(id: number): Promise<OptionItem | null> {
+    await requireUserPermission('admin.manage')
+    return prisma.optionItem.findUnique({ where: { id } })
 }
 
 export async function getCouponCodes(): Promise<CouponCode[]> {
@@ -48,14 +58,29 @@ export async function getCouponCodes(): Promise<CouponCode[]> {
     return prisma.couponCode.findMany()
 }
 
+export async function getCouponCode(id: string): Promise<CouponCode | null> {
+    await requireUserPermission('admin.manage')
+    return prisma.couponCode.findUnique({ where: { id } })
+}
+
 export async function getTags(): Promise<Tag[]> {
     await requireUserPermission('admin.manage')
     return prisma.tag.findMany()
 }
 
+export async function getTag(id: number): Promise<Tag | null> {
+    await requireUserPermission('admin.manage')
+    return prisma.tag.findUnique({ where: { id } })
+}
+
 export async function getAds(): Promise<Ad[]> {
     await requireUserPermission('admin.manage')
     return prisma.ad.findMany()
+}
+
+export async function getAd(id: number): Promise<Ad | null> {
+    await requireUserPermission('admin.manage')
+    return prisma.ad.findUnique({ where: { id } })
 }
 
 export async function upsertCategory(id: number | undefined, data: CategoryCreateInput): Promise<Category> {
