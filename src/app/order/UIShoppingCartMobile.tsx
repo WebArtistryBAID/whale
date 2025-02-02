@@ -2,12 +2,15 @@
 
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { useTranslationClient } from '@/app/i18n/client'
-import { Button } from 'flowbite-react'
+import { Button, Popover } from 'flowbite-react'
 import If from '@/app/lib/If'
 import { HiClock } from 'react-icons/hi'
 import { useRouter } from 'next/navigation'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { useEffect, useRef, useState } from 'react'
+import { Trans } from 'react-i18next/TransWithoutContext'
+import { isMaximumCupsReached, isStoreOpen } from '@/app/lib/ordering-actions'
+import { getConfigValueAsNumber } from '@/app/lib/settings-actions'
 
 export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: string }) {
     const { t } = useTranslationClient('order')
@@ -16,11 +19,31 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
     const [ showAll, setShowAll ] = useState(false)
     const detailsRef = useRef<HTMLDivElement>(null)
 
+    const [ storeOpen, setStoreOpen ] = useState(false)
+    const [ atCapacity, setAtCapacity ] = useState(false)
+    const [ maxCups, setMaxCups ] = useState(0)
+
+    useEffect(() => {
+        (async () => {
+            setStoreOpen(await isStoreOpen())
+            setAtCapacity(await isMaximumCupsReached())
+            setMaxCups(await getConfigValueAsNumber('maximum-cups-per-order'))
+        })()
+    }, [])
+
     useEffect(() => {
         if (showAll) {
             detailsRef.current!.focus()
         }
     }, [ showAll ])
+
+    const checkout = <Button pill
+                             disabled={!storeOpen || atCapacity || shoppingCart.getAmount() > maxCups || shoppingCart.items.length < 1}
+                             color="yellow" onClick={() => {
+        if (shoppingCart.items.length > 0) {
+            router.push('/order/checkout')
+        }
+    }}>{t('checkout.title')}</Button>
 
     return <>
         <If condition={showAll}>
@@ -49,11 +72,37 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
                     <Button pill color="gray" className="mr-3" onClick={() => setShowAll(false)}>
                         {t('close')}
                     </Button>
-                    <Button pill color="warning" onClick={() => {
-                        if (shoppingCart.items.length > 0) {
-                            router.push('/order/checkout')
-                        }
-                    }}>{t('checkout.title')}</Button>
+                    <If condition={!storeOpen || atCapacity || shoppingCart.getAmount() > maxCups}>
+                        <span className="sr-only">
+                            <If condition={!storeOpen}>
+                                <span className="text-sm">{t('storeClosedModal.simple')}</span>
+                            </If>
+                            <If condition={atCapacity}>
+                                <span className="text-sm">{t('maximumCupsModal.simple')}</span>
+                            </If>
+                            <If condition={shoppingCart.getAmount() > maxCups}>
+                                <span className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
+                                                                 count={shoppingCart.getAmount()}/></span>
+                            </If>
+                        </span>
+                        <Popover trigger="hover" aria-hidden content={<div className="p-3 flex flex-col gap-1">
+                            <If condition={!storeOpen}>
+                                <p className="text-sm">{t('storeClosedModal.simple')}</p>
+                            </If>
+                            <If condition={atCapacity}>
+                                <p className="text-sm">{t('maximumCupsModal.simple')}</p>
+                            </If>
+                            <If condition={shoppingCart.getAmount() > maxCups}>
+                                <p className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
+                                                              count={shoppingCart.getAmount()}/></p>
+                            </If>
+                        </div>}>
+                            {checkout}
+                        </Popover>
+                    </If>
+                    <If condition={storeOpen && !atCapacity && shoppingCart.getAmount() <= maxCups}>
+                        {checkout}
+                    </If>
                 </div>
             </div>
         </If>

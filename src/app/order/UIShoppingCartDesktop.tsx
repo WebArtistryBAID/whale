@@ -60,22 +60,22 @@ export default function UIShoppingCartDesktop({ uploadPrefix }: { uploadPrefix: 
             <If condition={!storeOpen || atCapacity || shoppingCart.getAmount() > maxCups}>
                 <span className="sr-only">
                     <If condition={!storeOpen}>
-                        <span className="mb-1 text-sm">{t('storeClosedModal.simple')}</span>
+                        <span className="text-sm">{t('storeClosedModal.simple')}</span>
                     </If>
                     <If condition={atCapacity}>
-                        <span className="mb-1 text-sm">{t('maximumCupsModal.simple')}</span>
+                        <span className="text-sm">{t('maximumCupsModal.simple')}</span>
                     </If>
                     <If condition={shoppingCart.getAmount() > maxCups}>
                         <span className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
                                                          count={shoppingCart.getAmount()}/></span>
                     </If>
                 </span>
-                <Popover trigger="hover" aria-hidden content={<div className="p-3">
+                <Popover trigger="hover" aria-hidden content={<div className="p-3 flex flex-col gap-1">
                     <If condition={!storeOpen}>
-                        <p className="mb-1 text-sm">{t('storeClosedModal.simple')}</p>
+                        <p className="text-sm">{t('storeClosedModal.simple')}</p>
                     </If>
                     <If condition={atCapacity}>
-                        <p className="mb-1 text-sm">{t('maximumCupsModal.simple')}</p>
+                        <p className="text-sm">{t('maximumCupsModal.simple')}</p>
                     </If>
                     <If condition={shoppingCart.getAmount() > maxCups}>
                         <p className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
