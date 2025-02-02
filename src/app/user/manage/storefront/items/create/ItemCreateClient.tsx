@@ -178,7 +178,7 @@ export default function ItemCreateClient({
                     <Label htmlFor="description" value={t('manage.storefront.itemD.description')}/>
                 </div>
                 <Textarea id="description" required
-                          placeholder={t('manage.storefront.itemD.sescription') + '...'}
+                          placeholder={t('manage.storefront.itemD.description') + '...'}
                           color={descriptionError ? 'failure' : undefined}
                           value={description} onChange={e => setDescription(e.currentTarget.value)}
                           helperText={descriptionError ? t('manage.storefront.itemD.descriptionError') : null}/>
