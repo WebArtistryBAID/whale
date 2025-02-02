@@ -274,8 +274,9 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
             values: [ data.name ]
         }
     })
+    let result
     if (id == null) {
-        await prisma.itemType.create({
+        result = await prisma.itemType.create({
             data: {
                 categoryId: data.categoryId,
                 name: data.name,
@@ -291,10 +292,18 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
                 basePrice: Decimal(data.basePrice).toString(),
                 salePercent: Decimal(data.salePercent).toString(),
                 soldOut: data.soldOut
+            },
+            include: {
+                tags: true,
+                options: {
+                    include: {
+                        items: true
+                    }
+                }
             }
         })
     } else {
-        await prisma.itemType.update({
+        result = await prisma.itemType.update({
             where: {
                 id
             },
@@ -313,22 +322,18 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
                 basePrice: Decimal(data.basePrice).toString(),
                 salePercent: Decimal(data.salePercent).toString(),
                 soldOut: data.soldOut
+            },
+            include: {
+                tags: true,
+                options: {
+                    include: {
+                        items: true
+                    }
+                }
             }
         })
     }
-    return (await prisma.itemType.findUnique({
-        where: {
-            id
-        },
-        include: {
-            tags: true,
-            options: {
-                include: {
-                    items: true
-                }
-            }
-        }
-    }))!
+    return result
 }
 
 export async function deleteCategory(id: number): Promise<Category> {
