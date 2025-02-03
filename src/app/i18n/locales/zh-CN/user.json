@@ -1,5 +1,6 @@
 {
   "brand": "白鲸咖啡",
+  "anonymous": "访客",
   "confirm": "确认",
   "close": "关闭",
   "cancel": "取消",
@@ -109,7 +110,7 @@
       "login": "{{user}} 透过 OneLogin 登录。",
       "blocked": "{{user}} 屏蔽了 {{v0}}。",
       "unblocked": "{{user}} 解除屏蔽了 {{v0}}。",
-      "permissionsUpdated": "{{user}} 更新了 {{v0}} 的权限: {{values}}。",
+      "permissionsUpdated": "{{user}} 更新了 {{v0}} 的权限: {{v1}}。",
       "balanceTransaction": "{{user}} 充值了余额 ¥{{v0}}。微信支付交易号: {{v1}}。",
       "balanceUsed": "{{user}} 使用了余额 ¥{{v0}} 支付订单 {{order}}。新余额: ¥{{v1}}。",
       "pointsUpdated": "{{user}} 的积分增加了 {{v0}}。新积分: {{v1}}。",

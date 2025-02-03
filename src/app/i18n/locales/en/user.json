@@ -1,5 +1,6 @@
 {
   "brand": "Whale Cafe",
+  "anonymous": "Anonymous",
   "confirm": "Confirm",
   "close": "Close",
   "cancel": "Cancel",
@@ -109,7 +110,7 @@
       "login": "{{user}} logged in with OneLogin.",
       "blocked": "{{user}} blocked {{v0}}.",
       "unblocked": "{{user}} unblocked {{v0}}.",
-      "permissionsUpdated": "{{user}} updated {{v0}}'s permissions: {{values}}.",
+      "permissionsUpdated": "{{user}} updated {{v0}}'s permissions: {{v1}}.",
       "balanceTransaction": "{{user}} recharged their balance with ¥{{v0}}. Weixin Pay transaction ID: {{v1}}.",
       "balanceUsed": "{{user}} used balance ¥{{v0}} to pay for order {{order}}. New balance: ¥{{v1}}.",
       "pointsUpdated": "{{user}}'s points is updated by {{v0}}. New points: {{v1}}.",

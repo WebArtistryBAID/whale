@@ -64,9 +64,13 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
                         const messageData: { [key: string]: string } = Object()
                         if (log.userId != null) {
                             messageData.user = log.user!.name
+                        } else {
+                            messageData.user = t('anonymous')
                         }
                         if (log.orderId != null) {
                             messageData.order = log.orderId.toString()
+                        } else {
+                            messageData.order = 'N/A'
                         }
                         if (([
                             UserAuditLogType.blocked,
