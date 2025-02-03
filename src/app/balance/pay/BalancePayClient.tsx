@@ -40,21 +40,23 @@ export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
     const [ qrCodeShowProcessing, setQRCodeShowProcessing ] = useState(false)
 
     useEffect(() => {
-        if (isMobileOriPad()) {
-            void launchWeChat()
-        }
-        if (isDesktop()) {
-            (async () => {
-                const qr = await getPaymentQRCode(trans.id)
-                if (qr == null) {
-                    setError(true)
-                    return
-                }
-                setQRCode(qr)
-                setTimeout(() => {
-                    setQRCodeShowProcessing(true) // We don't actually know if the user finished paying or not, but we pretend we do
-                }, 10000)
-            })()
+        if (!searchParams.has('oaready')) { // Do not launch again if user already paid
+            if (isMobileOriPad()) {
+                void launchWeChat()
+            }
+            if (isDesktop()) {
+                (async () => {
+                    const qr = await getPaymentQRCode(trans.id)
+                    if (qr == null) {
+                        setError(true)
+                        return
+                    }
+                    setQRCode(qr)
+                    setTimeout(() => {
+                        setQRCodeShowProcessing(true) // We don't actually know if the user finished paying or not, but we pretend we do
+                    }, 10000)
+                })()
+            }
         }
         setTimeout(() => {
             setCanRestart(true) // Make sure the user don't restart right away

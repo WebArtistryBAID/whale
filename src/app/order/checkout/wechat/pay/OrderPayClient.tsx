@@ -44,21 +44,23 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
     const shoppingCart = useShoppingCart()
 
     useEffect(() => {
-        if (isMobileOriPad() && order.paymentMethod !== PaymentMethod.payForMe && !shoppingCart.onSiteOrderMode) {
-            void launchWeChat()
-        }
-        if (isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode) {
-            (async () => {
-                const qr = await getPaymentQRCode(order.id)
-                if (qr == null) {
-                    setError(true)
-                    return
-                }
-                setQRCode(qr)
-                setTimeout(() => {
-                    setQRCodeShowProcessing(true) // We don't actually know if the user finished paying or not, but we pretend we do
-                }, 10000)
-            })()
+        if (!searchParams.has('oaready')) { // Do not launch again if user already paid
+            if (isMobileOriPad() && order.paymentMethod !== PaymentMethod.payForMe && !shoppingCart.onSiteOrderMode) {
+                void launchWeChat()
+            }
+            if (isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode) {
+                (async () => {
+                    const qr = await getPaymentQRCode(order.id)
+                    if (qr == null) {
+                        setError(true)
+                        return
+                    }
+                    setQRCode(qr)
+                    setTimeout(() => {
+                        setQRCodeShowProcessing(true) // We don't actually know if the user finished paying or not, but we pretend we do
+                    }, 10000)
+                })()
+            }
         }
         setTimeout(() => {
             setCanRestart(true) // Make sure the user don't restart right away

@@ -142,6 +142,7 @@ export async function getOAPaymentPackage(id: number, openid: string): Promise<s
         body: new URLSearchParams({
             ...data,
             notify_url: `${process.env.HOST}/balance/notify`,
+            return_url: `${process.env.HOST}/balance/pay?id=${id}&oaready=true`,
             sign: signData(data)
         })
     })
