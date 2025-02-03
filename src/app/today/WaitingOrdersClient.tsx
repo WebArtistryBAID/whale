@@ -4,11 +4,11 @@ import { HydratedOrder } from '@/app/lib/ordering-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 import { useEffect, useState } from 'react'
 import { getWaitingOrders } from '@/app/lib/order-manage-actions'
-import ManageOrderClient from '@/app/user/manage/orders/[id]/ManageOrderClient'
 import { Button } from 'flowbite-react'
 import Link from 'next/link'
 import { OrderType } from '@prisma/client'
 import If from '@/app/lib/If'
+import OrderWithData from '@/app/user/manage/orders/[id]/OrderWithData'
 
 export default function WaitingOrdersClient({ init }: { init: { [id: number]: HydratedOrder } }) {
     const { t } = useTranslationClient('user')
@@ -46,7 +46,9 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
             <Button color="yellow" as={Link} href="/user/manage/orders">{t('today.return')}</Button>
         </div>
         <div className="w-4/5 p-8 h-full overflow-y-auto" aria-label={t('today.detailsPane')}>
-            <ManageOrderClient init={orders[selected]}/>
+            <OrderWithData order={orders[selected]} forceUpdate={async () => {
+                setOrders(await getWaitingOrders())
+            }}/>
         </div>
     </div>
 }
