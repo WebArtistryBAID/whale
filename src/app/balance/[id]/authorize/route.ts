@@ -19,16 +19,14 @@ export async function GET(request: NextRequest, { params }: {
         mch_id: process.env.WX_PAY_MCH_ID,
         code
     }
-    const r = await fetch('https://api.pay.yungouos.com/api/wx/getOauthInfo', {
-        method: 'POST',
+    const r = await fetch('https://api.pay.yungouos.com/api/wx/getOauthInfo?' + new URLSearchParams({
+        ...data,
+        sign: signData(data)
+    }).toString(), {
+        method: 'GET',
         headers: {
-            'User-Agent': userAgent,
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-            ...data,
-            sign: signData(data)
-        })
+            'User-Agent': userAgent
+        }
     })
     const resp = await r.json()
     if (resp.code === 0) {
