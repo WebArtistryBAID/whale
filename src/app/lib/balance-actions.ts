@@ -87,6 +87,8 @@ export async function getPaymentQRCode(id: number): Promise<string | null> {
     const resp = await r.json()
     if (resp.code === 0) {
         return resp.data
+    } else {
+        console.error('An error occurred when requesting Weixin Pay:', resp)
     }
     return null
 }
@@ -113,6 +115,8 @@ export async function getWeChatOAuthRedirect(id: number): Promise<string | null>
     const resp = await r.json()
     if (resp.code === 0) {
         return resp.data
+    } else {
+        console.error('An error occurred when requesting Weixin Pay:', resp)
     }
     return null
 }
@@ -144,6 +148,8 @@ export async function getOAPaymentPackage(id: number, openid: string): Promise<s
     const resp = await r.json()
     if (resp.code === 0) {
         return resp.data
+    } else {
+        console.error('An error occurred when requesting Weixin Pay:', resp)
     }
     return null
 }
@@ -174,6 +180,8 @@ export async function getExternalPaymentRedirect(id: number): Promise<string | n
     const resp = await r.json()
     if (resp.code === 0) {
         return resp.data
+    } else {
+        console.error('An error occurred when requesting Weixin Pay:', resp)
     }
     return null
 }
