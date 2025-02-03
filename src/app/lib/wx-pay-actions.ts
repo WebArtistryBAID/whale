@@ -46,7 +46,7 @@ export async function getPaymentQRCode(id: number): Promise<string | null> {
         },
         body: new URLSearchParams({
             ...data,
-            notifyUrl: `${process.env.HOST}/order/checkout/wechat/notify`,
+            notify_url: `${process.env.HOST}/order/checkout/wechat/notify`,
             sign: signData(data)
         })
     })
@@ -107,7 +107,7 @@ export async function getOAPaymentPackage(id: number, openid: string): Promise<s
         },
         body: new URLSearchParams({
             ...data,
-            notifyUrl: `${process.env.HOST}/order/checkout/wechat/notify`,
+            notify_url: `${process.env.HOST}/order/checkout/wechat/notify`,
             sign: signData(data)
         })
     })
@@ -139,7 +139,7 @@ export async function getExternalPaymentRedirect(id: number): Promise<string | n
         },
         body: new URLSearchParams({
             ...data,
-            notifyUrl: `${process.env.HOST}/order/checkout/wechat/notify`,
+            notify_url: `${process.env.HOST}/order/checkout/wechat/notify`,
             sign: signData(data)
         })
     })
