@@ -149,7 +149,11 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             <ModalBody>
                 <p className="mb-5">{t('checkout.loginNagModal.message')}</p>
                 <div className="w-full flex justify-center">
-                    <img src="/assets/illustrations/login-nag.svg" alt="" width={943} height={796} className="w-72"/>
+                    <img width={400} height={260} src="/assets/illustrations/reading-light.png"
+                         className="dark:hidden w-72" alt=""/>
+                    <img width={400} height={260} src="/assets/illustrations/reading-dark.png"
+                         className="hidden dark:block w-72"
+                         alt=""/>
                 </div>
             </ModalBody>
             <ModalFooter>
