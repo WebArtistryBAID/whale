@@ -16,6 +16,7 @@ import {
 import { PaymentMethod, PaymentStatus } from '@prisma/client'
 import QRCode from 'react-qr-code'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
+import { Trans } from 'react-i18next/TransWithoutContext'
 
 function isDesktop(): boolean {
     return !isMobileOriPad()
@@ -169,7 +170,8 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
         <h1 className="mb-5">{t('wechatPay.title')}</h1>
         <p className="mb-3 text-lg">{t('checkout.total')} ¥{order.totalPrice}</p>
         <If condition={error}>
-            <p className="mb-3">{t('wechatPay.error')}</p>
+            <p className="mb-3"><Trans t={t} i18nKey="wechatPay.error"
+                                       components={{ 1: <span className="font-bold" key="bold"/> }}/></p>
             <Button onClick={() => location.reload()} pill color="warning">{t('wechatPay.restart')}</Button>
         </If>
         <If condition={!error}>
