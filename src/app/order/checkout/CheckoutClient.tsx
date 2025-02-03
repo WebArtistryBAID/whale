@@ -139,7 +139,7 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
             router.push(`/order/details/${order.id}`)
         } else {
             // Start payment process
-            router.push(`/order/checkout/wechat/${order.id}`)
+            router.push(`/order/checkout/wechat/pay?id=${order.id}`)
         }
     }
 

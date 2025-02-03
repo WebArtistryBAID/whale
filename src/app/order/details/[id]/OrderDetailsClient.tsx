@@ -69,7 +69,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
             </ModalBody>
             <ModalFooter>
                 <Button pill color="yellow" as={Link}
-                        href={`/order/checkout/wechat/${order.id}`}>{t('checkout.wxPay')}</Button>
+                        href={`/order/checkout/wechat/pay?id=${order.id}`}>{t('checkout.wxPay')}</Button>
                 <Button pill color="yellow" disabled={!canUseBalance || loading} onClick={async () => {
                     setLoading(true)
                     await payLaterBalance(order.id)
@@ -144,7 +144,8 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                     <If condition={order.paymentMethod !== PaymentMethod.payLater}>
                         <Alert additionalContent={<div className="text-left">
                             <p className="mb-1">{t('details.paymentPrompt')}</p>
-                            <Button size="xs" as={Link} href={`/order/checkout/wechat/${order.id}`} pill color="warning"
+                            <Button size="xs" as={Link} href={`/order/checkout/wechat/pay?id=${order.id}`} pill
+                                    color="warning"
                                     className="inline-block">{t('details.payNow')}</Button>
                         </div>}
                                color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>

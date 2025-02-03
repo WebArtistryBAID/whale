@@ -32,9 +32,9 @@ export async function GET(request: NextRequest, { params }: {
     })
     const resp = await r.json()
     if (resp.code === 0) {
-        redirect(`/order/checkout/wechat/${(await params).id}?openid=${resp.data.openId}`)
+        redirect(`/order/checkout/wechat/pay?openid=${resp.data.openId}&id=${(await params).id}`)
     } else {
         console.error('An error occurred when requesting Weixin Pay:', resp)
     }
-    redirect(`/order/checkout/wechat/${(await params).id}?openid=error`)
+    redirect(`/order/checkout/wechat/pay?openid=error&id=${(await params).id}`)
 }

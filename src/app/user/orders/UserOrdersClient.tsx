@@ -42,7 +42,7 @@ export default function UserOrdersClient({ init }: { init: Paginated<Order> }) {
         </Breadcrumb>
         <h1 className="mb-5">{t('orders.title')}</h1>
         <If condition={page.pages < 1}>
-            <div className="w-full h-[60dvh] flex flex-col justify-center items-center">
+            <div className="w-full h-[60dvh] flex flex-col justify-center items-center text-center">
                 <img width={400} height={322} src="/assets/illustrations/unboxing-light.png"
                      className="dark:hidden w-72" alt=""/>
                 <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
