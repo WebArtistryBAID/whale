@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
 // ONLY required parameters need to go into the signature
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function signData(params: any): string {
-    const key = process.env.WXPAY_MCH_KEY
+    const key = process.env.WX_PAY_MCH_KEY
     const paramsArr = Object.keys(params)
     paramsArr.sort()
     const stringArr = []

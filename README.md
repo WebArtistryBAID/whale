@@ -30,8 +30,8 @@ To run in development:
 | `ONELOGIN_HOST`          | The location where [OneLogin](https://github.com/WebArtistryBAID/baid-onelogin) is hosted. No trailing slashes. |
 | `ONELOGIN_CLIENT_ID`     | OneLogin client ID. `basic`, `phone`, and `sms` scopes are required.                                            |
 | `ONELOGIN_CLIENT_SECRET` | OneLogin client secret.                                                                                         |
-| `WXPAY_MCH_ID`           | Weixin Pay merchant ID.                                                                                         |
-| `WXPAY_MCH_KEY`          | Weixin Pay signature key.                                                                                       |
+| `WX_PAY_MCH_ID`          | Weixin Pay merchant ID.                                                                                         |
+| `WX_PAY_MCH_KEY`         | Weixin Pay signature key.                                                                                       |
 | `CRON_KEY`               | Cron task verification key.                                                                                     |
 
 ## Cron Tasks
