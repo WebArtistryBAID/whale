@@ -126,7 +126,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
             <Button pill color="warning" onClick={() => {
                 shoppingCart.addItem(getThisItem())
                 close()
-            }}>{t('addItem')}</Button>
+            }}>{t('addConfirm')}</Button>
         </div>
     </div>
 }

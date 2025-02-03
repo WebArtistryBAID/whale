@@ -50,6 +50,7 @@
   "maximumCupsPerOrder_one": "一单只能购买 {{count}} 杯。",
   "maximumCupsPerOrder_other": "一单只能购买 {{count}} 杯。",
   "addItem": "选规格",
+  "addConfirm": "加入购物车",
   "itemDetails": {
     "soldOut": "售罄",
     "sale": "{{sale}} 降价!",
