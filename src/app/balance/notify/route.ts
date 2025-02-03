@@ -6,19 +6,19 @@ import signData from '@/app/lib/wx-pay-sign'
 const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-    const body = await request.json()
+    const body = await request.formData()
     if (signData({
-        code: body.code,
-        orderNo: body.orderNo,
-        outTradeNo: body.outTradeNo,
-        payNo: body.payNo,
-        money: body.money,
-        mchId: body.mchId
-    }) !== body.sign) {
+        code: body.get('code'),
+        orderNo: body.get('orderNo'),
+        outTradeNo: body.get('outTradeNo'),
+        payNo: body.get('payNo'),
+        money: body.get('money'),
+        mchId: body.get('mchId')
+    }) !== body.get('sign')) {
         return new NextResponse('FAILURE')
     }
 
-    const id = parseInt(body.outTradeNo.split('-BALANCE')[0])
+    const id = parseInt((body.get('outTradeNo')! as string).split('-BALANCE')[0])
     const trans = await prisma.userAuditLog.findUnique({
         where: {
             id
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             user: true
         }
     })
-    if (trans == null || trans.time.getTime().toString() !== body.outTradeNo.split('-BALANCE')[1]) {
+    if (trans == null || trans.time.getTime().toString() !== (body.get('outTradeNo')! as string).split('-BALANCE')[1]) {
         return new NextResponse('FAILURE')
     }
     if (trans.values[1] !== 'await') {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             id: trans.id
         },
         data: {
-            values: [ trans.values[0], body.payNo ]
+            values: [ trans.values[0], body.get('payNo')! as string ]
         }
     })
 

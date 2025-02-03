@@ -7,21 +7,20 @@ import signData from '@/app/lib/wx-pay-sign'
 const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-    const body = await request.json()
+    const body = await request.formData()
     if (signData({
-        code: body.code,
-        orderNo: body.orderNo,
-        outTradeNo: body.outTradeNo,
-        payNo: body.payNo,
-        money: body.money,
-        mchId: body.mchId
-    }) !== body.sign) {
+        code: body.get('code'),
+        orderNo: body.get('orderNo'),
+        outTradeNo: body.get('outTradeNo'),
+        payNo: body.get('payNo'),
+        money: body.get('money'),
+        mchId: body.get('mchId')
+    }) !== body.get('sign')) {
         return new NextResponse('FAILURE')
     }
-
-    const id = parseInt(body.outTradeNo.split('-ORDER')[0])
+    const id = parseInt((body.get('outTradeNo')! as string).split('-ORDER')[0])
     const order = await getOrder(id)
-    if (order == null || order.createdAt.getTime().toString() !== body.outTradeNo.split('-ORDER')[1]) {
+    if (order == null || order.createdAt.getTime().toString() !== (body.get('outTradeNo')! as string).split('-ORDER')[1]) {
         return new NextResponse('FAILURE')
     }
     if (order.paymentStatus === PaymentStatus.paid) {
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
         data: {
             paymentStatus: PaymentStatus.paid,
-            wxPayId: body.payNo
+            wxPayId: body.get('payNo')! as string
         }
     })
 
