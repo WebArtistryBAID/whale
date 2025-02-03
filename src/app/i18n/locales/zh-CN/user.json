@@ -14,10 +14,10 @@
     "dashboard": "主页",
     "orders": "订单",
     "inbox": "收件箱",
-    "auditLogs": "交易记录",
+    "auditLogs": "操作记录",
     "manageCategory": "管理",
     "manageStore": "店面",
-    "manageAuditLogs": "交易记录",
+    "manageAuditLogs": "操作记录",
     "manageStats": "统计数据",
     "manageSettings": "设置",
     "manageUsers": "用户",
@@ -99,8 +99,8 @@
     "onSiteExit": "退出现场点单"
   },
   "logs": {
-    "title": "交易记录",
-    "empty": "暂时没有交易记录。",
+    "title": "操作记录",
+    "empty": "暂时没有操作记录。",
     "id": "ID",
     "user": "用户",
     "order": "订单",

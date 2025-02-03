@@ -14,10 +14,10 @@
     "dashboard": "Dashboard",
     "orders": "Orders",
     "inbox": "Inbox",
-    "auditLogs": "Transactions",
+    "auditLogs": "Audit Logs",
     "manageCategory": "Management",
     "manageStore": "Storefront",
-    "manageAuditLogs": "Transactions",
+    "manageAuditLogs": "Audit Logs",
     "manageStats": "Statistics",
     "manageSettings": "Settings",
     "manageUsers": "Users",
@@ -99,8 +99,8 @@
     "onSiteExit": "Exit On-Site"
   },
   "logs": {
-    "title": "Transactions",
-    "empty": "No transactions yet.",
+    "title": "Audit Logs",
+    "empty": "No audit logs yet.",
     "id": "ID",
     "user": "User",
     "order": "Order",
