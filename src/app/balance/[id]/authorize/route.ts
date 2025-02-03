@@ -1,22 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import md5 from 'md5'
 import { redirect } from 'next/navigation'
+import signData from '@/app/lib/wx-pay-sign'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
-
-// ONLY required parameters need to go into the signature
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function signData(params: any): string {
-    const key = process.env.WX_PAY_MCH_KEY
-    const paramsArr = Object.keys(params)
-    paramsArr.sort()
-    const stringArr = []
-    paramsArr.map(key => {
-        stringArr.push(`key=${params[key]}`)
-    })
-    stringArr.push(`key=${key}`)
-    return md5(stringArr.join('&')).toString().toUpperCase()
-}
 
 export async function GET(request: NextRequest, { params }: {
     params: Promise<{ id: string }>

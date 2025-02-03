@@ -1,30 +1,16 @@
 'use server'
 
-import md5 from 'md5'
 import { PrismaClient, UserAuditLog, UserAuditLogType } from '@prisma/client'
 import { getMyUser } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 import { getConfigValue } from '@/app/lib/settings-actions'
 import { me } from '@/app/login/login'
+import signData from '@/app/lib/wx-pay-sign'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
 const orderBody = '白鲸咖啡余额充值 Whale Cafe Balance Recharge'
 
 const prisma = new PrismaClient()
-
-// ONLY required parameters need to go into the signature
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function signData(params: any): string {
-    const key = process.env.WX_PAY_MCH_KEY
-    const paramsArr = Object.keys(params)
-    paramsArr.sort()
-    const stringArr = []
-    paramsArr.map(key => {
-        stringArr.push(`key=${params[key]}`)
-    })
-    stringArr.push(`key=${key}`)
-    return md5(stringArr.join('&')).toString().toUpperCase()
-}
 
 function getTransactionNo(auditLog: UserAuditLog): string {
     return `${auditLog.id}-BALANCE${auditLog.time.getTime()}`

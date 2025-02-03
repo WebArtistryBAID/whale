@@ -16,7 +16,7 @@ import Decimal from 'decimal.js'
 import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
 import { sendNotification } from '@/app/lib/notification-actions'
 import { me } from '@/app/login/login'
-import md5 from 'md5'
+import signData from '@/app/lib/wx-pay-sign'
 
 const prisma = new PrismaClient()
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
@@ -210,20 +210,6 @@ async function finishRefunding(order: HydratedOrder): Promise<void> {
     if (order.user != null) {
         await sendNotification(order.user, NotificationType.orderRefunded, [ order.totalPrice ], order.id)
     }
-}
-
-// ONLY required parameters need to go into the signature
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function signData(params: any): string {
-    const key = process.env.WX_PAY_MCH_KEY
-    const paramsArr = Object.keys(params)
-    paramsArr.sort()
-    const stringArr = []
-    paramsArr.map(key => {
-        stringArr.push(`key=${params[key]}`)
-    })
-    stringArr.push(`key=${key}`)
-    return md5(stringArr.join('&')).toString().toUpperCase()
 }
 
 function getOrderTransactionNo(order: HydratedOrder): string {

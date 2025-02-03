@@ -1,25 +1,11 @@
 'use server'
 
-import md5 from 'md5'
 import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
 import { PaymentStatus } from '@prisma/client'
+import signData from '@/app/lib/wx-pay-sign'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
 const orderBody = '白鲸咖啡订单 Whale Cafe Order'
-
-// ONLY required parameters need to go into the signature
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function signData(params: any): string {
-    const key = process.env.WX_PAY_MCH_KEY
-    const paramsArr = Object.keys(params)
-    paramsArr.sort()
-    const stringArr = []
-    paramsArr.map(key => {
-        stringArr.push(`key=${params[key]}`)
-    })
-    stringArr.push(`key=${key}`)
-    return md5(stringArr.join('&')).toString().toUpperCase()
-}
 
 async function requireUnpaidOrder(order: number): Promise<HydratedOrder> {
     const o = await getOrder(order)
