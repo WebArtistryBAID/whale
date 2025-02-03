@@ -108,7 +108,7 @@ export async function getOAPaymentPackage(id: number, openid: string): Promise<s
         body: new URLSearchParams({
             ...data,
             notify_url: `${process.env.HOST}/order/checkout/wechat/notify`,
-            return_url: `${process.env.HOST}/order/checkout/wechat/pay?id=${id}&oaready=true`,
+            return_url: `${process.env.HOST}/order/details/${id}`,
             sign: signData(data)
         })
     })
