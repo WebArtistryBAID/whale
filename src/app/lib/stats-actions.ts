@@ -1,6 +1,6 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
+import { PaymentStatus, PrismaClient } from '@prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 
@@ -119,7 +119,10 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
         }
         for (const orderedItem of await prisma.orderedItem.findMany({
             where: {
-                itemTypeId: item.id
+                itemTypeId: item.id,
+                order: {
+                    paymentStatus: PaymentStatus.paid
+                }
             },
             select: {
                 amount: true,
@@ -199,7 +202,8 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
             createdAt: {
                 gte: start,
                 lt: end
-            }
+            },
+            paymentStatus: PaymentStatus.paid
         },
         select: {
             createdAt: true,
@@ -276,7 +280,8 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
             createdAt: {
                 gte: lastStart,
                 lt: start
-            }
+            },
+            paymentStatus: PaymentStatus.paid
         },
         select: {
             totalPrice: true,
@@ -316,6 +321,9 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
             createdAt: {
                 gte: start,
                 lt: end
+            },
+            order: {
+                paymentStatus: PaymentStatus.paid
             }
         },
         select: {
