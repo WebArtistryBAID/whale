@@ -99,6 +99,7 @@
     "error": "尝试开始支付流程时出现了错误，请再试一次。<1>如果您已经完成支付，请稍等，不需要再次支付。</1>",
     "restart": "重新支付",
     "share": "找朋友帮我付",
+    "cancel": "取消或更改支付方式",
     "shareTitle": "帮我支付白鲸咖啡订单",
     "shareMessage": "我在白鲸咖啡下了一个订单，帮我支付一下吧!"
   },
@@ -118,6 +119,7 @@
     "paymentPromptPayLater": "此「先喝后付」订单尚未支付。",
     "paymentPrompt": "此订单尚未支付。支付后，订单才会开始准备。",
     "payNow": "立即支付",
+    "cancelOrder": "取消订单",
     "refundedPrompt": "此订单已退款。",
     "refundTip": "如需退款，请联系我们。",
     "paymentMethod": "支付方式",

@@ -1,6 +1,7 @@
 'use client'
 
 import {
+    cancelUnpaidOrder,
     canPayWithBalance,
     EstimatedWaitTimeResponse,
     getEstimatedWaitTimeFor,
@@ -59,6 +60,11 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
             }
         }, 10000)
     }, [ order.id, order.totalPrice ])
+
+    async function cancel() {
+        await cancelUnpaidOrder(order.id)
+        location.href = '/'
+    }
 
     return <>
         <Modal show={payModal} onClose={() => setPayModal(false)}>
@@ -144,9 +150,14 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                     <If condition={order.paymentMethod !== PaymentMethod.payLater}>
                         <Alert additionalContent={<div className="text-left">
                             <p className="mb-1">{t('details.paymentPrompt')}</p>
-                            <Button size="xs" as={Link} href={`/order/checkout/wechat/pay?id=${order.id}`} pill
-                                    color="warning"
-                                    className="inline-block">{t('details.payNow')}</Button>
+                            <div className="flex gap-3">
+                                <Button size="xs" as={Link} href={`/order/checkout/wechat/pay?id=${order.id}`} pill
+                                        color="warning"
+                                        className="inline-block">{t('details.payNow')}</Button>
+                                <Button size="xs" as={Link} pill color="failure"
+                                        onClick={cancel}
+                                        className="inline-block">{t('details.cancelOrder')}</Button>
+                            </div>
                         </div>}
                                color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
                             <span className="font-bold">{t('details.paymentTitle')}</span>

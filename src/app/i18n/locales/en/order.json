@@ -99,6 +99,7 @@
     "error": "An error occurred while trying to begin the payment process. Please try again. <1>If you have already paid, please wait a moment.</1>",
     "restart": "Restart Payment",
     "share": "Ask Friend to Pay",
+    "cancel": "Cancel or Change Payment Method",
     "shareTitle": "Help me pay for my order at Whale Cafe",
     "shareText": "I need help paying for my order at Whale Cafe. Can you help me out?"
   },
@@ -118,6 +119,7 @@
     "paymentPromptPayLater": "This Pay Later order hasn't been paid for yet.",
     "paymentPrompt": "This order hasn't been paid for yet. This order will not start until you pay.",
     "payNow": "Pay Now",
+    "cancelOrder": "Cancel Order",
     "refundedPrompt": "This order has been refunded.",
     "refundTip": "Please contact us if you need a refund.",
     "paymentMethod": "Payment Method",

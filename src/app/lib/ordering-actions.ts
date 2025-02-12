@@ -572,3 +572,33 @@ export async function getEstimatedWaitTimeFor(order: number): Promise<EstimatedW
         orders: orders.length
     }
 }
+
+export async function cancelUnpaidOrder(id: number): Promise<OrderedItemTemplate[]> {
+    const order = await prisma.order.findUnique({
+        where: {
+            id,
+            paymentStatus: PaymentStatus.notPaid
+        },
+        include: {
+            items: {
+                include: {
+                    itemType: true,
+                    appliedOptions: true
+                }
+            }
+        }
+    })
+    if (order == null) {
+        return []
+    }
+    await prisma.order.delete({
+        where: {
+            id
+        }
+    })
+    return order.items.map(item => ({
+        item: item.itemType,
+        amount: item.amount,
+        options: item.appliedOptions
+    }))
+}

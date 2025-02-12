@@ -1,6 +1,6 @@
 'use client'
 
-import { HydratedOrder } from '@/app/lib/ordering-actions'
+import { cancelUnpaidOrder, HydratedOrder } from '@/app/lib/ordering-actions'
 import { useSearchParams } from 'next/navigation'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
@@ -94,6 +94,20 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
             setTimeout(() => {
                 setShareCopied(false)
             }, 3000)
+        }
+    }
+
+    async function cancel() {
+        const result = await cancelUnpaidOrder(order.id)
+        if (result.length < 1) {
+            location.href = '/'
+        } else {
+            shoppingCart.clear()
+            // Reinstate the shopping cart and return to check out page
+            for (const item of result) {
+                shoppingCart.addItem(item)
+            }
+            location.href = '/order/checkout'
         }
     }
 
@@ -211,5 +225,8 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                         onClick={share}>{shareCopied ? t('copied') : t('wechatPay.share')}</Button>
             </If>
         </If>
+        <Button className="mt-3" pill color="failure" onClick={cancel}>
+            {t('wechatPay.cancel')}
+        </Button>
     </div>
 }
