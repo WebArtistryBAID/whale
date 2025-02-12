@@ -154,8 +154,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                                 <Button size="xs" as={Link} href={`/order/checkout/wechat/pay?id=${order.id}`} pill
                                         color="warning"
                                         className="inline-block">{t('details.payNow')}</Button>
-                                <Button size="xs" as={Link} pill color="failure"
-                                        onClick={cancel}
+                                <Button size="xs" pill color="failure" onClick={cancel}
                                         className="inline-block">{t('details.cancelOrder')}</Button>
                             </div>
                         </div>}
