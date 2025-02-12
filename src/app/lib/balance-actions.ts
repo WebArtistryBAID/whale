@@ -175,6 +175,7 @@ export async function getExternalPaymentRedirect(id: number): Promise<string | n
         body: new URLSearchParams({
             ...data,
             notify_url: `${process.env.HOST}/balance/notify`,
+            return_url: `${process.env.HOST}/user`,
             sign: signData(data)
         })
     })

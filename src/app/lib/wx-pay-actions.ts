@@ -141,6 +141,7 @@ export async function getExternalPaymentRedirect(id: number): Promise<string | n
         body: new URLSearchParams({
             ...data,
             notify_url: `${process.env.HOST}/order/checkout/wechat/notify`,
+            return_url: `${process.env.HOST}/order/details/${id}`,
             sign: signData(data)
         })
     })
