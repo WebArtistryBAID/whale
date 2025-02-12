@@ -127,13 +127,13 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
         setLoading(true)
         const order = await createOrder(shoppingCart.items, coupon.length > 0 ? coupon : null, shoppingCart.onSiteOrderMode,
             useDelivery ? deliveryRoom : null, paymentMethod)
-        setLoading(false)
         if (order == null) {
             setOrderFailed(true)
             return
         }
         storedOrder.setOrder(order.id)
         shoppingCart.clear()
+        setLoading(false)
         if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
             // Redirect to check page directly
             router.push(`/order/details/${order.id}`)
