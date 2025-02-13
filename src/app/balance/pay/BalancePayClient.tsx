@@ -15,6 +15,7 @@ import {
 import { UserAuditLog } from '@prisma/client'
 import QRCode from 'react-qr-code'
 import { Trans } from 'react-i18next/TransWithoutContext'
+import Link from 'next/link'
 
 function isDesktop(): boolean {
     return !isMobileOriPad()
@@ -140,7 +141,7 @@ export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
         }
     }
 
-    return <div id="primary-content" className="container">
+    return <div id="primary-content" className="container bg-coffee-1 dark:bg-coffee-4 h-screen w-screen">
         <h1 className="mb-5">{t('wechatPay.title')}</h1>
         <p className="mb-3 text-lg">{t('checkout.total')} ¥{trans.values[0]}</p>
         <If condition={error}>
@@ -179,5 +180,8 @@ export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
                         color="warning">{t('wechatPay.restart')}</Button>
             </If>
         </If>
+        <Button className="mt-3 inline-block" pill color="failure" as={Link} href="/user">
+            {t('cancel')}
+        </Button>
     </div>
 }

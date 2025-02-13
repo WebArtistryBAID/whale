@@ -190,7 +190,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                 </ButtonGroup>
 
                 <p aria-hidden className="mb-1">{t('checkout.orderDetails')}</p>
-                <div className="mb-5 text-sm p-5 bg-yellow-50 dark:bg-yellow-800 rounded-3xl"
+                <div className="mb-5 text-sm p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl"
                      aria-label={t('checkout.orderDetails')}>
                     <p className="text-sm">{t('checkout.total')}</p>
                     <p className="mb-3 text-lg">¥{getRealTotal().toString()}</p>

@@ -9,7 +9,7 @@ export default async function SimpleNav() {
     const me = await getMyUser()
     const { t } = await serverTranslation('order')
 
-    return <Navbar fluid rounded className="bg-yellow-100 dark:bg-yellow-900">
+    return <Navbar fluid rounded className="bg-coffee-4 text-white">
         <a href="#primary-content" className="sr-only">{t('a11y.skip')}</a>
         <NavbarBrand as={Link} href="/">
             <img width={32} height={32} src="/assets/logo.png" className="mr-3 w-8 h-8 lg:w-10 lg:h-10"
@@ -20,7 +20,7 @@ export default async function SimpleNav() {
         <div className="flex gap-3">
             <If condition={me != null && me.permissions.includes('admin.manage')}>
                 <OnSiteOrder/>
-                <Button as={Link} href="/today" pill color="yellow" className="hidden lg:block">{t('today')}</Button>
+                <Button as={Link} href="/today" pill color="warning" className="hidden lg:block">{t('today')}</Button>
             </If>
             <If condition={me == null}>
                 <Button as={Link} href="/login" pill color="warning">{t('login')}</Button>

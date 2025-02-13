@@ -10,8 +10,8 @@ export default function OnSiteOrder() {
 
     if (shoppingCart.onSiteOrderMode) {
         return <Button onClick={() => shoppingCart.setOnSiteOrderMode(false)} pill className="hidden lg:block"
-                       color="yellow">{t('orders.onSiteExit')}</Button>
+                       color="warning">{t('orders.onSiteExit')}</Button>
     }
     return <Button onClick={() => shoppingCart.setOnSiteOrderMode(true)} pill className="hidden lg:block"
-                   color="yellow">{t('orders.onSite')}</Button>
+                   color="warning">{t('orders.onSite')}</Button>
 }

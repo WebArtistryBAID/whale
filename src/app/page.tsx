@@ -5,32 +5,45 @@ import { HiCake, HiUser } from 'react-icons/hi'
 import { getMyUser } from '@/app/login/login-actions'
 import If from '@/app/lib/If'
 import RecentOrder from '@/app/core-components/RecentOrder'
-import UIAds from '@/app/core-components/UIAds'
+import { IconType } from 'react-icons'
+import { Trans } from 'react-i18next/TransWithoutContext'
+
+function HomeBlock({ title, subtitle, icon, href }: { title: string, subtitle: string, icon: IconType, href: string }) {
+    return <Link aria-label={title} className="w-40 lg:w-72 h-40 rounded-3xl bg-amber-50 dark:bg-amber-800
+    hover:bg-amber-100 dark:hover:bg-amber-700 transition-colors duration-100
+    flex flex-col lg:flex-row text-center lg:text-left gap-1 lg:gap-3 items-center justify-center p-5" href={href}>
+        <div>
+            {icon({
+                className: 'text-yellow-300 dark:text-yellow-400 text-3xl lg:text-5xl'
+            })}
+        </div>
+        <div>
+            <p className="font-bold text-lg" aria-hidden>{title}</p>
+            <p className="secondary text-xs" aria-hidden>{subtitle}</p>
+        </div>
+    </Link>
+}
 
 export default async function Home() {
     const { t } = await serverTranslation('welcome')
     const user = await getMyUser()
 
-    return <>
+    return <div className="bg-coffee-1 dark:bg-coffee-4 min-h-screen">
         <SimpleNav/>
         <div id="primary-content" className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
-            <div className="lg:w-1/2 w-full text-center lg:text-left items-center lg:items-start
-            flex flex-col lg:justify-center p-8 xl:p-16 lg:h-full overflow-y-auto" aria-label={t('welcome')}>
-                <h1>{t('title')}</h1>
-                <h2 className="text-lg font-normal mb-5">{t('subtitle')}</h2>
+            <div className="w-full text-center items-center
+            flex flex-col justify-center p-8 xl:p-16 lg:h-full overflow-y-auto" aria-label={t('welcome')}>
+                <h1 className="mb-8">
+                    <Trans t={t} i18nKey="title" components={{ 1: <span key="soft-break">&shy;</span> }}/>
+                </h1>
 
                 <div className="flex flex-wrap justify-center items-center gap-5">
-                    <Link aria-label={t('order')} className="w-40 h-40 rounded-3xl bg-yellow-50 dark:bg-yellow-800
-                    hover:bg-yellow-100 dark:hover:bg-yellow-700 transition-colors duration-100
-                    flex flex-col text-center items-center justify-center p-5" href="/order">
-                        <HiCake className="text-yellow-300 dark:text-yellow-400 text-3xl mb-1"/>
-                        <p className="font-bold text-lg" aria-hidden>{t('order')}</p>
-                        <p className="secondary text-xs" aria-hidden>{t('orderSub')}</p>
-                    </Link>
+                    <HomeBlock title={t('order')} subtitle={t('orderSub')} href="/order" icon={HiCake}/>
 
                     <If condition={user == null}>
-                        <Link aria-label={t('login')} className="w-40 h-40 rounded-3xl bg-yellow-50 dark:bg-yellow-800
-                    hover:bg-yellow-100 dark:hover:bg-yellow-700 transition-colors duration-100
+                        <HomeBlock title={t('login')} subtitle={t('loginSub')} href="/login" icon={HiUser}/>
+                        <Link aria-label={t('login')} className="w-40 h-40 rounded-3xl bg-amber-50 dark:bg-amber-800
+                    hover:bg-amber-100 dark:hover:bg-amber-700 transition-colors duration-100
                     flex flex-col text-center items-center justify-center p-5" href="/login">
                             <HiUser className="text-yellow-300 dark:text-yellow-400 text-3xl mb-1"/>
                             <p className="font-bold text-lg" aria-hidden>{t('login')}</p>
@@ -39,26 +52,12 @@ export default async function Home() {
                     </If>
 
                     <If condition={user != null}>
-                        <Link aria-label={t('login')} className="w-40 h-40 rounded-3xl bg-yellow-50 dark:bg-yellow-800
-                    hover:bg-yellow-100 dark:hover:bg-yellow-700 transition-colors duration-100
-                    flex flex-col text-center items-center justify-center p-5" href="/user">
-                            <HiUser className="text-yellow-300 dark:text-yellow-400 text-3xl mb-1"/>
-                            <p className="font-bold text-lg" aria-hidden>{t('user')}</p>
-                            <p className="secondary text-xs" aria-hidden>{t('userSub')}</p>
-                        </Link>
+                        <HomeBlock title={t('user')} subtitle={t('userSub')} href="/user" icon={HiUser}/>
                     </If>
 
                     <RecentOrder/>
                 </div>
             </div>
-            <div
-                className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto border-l border-yellow-100 dark:border-yellow-800 flex flex-col gap-5"
-                aria-label={t('news')}>
-                <div className="hidden lg:block h-1/2"></div>
-                <div className="h-72 lg:h-1/2 w-full">
-                    <UIAds/>
-                </div>
-            </div>
         </div>
-    </>
+    </div>
 }

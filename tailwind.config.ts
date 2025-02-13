@@ -14,6 +14,12 @@ export default {
             fontFamily: {
                 display: [ 'system-ui', 'sans-serif' ],
                 body: [ 'system-ui', 'sans-serif' ]
+            },
+            colors: {
+                'coffee-1': '#ffebc9',
+                'coffee-2': '#d79771',
+                'coffee-3': '#b05b3b',
+                'coffee-4': '#753422'
             }
         }
     },
