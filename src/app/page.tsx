@@ -28,7 +28,7 @@ export default async function Home() {
     const { t } = await serverTranslation('welcome')
     const user = await getMyUser()
 
-    return <div className="bg-coffee-1 dark:bg-coffee-4 min-h-screen">
+    return <div className="bg-coffee-1 dark:bg-yellow-950 min-h-screen">
         <SimpleNav/>
         <div id="primary-content" className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
             <div className="w-full text-center items-center

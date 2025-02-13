@@ -7,7 +7,7 @@ body {
 }
 
 .bg-default {
-    @apply bg-coffee-1 dark:bg-coffee-4 text-black dark:text-white;
+    @apply bg-coffee-1 dark:yellow-950 text-black dark:text-white;
 }
 
 .messagebox-container {
