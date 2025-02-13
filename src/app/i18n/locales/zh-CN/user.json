@@ -169,7 +169,8 @@
         "maximum-cups-per-order": "每单最大杯数",
         "maximum-cups-per-day": "每日最大杯数",
         "maximum-balance": "最大余额",
-        "balance-recharge-minimum": "余额充值下限"
+        "balance-recharge-minimum": "余额充值下限",
+        "allow-pay-later": "允许「先喝后付」"
       },
       "descriptions": {
         "enable-scheduled-availability": "当启用本设置时，店铺会自动开关，无需手动操作。",
@@ -180,7 +181,8 @@
         "maximum-cups-per-order": "用户在一单内最多可以添加的杯数。",
         "maximum-cups-per-day": "一天内最多能处理的杯数。当达到本数量时，用户将无法点单。当「每单最大杯数」不是 1 时，可能会略微超出本限额。",
         "maximum-balance": "用户最多能够持有的余额，单位为 CN¥。",
-        "balance-recharge-minimum": "用户充值的最低金额，单位为 CN¥。"
+        "balance-recharge-minimum": "用户充值的最低金额，单位为 CN¥。",
+        "allow-pay-later": "当启用本设置时，用户可以选择「先喝后付」。"
       }
     },
     "users": {

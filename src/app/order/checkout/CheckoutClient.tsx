@@ -51,7 +51,10 @@ function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     </Button>
 }
 
-export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string }) {
+export default function CheckoutClient({ showPayLater, uploadPrefix }: {
+    showPayLater: boolean,
+    uploadPrefix: string
+}) {
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     const storedOrder = useStoredOrder()
@@ -228,10 +231,12 @@ export default function CheckoutClient({ uploadPrefix }: { uploadPrefix: string 
                                                  disabled={!balanceEnabled || loading}
                                                  selected={paymentMethod === PaymentMethod.balance}
                                                  select={() => setPaymentMethod(PaymentMethod.balance)}/>
-                            <PaymentMethodButton paymentMethod={PaymentMethod.payLater}
-                                                 disabled={!payLaterEnabled || loading}
-                                                 selected={paymentMethod === PaymentMethod.payLater}
-                                                 select={() => setPaymentMethod(PaymentMethod.payLater)}/>
+                            <If condition={showPayLater}>
+                                <PaymentMethodButton paymentMethod={PaymentMethod.payLater}
+                                                     disabled={!payLaterEnabled || loading}
+                                                     selected={paymentMethod === PaymentMethod.payLater}
+                                                     select={() => setPaymentMethod(PaymentMethod.payLater)}/>
+                            </If>
                         </If>
 
                         <If condition={isMobileOriPad() && !shoppingCart.onSiteOrderMode}>

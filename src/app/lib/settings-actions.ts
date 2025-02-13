@@ -27,6 +27,7 @@ async function initialize() {
     await setConfigValueInternal('maximum-cups-per-day', '14')
     await setConfigValueInternal('maximum-balance', '500')
     await setConfigValueInternal('balance-recharge-minimum', '20')
+    await setConfigValueInternal('allow-pay-later', 'true')
 }
 
 export async function getConfigValues(): Promise<{ [key: string]: string }> {
