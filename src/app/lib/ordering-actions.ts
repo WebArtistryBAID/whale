@@ -258,6 +258,10 @@ export async function createOrder(items: OrderedItemTemplate[],
         return null
     }
 
+    if (!(await getConfigValueAsBoolean('allow-pay-later')) && paymentMethod === PaymentMethod.payLater) {
+        return null
+    }
+
     // Ensure items and options aren't sold out
     for (const item of items) {
         if (item.item.soldOut) {

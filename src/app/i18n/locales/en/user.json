@@ -182,7 +182,7 @@
         "maximum-cups-per-day": "The maximum amount of cups that can be processed in a day. The user will be unable to place orders when this amount is reached. There may be a slight overflow when Maximum Cups Per Order is not 1.",
         "maximum-balance": "The maximum balance users can hold, in CN¥.",
         "balance-recharge-minimum": "The minimum amount users can recharge, in CN¥.",
-        "allow-pay-later": "When this setting is turned on, users can order without paying immediately."
+        "allow-pay-later": "When this setting is turned on, users can order without paying immediately. Existing orders are not affected."
       }
     },
     "users": {
