@@ -9,7 +9,7 @@ export default async function SimpleNav() {
     const me = await getMyUser()
     const { t } = await serverTranslation('order')
 
-    return <Navbar fluid rounded className="bg-coffee-4 text-white">
+    return <Navbar fluid rounded className="bg-coffee-4 dark:bg-yellow-900 text-white">
         <a href="#primary-content" className="sr-only">{t('a11y.skip')}</a>
         <NavbarBrand as={Link} href="/">
             <img width={32} height={32} src="/assets/logo.png" className="mr-3 w-8 h-8 lg:w-10 lg:h-10"

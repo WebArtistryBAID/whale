@@ -141,7 +141,7 @@ export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
         }
     }
 
-    return <div id="primary-content" className="container bg-coffee-1 dark:bg-coffee-4 h-screen w-screen">
+    return <div id="primary-content" className="container bg-coffee-1 dark:bg-yellow-950 h-screen w-screen">
         <h1 className="mb-5">{t('wechatPay.title')}</h1>
         <p className="mb-3 text-lg">{t('checkout.total')} ¥{trans.values[0]}</p>
         <If condition={error}>
