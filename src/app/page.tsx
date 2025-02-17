@@ -42,13 +42,6 @@ export default async function Home() {
 
                     <If condition={user == null}>
                         <HomeBlock title={t('login')} subtitle={t('loginSub')} href="/login" icon={HiUser}/>
-                        <Link aria-label={t('login')} className="w-40 h-40 rounded-3xl bg-amber-50 dark:bg-amber-800
-                    hover:bg-amber-100 dark:hover:bg-amber-700 transition-colors duration-100
-                    flex flex-col text-center items-center justify-center p-5" href="/login">
-                            <HiUser className="text-yellow-300 dark:text-yellow-400 text-3xl mb-1"/>
-                            <p className="font-bold text-lg" aria-hidden>{t('login')}</p>
-                            <p className="secondary text-xs" aria-hidden>{t('loginSub')}</p>
-                        </Link>
                     </If>
 
                     <If condition={user != null}>
