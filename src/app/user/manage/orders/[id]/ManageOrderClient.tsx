@@ -18,7 +18,8 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
         }, 10000)
     }, [ order.id ])
 
-    return <OrderWithData order={order} forceUpdate={async () => {
+    return <OrderWithData order={order} close={() => {
+    }} forceUpdate={async () => {
         const o = await getOrder(order.id)
         if (o == null) {
             location.href = '/'

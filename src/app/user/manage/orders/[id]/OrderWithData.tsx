@@ -11,9 +11,10 @@ import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
 import { useState } from 'react'
 import { useTranslationClient } from '@/app/i18n/client'
 
-export default function OrderWithData({ order, forceUpdate }: {
+export default function OrderWithData({ order, forceUpdate, close }: {
     order: HydratedOrder,
     forceUpdate: () => Promise<void>
+    close: () => void
 }) {
     const { t } = useTranslationClient('user')
     const [ refundModal, setRefundModal ] = useState(false)
@@ -41,6 +42,7 @@ export default function OrderWithData({ order, forceUpdate }: {
                     setRefundError(!(await refundOrder(order.id)))
                     setLoading(false)
                     setRefundModal(false)
+                    close()
                     await forceUpdate()
                 }}>{refundError ? t('error') : t('confirm')}</Button>
                 <Button pill color="gray" onClick={() => setRefundModal(false)}>{t('cancel')}</Button>
@@ -102,6 +104,7 @@ export default function OrderWithData({ order, forceUpdate }: {
                             onClick={async () => {
                                 setLoading(true)
                                 await markOrderDone(order.id)
+                                close()
                                 await forceUpdate()
                                 setLoading(false)
                             }}>
