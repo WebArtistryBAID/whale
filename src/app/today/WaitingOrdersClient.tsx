@@ -46,9 +46,10 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
             <Button color="yellow" as={Link} href="/user/manage/orders">{t('today.return')}</Button>
         </div>
         <div className="w-4/5 p-8 h-full overflow-y-auto" aria-label={t('today.detailsPane')}>
-            <OrderWithData order={orders[selected]} close={() => setSelected(-1)} forceUpdate={async () => {
+            {selected !== -1 ?
+                <OrderWithData order={orders[selected]} close={() => setSelected(-1)} forceUpdate={async () => {
                 setOrders(await getWaitingOrders())
-            }}/>
+                }}/> : null}
         </div>
     </div>
 }
