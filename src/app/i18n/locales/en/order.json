@@ -96,12 +96,13 @@
     "title": "Weixin Pay",
     "scan": "Please use WeChat to scan the QR code below.",
     "processing": "Please wait while we are processing your payment.",
-    "error": "An error occurred while trying to begin the payment process. Please try again. <1>If you have already paid, please wait a moment.</1>",
+    "error": "Payment failed. Please try again.",
     "restart": "Restart Payment",
     "share": "Ask Friend to Pay",
     "cancel": "Cancel or Change Payment Method",
     "shareTitle": "Help me pay for my order at Whale Cafe",
-    "shareText": "I need help paying for my order at Whale Cafe. Can you help me out?"
+    "shareText": "I need help paying for my order at Whale Cafe. Can you help me out?",
+    "mobile": "You will be redirected to WeChat to complete the payment."
   },
   "details": {
     "waitTime": {

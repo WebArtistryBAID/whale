@@ -4,7 +4,7 @@ import { sendNotification } from '@/app/lib/notification-actions'
 
 const prisma = new PrismaClient()
 
-// Remove all orders that are older than 1 hour and aren't paid
+// Send notifications to Pay Later order customers
 export async function GET(request: NextRequest): Promise<NextResponse> {
     if (request.nextUrl.searchParams.get('key') !== process.env.CRON_KEY) {
         return NextResponse.json({ success: false })
