@@ -67,7 +67,7 @@ export default function UIShoppingCartDesktop({ uploadPrefix }: { uploadPrefix: 
                     </If>
                     <If condition={shoppingCart.getAmount() > maxCups}>
                         <span className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
-                                                         count={shoppingCart.getAmount()}/></span>
+                                                         count={maxCups}/></span>
                     </If>
                 </span>
                 <Popover trigger="hover" aria-hidden content={<div className="p-3 flex flex-col gap-1">
@@ -79,7 +79,7 @@ export default function UIShoppingCartDesktop({ uploadPrefix }: { uploadPrefix: 
                     </If>
                     <If condition={shoppingCart.getAmount() > maxCups}>
                         <p className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
-                                                      count={shoppingCart.getAmount()}/></p>
+                                                      count={maxCups}/></p>
                     </If>
                 </div>}>
                     {checkout}

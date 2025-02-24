@@ -15,7 +15,6 @@ import {
 import { UserAuditLog } from '@prisma/client'
 import QRCode from 'react-qr-code'
 import { Trans } from 'react-i18next/TransWithoutContext'
-import Link from 'next/link'
 
 function isDesktop(): boolean {
     return !isMobileOriPad()
@@ -141,47 +140,66 @@ export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
         }
     }
 
-    return <div id="primary-content" className="container bg-coffee-1 dark:bg-yellow-950 h-screen w-screen">
-        <h1 className="mb-5">{t('wechatPay.title')}</h1>
-        <p className="mb-3 text-lg">{t('checkout.total')} ¥{trans.values[0]}</p>
-        <If condition={error}>
-            <p className="mb-3"><Trans t={t} i18nKey="wechatPay.error"
-                                       components={{ 1: <span className="font-bold" key="bold"/> }}/></p>
-            <Button onClick={() => location.reload()} pill color="warning">{t('wechatPay.restart')}</Button>
-        </If>
-        <If condition={!error}>
-            <If condition={isDesktop()}>
-                <If condition={qrCode == null}>
-                    <Spinner color="warning"/>
-                </If>
-                <span className="sr-only" aria-live="polite">
-                    <If condition={qrCodeShowProcessing}>
-                        {t('wechatPay.processing')}
-                    </If>
-                </span>
-                <If condition={qrCode != null}>
-                    <If condition={!qrCodeShowProcessing}>
-                        <p className="mb-3">{t('wechatPay.scan')}</p>
-                    </If>
-                    <div aria-label={t('a11y.qrCode')} className="rounded-3xl border-white border-[2rem] mb-3"
-                         style={{ width: 'calc(200px + 4rem)', height: 'calc(200px + 4rem)' }}>
-                        <QRCode value={qrCode ?? 'Please wait...'} size={200} className="aspect-square"/>
-                    </div>
-                    <If condition={qrCodeShowProcessing}>
-                        <p className="mb-3">{t('wechatPay.processing')}</p>
-                        <Button disabled={!canRestart} onClick={() => location.reload()} pill
-                                color="warning">{t('wechatPay.restart')}</Button>
-                    </If>
-                </If>
+    return <div className="flex justify-center items-center flex-col bg-green-50 dark:bg-green-950 h-screen w-screen">
+        <div
+            className="lg:rounded-3xl p-4 lg:p-8 xl:p-16 bg-white dark:bg-gray-900 2xl:w-1/2 xl:w-2/3 lg:w-3/4 w-full h-full lg:h-auto">
+            <div className="flex items-center mb-5">
+                <h1 className="mr-auto">
+                    <img src="/assets/brand/wx-pay-light.svg" alt={t('wechatPay.title')}
+                         className="block dark:hidden h-8"/>
+                    <img src="/assets/brand/wx-pay-dark.svg" alt={t('wechatPay.title')}
+                         className="hidden dark:block h-8"/>
+                </h1>
+                <p className="text-2xl">CN<span className="font-bold">¥{trans.values[0]}</span></p>
+            </div>
+            <If condition={error}>
+                <p className="mb-3"><Trans t={t} i18nKey="wechatPay.error"
+                                           components={{ 1: <span className="font-bold" key="bold"/> }}/></p>
+                <Button onClick={() => location.reload()} pill color="warning">{t('wechatPay.restart')}</Button>
             </If>
-            <If condition={isMobileOriPad()}>
-                <p className="mb-3">{t('wechatPay.processing')}</p>
-                <Button disabled={!canRestart} onClick={launchWeChat} pill
-                        color="warning">{t('wechatPay.restart')}</Button>
-            </If>
-        </If>
-        <Button className="mt-3 inline-block" pill color="failure" as={Link} href="/user">
-            {t('cancel')}
-        </Button>
+            <div className="w-full flex justify-center items-center text-center flex-col">
+                <If condition={!error}>
+                    <If condition={isDesktop()}>
+                        <If condition={qrCode == null}>
+                            <div className="lg:h-96 flex justify-center items-center">
+                                <Spinner color="success"/>
+                            </div>
+                        </If>
+                        <span className="sr-only" aria-live="polite">
+                            <If condition={qrCodeShowProcessing}>
+                                {t('wechatPay.processing')}
+                            </If>
+                        </span>
+
+                        <If condition={qrCode != null}>
+                            <If condition={!qrCodeShowProcessing}>
+                                <p className="mb-3">{t('wechatPay.scan')}</p>
+                            </If>
+                            <If condition={qrCodeShowProcessing}>
+                                <p className="mb-3">{t('wechatPay.processing')}</p>
+                            </If>
+                            <div aria-label={t('a11y.qrCode')} className="rounded-3xl border-white border-[2rem] mb-3"
+                                 style={{ width: 'calc(200px + 4rem)', height: 'calc(200px + 4rem)' }}>
+                                <QRCode value={qrCode ?? 'Please wait...'} size={200} className="aspect-square"/>
+                            </div>
+                            <div className="flex gap-3">
+                                <If condition={qrCodeShowProcessing}>
+                                    <Button disabled={!canRestart} onClick={() => location.reload()} pill
+                                            color="green" className="inline-block">{t('wechatPay.restart')}</Button>
+                                </If>
+                            </div>
+                        </If>
+                    </If>
+
+                    <If condition={isMobileOriPad()}>
+                        <p className="mb-3">{t('wechatPay.mobile')}</p>
+                        <div className="flex gap-3">
+                            <Button disabled={!canRestart} onClick={launchWeChat} pill className="inline-block"
+                                    color="green">{t('wechatPay.restart')}</Button>
+                        </div>
+                    </If>
+                </If>
+            </div>
+        </div>
     </div>
 }
