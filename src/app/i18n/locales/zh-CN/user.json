@@ -392,6 +392,7 @@
   },
   "today": {
     "orderNumber": "(订单号)",
+    "delivery": " (外送)",
     "info": "订单信息",
     "items": "订单内容",
     "status": "订单状态",

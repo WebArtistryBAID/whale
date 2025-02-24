@@ -392,6 +392,7 @@
   },
   "today": {
     "orderNumber": "(Order Number)",
+    "delivery": " (Delivery)",
     "info": "Order Information",
     "items": "Order Items",
     "status": "Order Status",

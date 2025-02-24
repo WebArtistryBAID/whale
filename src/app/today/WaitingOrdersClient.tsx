@@ -36,8 +36,11 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
         <div className="w-1/5 flex flex-col gap-3 h-full overflow-y-auto p-5" aria-label={t('today.ordersPane')}>
             {Object.keys(orders).map(id =>
                 <Button key={id} onClick={() => setSelected(parseInt(id))} className="w-full"
-                        color={selected === parseInt(id) ? 'warning' : (orders[parseInt(id)].type === OrderType.pickUp ? 'gray' : 'failure')}>
+                        color={selected === parseInt(id) ? 'warning' : (orders[parseInt(id)].type === OrderType.pickUp ? 'gray' : 'green')}>
                     {id}
+                    <If condition={orders[parseInt(id)].type === OrderType.delivery}>
+                        <span>{t('today.delivery')}</span>
+                    </If>
                     <If condition={selected === parseInt(id)}>
                         <span className="sr-only">{t('selected')}</span>
                     </If>
