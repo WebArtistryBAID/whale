@@ -39,7 +39,7 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
                         color={selected === parseInt(id) ? 'warning' : (orders[parseInt(id)].type === OrderType.pickUp ? 'gray' : 'green')}>
                     {id}
                     <If condition={orders[parseInt(id)].type === OrderType.delivery}>
-                        <span>{t('today.delivery')}</span>
+                        <span className="ml-1">{t('today.delivery')}</span>
                     </If>
                     <If condition={selected === parseInt(id)}>
                         <span className="sr-only">{t('selected')}</span>
