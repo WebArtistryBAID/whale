@@ -216,72 +216,74 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                     </div>
                 </If>
 
-                <div aria-label={t('manage.stats.perDay')} className="mb-8">
-                    <h2 aria-hidden className="mb-3">{t('manage.stats.perDay')}</h2>
-                    <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
-                        <Block title={t('manage.stats.ordersCupsPerDay')} center aria-hidden>
-                            <ReactApexChart width={500} type="area" options={{
-                                dataLabels: {
-                                    enabled: false
-                                },
-                                stroke: {
-                                    curve: 'smooth'
-                                },
-                                xaxis: {
-                                    type: 'datetime',
-                                    categories: days
-                                },
-                                tooltip: {
-                                    x: {
-                                        format: 'dd/MM/yy'
+                <If condition={range !== 'day'}>
+                    <div aria-label={t('manage.stats.perDay')} className="mb-8">
+                        <h2 aria-hidden className="mb-3">{t('manage.stats.perDay')}</h2>
+                        <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
+                            <Block title={t('manage.stats.ordersCupsPerDay')} center aria-hidden>
+                                <ReactApexChart width={500} type="area" options={{
+                                    dataLabels: {
+                                        enabled: false
+                                    },
+                                    stroke: {
+                                        curve: 'smooth'
+                                    },
+                                    xaxis: {
+                                        type: 'datetime',
+                                        categories: days
+                                    },
+                                    tooltip: {
+                                        x: {
+                                            format: 'dd/MM/yy'
+                                        }
+                                    },
+                                    theme: theme() as never
+                                }} series={[
+                                    {
+                                        name: t('manage.stats.orders'),
+                                        data: data.ordersPerUnit
+                                    },
+                                    {
+                                        name: t('manage.stats.cups'),
+                                        data: data.cupsPerUnit
                                     }
-                                },
-                                theme: theme() as never
-                            }} series={[
-                                {
-                                    name: t('manage.stats.orders'),
-                                    data: data.ordersPerUnit
-                                },
-                                {
-                                    name: t('manage.stats.cups'),
-                                    data: data.cupsPerUnit
-                                }
-                            ]}/>
-                        </Block>
+                                ]}/>
+                            </Block>
 
-                        <Block title={t('manage.stats.revenuePerDay')} center aria-hidden>
-                            <ReactApexChart width={500} type="area" options={{
-                                dataLabels: {
-                                    enabled: false
-                                },
-                                stroke: {
-                                    curve: 'smooth'
-                                },
-                                xaxis: {
-                                    type: 'datetime',
-                                    categories: days
-                                },
-                                tooltip: {
-                                    x: {
-                                        format: 'dd/MM/yy'
+                            <Block title={t('manage.stats.revenuePerDay')} center aria-hidden>
+                                <ReactApexChart width={500} type="area" options={{
+                                    dataLabels: {
+                                        enabled: false
+                                    },
+                                    stroke: {
+                                        curve: 'smooth'
+                                    },
+                                    xaxis: {
+                                        type: 'datetime',
+                                        categories: days
+                                    },
+                                    tooltip: {
+                                        x: {
+                                            format: 'dd/MM/yy'
+                                        }
+                                    },
+                                    theme: theme() as never
+                                }} series={[
+                                    {
+                                        name: t('manage.stats.revenue'),
+                                        data: data.revenuePerUnit.map(u => parseFloat(u))
                                     }
-                                },
-                                theme: theme() as never
-                            }} series={[
-                                {
-                                    name: t('manage.stats.revenue'),
-                                    data: data.revenuePerUnit.map(u => parseFloat(u))
-                                }
-                            ]}/>
-                        </Block>
+                                ]}/>
+                            </Block>
+                        </div>
                     </div>
-                </div>
+                </If>
 
                 <div aria-label={t('manage.stats.perOrder')} className="mb-8">
                     <h2 aria-hidden className="mb-3">{t('manage.stats.perOrder')}</h2>
                     <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <Block title={t('manage.stats.averageRevenue')}>
-                            <p className="text-2xl">¥{data.averageOrderValue}</p>
+                            <p className="text-2xl">¥{Decimal(data.averageOrderValue).toFixed(2)}</p>
                         </Block>
                         <Block title={t('manage.stats.averageCups')}>
                             <p className="text-2xl">{data.averageOrderCups.toFixed(2)}</p>
@@ -324,7 +326,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                             strokeColor: '#fbbf24'
                                         },
                                         label: {
-                                            text: `¥${data.averageOrderValuePerUnit[i]}`
+                                            text: `¥${Decimal(data.averageOrderValuePerUnit[i]).toFixed(2)}`
                                         }
                                     }))
                                 },
@@ -374,7 +376,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                             strokeColor: '#fbbf24'
                                         },
                                         label: {
-                                            text: data.averageOrderCupsPerUnit[i].toString()
+                                            text: Decimal(data.averageOrderCupsPerUnit[i]).toFixed(2)
                                         }
                                     }))
                                 },
