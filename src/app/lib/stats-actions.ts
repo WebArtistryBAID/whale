@@ -242,18 +242,21 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
         totalOrders++
         ordersPerUnit[thisOrderIndex]++
 
+        let thisOrderCups = 0
         for (const orderedItem of order.items) {
             totalCups += orderedItem.amount
             cupsPerUnit[thisOrderIndex] += orderedItem.amount
             genderCupsDistribution[order.user?.gender ?? 'anonymous'] += orderedItem.amount
             avgOrderCups += orderedItem.amount
             avgOrderCupsPerUnit[thisOrderIndex] += orderedItem.amount
-            if (orderedItem.amount > maxOrderCupsPerUnit[thisOrderIndex]) {
-                maxOrderCupsPerUnit[thisOrderIndex] = orderedItem.amount
-            }
-            if (orderedItem.amount < minOrderCupsPerUnit[thisOrderIndex]) {
-                minOrderCupsPerUnit[thisOrderIndex] = orderedItem.amount
-            }
+            thisOrderCups += orderedItem.amount
+        }
+
+        if (thisOrderCups > maxOrderCupsPerUnit[thisOrderIndex]) {
+            maxOrderCupsPerUnit[thisOrderIndex] = thisOrderCups
+        }
+        if (thisOrderCups < minOrderCupsPerUnit[thisOrderIndex]) {
+            minOrderCupsPerUnit[thisOrderIndex] = thisOrderCups
         }
     }
 

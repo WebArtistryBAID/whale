@@ -62,16 +62,6 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
             setLoading(false)
         })()
 
-        const newDays = []
-        for (let i = 0; i < {
-            day: 1,
-            week: 7,
-            month: daysInMonths(start.getFullYear())[start.getMonth()]
-        }[range]; i++) {
-            newDays.push(new Date(start.getTime() + i * 86400000).toISOString())
-        }
-        setDays(newDays)
-
         const actualStart = new Date(start)
         actualStart.setHours(0, 0, 0, 0)
         if (range === 'week') {
@@ -80,6 +70,16 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
         if (range === 'month') {
             actualStart.setDate(1)
         }
+
+        const newDays = []
+        for (let i = 0; i < {
+            day: 1,
+            week: 7,
+            month: daysInMonths(actualStart.getFullYear())[actualStart.getMonth()]
+        }[range]; i++) {
+            newDays.push(new Date(actualStart.getTime() + i * 86400000).toISOString())
+        }
+        setDays(newDays)
 
         const end = new Date(actualStart)
         if (range === 'week') {
