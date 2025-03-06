@@ -12,7 +12,7 @@ import {
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
-import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client'
+import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@prisma/client'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import { useEffect, useState } from 'react'
 import { Alert, Badge, Button, Modal, ModalBody, ModalFooter, ModalHeader, Popover, Spinner } from 'flowbite-react'
@@ -128,6 +128,17 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                 <Alert color="green" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
                     {t('details.orderNumberPrompt')}
                 </Alert>
+
+                <Alert color="green" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
+                    {t('details.contactPrompt')}
+                </Alert>
+
+                <If condition={order.type === OrderType.pickUp}>
+                    <Alert color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
+                        <Trans t={t} i18nKey="details.pickUpPrompt"
+                               components={{ 1: <span className="font-bold" key="highlight"/> }}/>
+                    </Alert>
+                </If>
 
                 <If condition={order.paymentStatus === PaymentStatus.refunded}>
                     <Alert color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>

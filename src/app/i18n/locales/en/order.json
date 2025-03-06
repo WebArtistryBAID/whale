@@ -116,6 +116,8 @@
     },
     "onSiteContinue": "Continue On-Site Ordering",
     "orderNumberPrompt": "Please remember your order number. You will need it when picking up.",
+    "contactPrompt": "Please contact Li Jiarui if you have any questions or need a refund.",
+    "pickUpPrompt": "You must pick up your order at the counter in the lobby. <1>You will NOT be refunded if you do not pick up.</1>",
     "paymentTitle": "Payment",
     "paymentPromptPayLater": "This Pay Later order hasn't been paid for yet.",
     "paymentPrompt": "This order hasn't been paid for yet. This order will not start until you pay.",
