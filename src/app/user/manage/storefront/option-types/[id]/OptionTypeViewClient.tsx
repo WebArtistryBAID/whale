@@ -72,8 +72,7 @@ export default function OptionTypeViewClient({ object, items }: { object: Hydrat
 
             <If condition={items.length > 0}>
                 <div aria-label={t('manage.storefront.optionTypeD.items')} className="mb-5">
-                    <p aria-hidden
-                       className="secondary text-sm font-display mb-3">{t('manage.storefront.optionTypeD.items')}</p>
+                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.optionTypeD.items')}</p>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
@@ -96,8 +95,7 @@ export default function OptionTypeViewClient({ object, items }: { object: Hydrat
 
             <If condition={object.items.length > 0}>
                 <div aria-label={t('manage.storefront.optionTypeD.optionItems')} className="mb-5">
-                    <p aria-hidden
-                       className="secondary text-sm font-display mb-3">{t('manage.storefront.optionTypeD.optionItems')}</p>
+                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.optionTypeD.optionItems')}</p>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>

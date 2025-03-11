@@ -100,8 +100,7 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
 
             <If condition={object.tags.length > 0}>
                 <div aria-label={t('manage.storefront.itemD.tags')} className="mb-5">
-                    <p aria-hidden
-                       className="secondary text-sm font-display mb-3">{t('manage.storefront.itemD.tags')}</p>
+                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.itemD.tags')}</p>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
@@ -124,8 +123,7 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
 
             <If condition={object.options.length > 0}>
                 <div aria-label={t('manage.storefront.itemD.options')} className="mb-5">
-                    <p aria-hidden
-                       className="secondary text-sm font-display mb-3">{t('manage.storefront.itemD.options')}</p>
+                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.itemD.options')}</p>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>

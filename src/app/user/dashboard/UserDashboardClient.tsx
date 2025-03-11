@@ -91,7 +91,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
 
             <div className="2xl:w-1/2">
                 <div className="mb-8" aria-label={t('dashboard.profile.title')}>
-                    <h2 aria-hidden className="text-sm font-normal mb-3">{t('dashboard.profile.title')}</h2>
+                    <h2 className="text-sm font-normal mb-3">{t('dashboard.profile.title')}</h2>
                     <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
                         <p className="secondary text-sm font-display">{t('dashboard.profile.name')}</p>
                         <p className="text-xl mb-3">{user.name}</p>
@@ -109,7 +109,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
                 </div>
 
                 <div className="mb-8" aria-label={t('dashboard.balance.title')}>
-                    <h2 aria-hidden className="text-sm font-normal mb-3">{t('dashboard.balance.title')}</h2>
+                    <h2 className="text-sm font-normal mb-3">{t('dashboard.balance.title')}</h2>
                     <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
                         <p className="text-xl mb-3">¥{user.balance}</p>
                         <If condition={Decimal(user.balance).lte(balanceMax.minus(rechargeMin))}>
@@ -121,7 +121,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
                 </div>
 
                 <div className="mb-8" aria-label={t('dashboard.points.title')}>
-                    <h2 aria-hidden className="text-sm font-normal mb-3">{t('dashboard.points.title')}</h2>
+                    <h2 className="text-sm font-normal mb-3">{t('dashboard.points.title')}</h2>
                     <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
                         <p className="text-xl mb-3">{user.points}</p>
                         <p className="text-sm secondary">{t('dashboard.points.pointsInfo')}</p>
@@ -129,7 +129,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
                 </div>
 
                 <div className="mb-8" aria-label={t('dashboard.notifications.title')}>
-                    <h2 aria-hidden className="text-sm font-normal mb-3">{t('dashboard.notifications.title')}</h2>
+                    <h2 className="text-sm font-normal mb-3">{t('dashboard.notifications.title')}</h2>
                     <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
                         <table className="w-full mb-5">
                             <thead>
@@ -179,7 +179,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
                 </div>
 
                 <div aria-label={t('dashboard.others.title')} className="mb-8">
-                    <h2 aria-hidden className="text-sm font-normal mb-3">{t('dashboard.others.title')}</h2>
+                    <h2 className="text-sm font-normal mb-3">{t('dashboard.others.title')}</h2>
                     <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
                         <Button pill color="warning" className="mb-3" onClick={() => {
                             removeCookie('access_token', { path: '/' })

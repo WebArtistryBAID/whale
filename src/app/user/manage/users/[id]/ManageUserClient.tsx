@@ -135,7 +135,7 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
 
             <If condition={page.pages >= 1}>
                 <div aria-label={t('manage.users.orders')} className="mb-8">
-                    <p aria-hidden className="secondary text-sm font-display mb-3">{t('manage.users.orders')}</p>
+                    <p className="secondary text-sm font-display mb-3">{t('manage.users.orders')}</p>
                     <p className="sr-only">{t('a11y.page', { page: page.page + 1, pages: page.pages })}</p>
                     <Table className="mb-5">
                         <TableHead>

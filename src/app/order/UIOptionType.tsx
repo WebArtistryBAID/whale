@@ -13,7 +13,7 @@ export default function UIOptionType({ optionType, selected, onChange }: {
     const { t } = useTranslationClient('order')
 
     return <div className="mb-5" aria-label={optionType.name + ' ' + t('a11y.option')}>
-        <p className="mb-1 text-sm" aria-hidden>{optionType.name}</p>
+        <p className="mb-1 text-sm">{optionType.name}</p>
         <div className="flex gap-3 flex-wrap">
             {optionType.items.map(item =>
                 item.soldOut ? null :

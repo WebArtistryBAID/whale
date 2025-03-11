@@ -16,7 +16,7 @@ function Block({ title, hideTitle, center, children }: {
     children: ReactNode
 }) {
     return <div aria-label={title} className="rounded-3xl p-5 bg-gray-50 dark:bg-amber-900">
-        <h3 aria-hidden style={{ display: hideTitle ? 'none' : 'block' }}
+        <h3 style={{ display: hideTitle ? 'none' : 'block' }}
             className="text-sm secondary font-normal mb-2">{title}</h3>
         <div className={center ? 'flex flex-col justify-center items-center w-full' : 'w-full'}>
             {children}
@@ -180,10 +180,10 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
 
                 <If condition={data.newItems.length > 0}>
                     <div aria-label={t('manage.stats.newItems')} className="mb-8">
-                        <h2 aria-hidden className="mb-3">{t('manage.stats.newItems')}</h2>
+                        <h2 className="mb-3">{t('manage.stats.newItems')}</h2>
                         {data.newItems.map(item => <div key={item.id} className="mb-5"
                                                         aria-label={data.mentionedItems[item.id]}>
-                            <h3 aria-hidden className="mb-1">{data.mentionedItems[item.id]}</h3>
+                            <h3 className="mb-1">{data.mentionedItems[item.id]}</h3>
                             <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                                 <Block title={t('manage.stats.totalRevenue')}>
                                     <p className="text-2xl">¥{item.revenue}</p>
@@ -280,7 +280,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                 </If>
 
                 <div aria-label={t('manage.stats.perOrder')} className="mb-8">
-                    <h2 aria-hidden className="mb-3">{t('manage.stats.perOrder')}</h2>
+                    <h2 className="mb-3">{t('manage.stats.perOrder')}</h2>
                     <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <Block title={t('manage.stats.averageRevenue')}>
                             <p className="text-2xl">¥{Decimal(data.averageOrderValue).toFixed(2)}</p>
@@ -392,7 +392,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                 </div>
 
                 <div aria-label={t('manage.stats.byItems')} className="mb-8">
-                    <h2 aria-hidden className="mb-3">{t('manage.stats.byItems')}</h2>
+                    <h2 className="mb-3">{t('manage.stats.byItems')}</h2>
                     <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <Block title={t('manage.stats.revenueByCategories')} center aria-hidden>
                             <ReactApexChart width={380} type="pie" options={{
@@ -446,7 +446,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                 </div>
 
                 <div aria-label={t('manage.stats.byUsers')} className="mb-8">
-                    <h2 aria-hidden className="mb-3">{t('manage.stats.byUsers')}</h2>
+                    <h2 className="mb-3">{t('manage.stats.byUsers')}</h2>
                     <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <Block title={t('manage.stats.revenueByUsers')} center aria-hidden>
                             <ReactApexChart width={380} type="pie" options={{
@@ -496,7 +496,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                 </div>
 
                 <div aria-label={t('manage.stats.byPayment')}>
-                    <h2 aria-hidden className="mb-3">{t('manage.stats.byPayment')}</h2>
+                    <h2 className="mb-3">{t('manage.stats.byPayment')}</h2>
                     <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <Block title={t('manage.stats.paymentMethod')} center aria-hidden>
                             <ReactApexChart width={380} type="pie" options={{

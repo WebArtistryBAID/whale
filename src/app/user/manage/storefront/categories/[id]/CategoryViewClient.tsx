@@ -75,8 +75,7 @@ export default function CategoryViewClient({ object }: { object: HydratedCategor
 
             <If condition={object.items.length > 0}>
                 <div aria-label={t('manage.storefront.categoryD.items')} className="mb-5">
-                    <p aria-hidden
-                       className="secondary text-sm font-display mb-3">{t('manage.storefront.categoryD.items')}</p>
+                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.categoryD.items')}</p>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>

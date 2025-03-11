@@ -116,7 +116,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                     <HiMinus/>
                     <If condition={amount <= 1}><span className="sr-only">{t('itemDetails.cannotMinusMore')}</span></If>
                 </Button>
-                <p aria-hidden aria-label={t('a11y.amount')}>{amount}</p>
+                <p aria-hidden>{amount}</p>
                 <Button pill size="xs" color="warning" aria-label={t('itemDetails.add')}
                         onClick={() => {
                             setAmount(amount + 1)

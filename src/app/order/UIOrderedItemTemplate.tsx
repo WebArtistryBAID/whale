@@ -15,7 +15,7 @@ export default function UIOrderedItemTemplate({ item, index, uploadPrefix, price
         <img src={uploadPrefix + item.item.image} alt="" width={512} height={512}
              className="w-16 lg:w-24 rounded-full flex-shrink"/>
         <div className="flex-grow">
-            <p className="font-bold font-display text-lg" aria-hidden>{item.item.name}</p>
+            <p className="font-bold font-display text-lg">{item.item.name}</p>
             <p className="text-sm secondary mb-2">
                 <span className="sr-only">{t('a11y.appliedOptions')}</span>
                 {item.options.map(i => i.name).join(' / ')}

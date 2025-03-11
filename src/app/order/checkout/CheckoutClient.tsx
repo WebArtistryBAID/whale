@@ -171,7 +171,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
             <div id="primary-content" className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto"
                  aria-label={t('checkout.title')}>
-                <h1 aria-hidden className="mb-5">{t('checkout.title')}</h1>
+                <h1 className="mb-5">{t('checkout.title')}</h1>
 
                 <ButtonGroup className="mb-3">
                     <Button color={useDelivery ? 'gray' : 'warning'} onClick={() => setUseDelivery(false)}>
@@ -189,7 +189,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                     </Button>
                 </ButtonGroup>
 
-                <p aria-hidden className="mb-1">{t('checkout.orderDetails')}</p>
+                <p className="mb-1">{t('checkout.orderDetails')}</p>
                 <div className="mb-5 text-sm p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl"
                      aria-label={t('checkout.orderDetails')}>
                     <p className="text-sm">{t('checkout.total')}</p>
@@ -211,7 +211,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                     </If>
                 </div>
 
-                <p aria-hidden className="mb-1">{t('checkout.paymentMethod')}</p>
+                <p className="mb-1">{t('checkout.paymentMethod')}</p>
                 <div className="mb-5" aria-label={t('checkout.paymentMethod')}>
                     <div className="flex flex-wrap gap-3 items-center">
                         <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
@@ -292,7 +292,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                     </div>
                 </div>
 
-                <p aria-hidden className="mb-1">{t('checkout.coupon')}</p>
+                <p className="mb-1">{t('checkout.coupon')}</p>
                 <TextInput className="w-full" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
                            onChange={e => setCoupon(e.currentTarget.value)}/>
                 <p className="mt-1 text-sm text-red-500" aria-live="polite">
@@ -307,7 +307,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                 </p>
 
                 <If condition={useDelivery}>
-                    <p aria-hidden className="mt-5 mb-1">{t('checkout.deliveryRoom')}</p>
+                    <p className="mt-5 mb-1">{t('checkout.deliveryRoom')}</p>
                     <TextInput className="w-full" type="text" value={deliveryRoom}
                                placeholder={t('checkout.deliveryRoom') + '...'}
                                onChange={e => setDeliveryRoom(e.currentTarget.value)}/>

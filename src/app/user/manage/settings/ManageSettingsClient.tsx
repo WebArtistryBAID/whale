@@ -67,7 +67,7 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
         }
 
         return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
-            <p aria-hidden className="mb-1">{t(`manage.settings.types.${key}`)}</p>
+            <p className="mb-1">{t(`manage.settings.types.${key}`)}</p>
             <TextInput value={tmpValues[key]} type="number" placeholder={t(`manage.settings.types.${key}`) + '...'}
                        onChange={e => {
                            setValue(key, e.currentTarget.value)
@@ -97,7 +97,7 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
 
     function StringValue(key: string) {
         return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
-            <p aria-hidden className="mb-1">{t(`manage.settings.types.${key}`)}</p>
+            <p className="mb-1">{t(`manage.settings.types.${key}`)}</p>
             <TextInput value={tmpValues[key]} type="text" placeholder={t(`manage.settings.types.${key}`) + '...'}
                        onChange={e => setValue(key, e.currentTarget.value)}/>
             <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.${key}`)}</p>

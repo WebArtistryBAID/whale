@@ -75,8 +75,7 @@ export default function TagViewClient({ object, items }: { object: Tag, items: I
 
             <If condition={items.length > 0}>
                 <div aria-label={t('manage.storefront.tagD.items')} className="mb-5">
-                    <p aria-hidden
-                       className="secondary text-sm font-display mb-3">{t('manage.storefront.tagD.items')}</p>
+                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.tagD.items')}</p>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
