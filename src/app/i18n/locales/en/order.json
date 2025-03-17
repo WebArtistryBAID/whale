@@ -47,6 +47,11 @@
     "simple": "The store has reached its maximum capacity for orders.",
     "message": "The store has reached its maximum capacity for orders. You can still view the menu, but you cannot place an order."
   },
+  "payLaterModal": {
+    "title": "Order Not Paid",
+    "message": "You have a Pay Later order that has not been paid yet. Please pay for it before placing a new order.",
+    "cta": "Pay Now"
+  },
   "maximumCupsPerOrder_one": "You can only order {{count}} cup at a time.",
   "maximumCupsPerOrder_other": "You can only order {{count}} cups at a time.",
   "addItem": "Add",

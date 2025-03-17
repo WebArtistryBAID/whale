@@ -47,6 +47,11 @@
     "simple": "店铺已达到订单最大额度。",
     "message": "店铺已达到订单最大额度。您可以查看菜单，但无法下单。"
   },
+  "payLaterModal": {
+    "title": "订单尚未付款",
+    "message": "您有一个「先喝后付」订单尚未付款。请先付款，再下单。",
+    "cta": "现在付款"
+  },
   "maximumCupsPerOrder_one": "一单只能购买 {{count}} 杯。",
   "maximumCupsPerOrder_other": "一单只能购买 {{count}} 杯。",
   "addItem": "选规格",

@@ -113,6 +113,20 @@ export async function canPayWithPayLater(): Promise<boolean> {
     }) === 0
 }
 
+export async function getUnpaidPayLaterOrder(): Promise<number> {
+    const me = await getMyUser()
+    if (me == null) {
+        return -1
+    }
+    const order = await prisma.order.findFirst({
+        where: {
+            userId: me.id,
+            paymentStatus: PaymentStatus.notPaid
+        }
+    })
+    return order?.id ?? -1
+}
+
 export async function payLaterBalance(id: number): Promise<boolean> {
     const me = await getMyUser()
     if (me == null) {
