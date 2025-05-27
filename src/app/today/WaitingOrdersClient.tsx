@@ -1,6 +1,6 @@
 'use client'
 
-import { HydratedOrder } from '@/app/lib/ordering-actions'
+import { HydratedOrder, isStoreOpen } from '@/app/lib/ordering-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 import { useEffect, useState } from 'react'
 import { getWaitingOrders } from '@/app/lib/order-manage-actions'
@@ -9,15 +9,18 @@ import Link from 'next/link'
 import { OrderType } from '@prisma/client'
 import If from '@/app/lib/If'
 import OrderWithData from '@/app/user/manage/orders/[id]/OrderWithData'
+import { setConfigValue } from '@/app/lib/settings-actions'
 
 export default function WaitingOrdersClient({ init }: { init: { [id: number]: HydratedOrder } }) {
     const { t } = useTranslationClient('user')
     const [ orders, setOrders ] = useState(init)
     const [ selected, setSelected ] = useState(Object.keys(init).length < 1 ? -1 : parseInt(Object.keys(init)[0]))
+    const [ isOpen, setOpen ] = useState(false)
 
     useEffect(() => {
         setInterval(async () => {
             setOrders(await getWaitingOrders())
+            setOpen(await isStoreOpen())
         }, 10000)
     }, [])
 
@@ -33,20 +36,33 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
     }
 
     return <div className="flex h-[93vh] w-screen">
-        <div className="w-1/5 flex flex-col gap-3 h-full overflow-y-auto p-5" aria-label={t('today.ordersPane')}>
-            {Object.keys(orders).map(id =>
-                <Button key={id} onClick={() => setSelected(parseInt(id))} className="w-full"
-                        color={selected === parseInt(id) ? 'warning' : (orders[parseInt(id)].type === OrderType.pickUp ? 'gray' : 'green')}>
-                    {id}
-                    <If condition={orders[parseInt(id)].type === OrderType.delivery}>
-                        <span className="ml-1">{t('today.delivery')}</span>
-                    </If>
-                    <If condition={selected === parseInt(id)}>
-                        <span className="sr-only">{t('selected')}</span>
-                    </If>
-                </Button>
-            )}
-            <Button color="yellow" as={Link} href="/user/manage/orders">{t('today.return')}</Button>
+        <div className="w-1/5 h-full flex flex-col p-5" aria-label={t('today.ordersPane')}>
+            <div className="override-y-auto flex-grow">
+                {Object.keys(orders).map(id =>
+                    <Button key={id} onClick={() => setSelected(parseInt(id))} className="w-full"
+                            color={selected === parseInt(id) ? 'warning' : (orders[parseInt(id)].type === OrderType.pickUp ? 'gray' : 'green')}>
+                        {id}
+                        <If condition={orders[parseInt(id)].type === OrderType.delivery}>
+                            <span className="ml-1">{t('today.delivery')}</span>
+                        </If>
+                        <If condition={selected === parseInt(id)}>
+                            <span className="sr-only">{t('selected')}</span>
+                        </If>
+                    </Button>
+                )}
+            </div>
+            <div className="flex-shrink flex flex-col gap-3">
+                <Button color="yellow" as={Link} href="/user/manage/orders">{t('today.return')}</Button>
+                <div className="flex items-center gap-2">
+                    <p className="mr-auto">{isOpen ? t('today.storeStatusOpen') : t('today.storeStatusClosed')}</p>
+                    <Button pill color="yellow" onClick={async () => {
+                        const date = new Date()
+                        await setConfigValue('availability-override-date', `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`)
+                        await setConfigValue('availability-override-value', isOpen ? 'false' : 'true')
+                        setOpen(!isOpen)
+                    }}>{isOpen ? t('today.openAction') : t('today.closeAction')}</Button>
+                </div>
+            </div>
         </div>
         <div className="w-4/5 p-8 h-full overflow-y-auto" aria-label={t('today.detailsPane')}>
             {selected !== -1 ?

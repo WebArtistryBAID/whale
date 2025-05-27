@@ -427,6 +427,10 @@
     "empty": "No orders yet.",
     "return": "Return to Order Management",
     "ordersPane": "Waiting Orders",
-    "detailsPane": "Order Details"
+    "detailsPane": "Order Details",
+    "storeStatusOpen": "Ready for ordering",
+    "storeStatusClosed": "Store is closed",
+    "openAction": "Open For Rest of Day",
+    "closeAction": "Close For Rest of Day"
   }
 }

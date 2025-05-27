@@ -46,18 +46,20 @@ For each task, you need to pass the query parameter `key={CRON_KEY}`.
 
 ## Settings
 
-| Key                             | Type    | Description                                                                                       |
-|---------------------------------|---------|---------------------------------------------------------------------------------------------------|
-| `enable-scheduled-availability` | boolean | Whether or not to use a schedule for making the store available.                                  |
-| `weekdays-only`                 | boolean | When `enable-scheduled-availability` is on, whether to only make the store available on weekdays. |
-| `open-time`                     | HH:mm   | When `enable-scheduled-availability` is on, the time when the store opens.                        |
-| `close-time`                    | HH:mm   | When `enable-scheduled-availability` is on, the time when the store closes.                       |
-| `store-open`                    | boolean | When `enable-scheduled-availability` is off, whether the store is currently open.                 |
-| `maximum-cups-per-order`        | number  | The maximum number of cups that can be ordered in a single order.                                 |
-| `maximum-cups-per-day`          | number  | The maximum number of cups that can be ordered in a single day.                                   |
-| `maximum-balance`               | Decimal | The maximum balance that a user can have.                                                         |
-| `balance-recharge-minimum`      | Decimal | The minimum amount that can be recharged.                                                         |
-| `allow-pay-later`               | boolean | Whether to allow Pay Later payment method.                                                        |
+| Key                             | Type       | Description                                                                                       |
+|---------------------------------|------------|---------------------------------------------------------------------------------------------------|
+| `enable-scheduled-availability` | boolean    | Whether or not to use a schedule for making the store available.                                  |
+| `weekdays-only`                 | boolean    | When `enable-scheduled-availability` is on, whether to only make the store available on weekdays. |
+| `open-time`                     | HH:mm      | When `enable-scheduled-availability` is on, the time when the store opens.                        |
+| `close-time`                    | HH:mm      | When `enable-scheduled-availability` is on, the time when the store closes.                       |
+| `store-open`                    | boolean    | When `enable-scheduled-availability` is off, whether the store is currently open.                 |
+| `availability-override-date`    | YYYY-MM-DD | The date on which store availability has been overridden.                                         |
+| `availability-override-value`   | boolean    | The value of the store availability override.                                                     |
+| `maximum-cups-per-order`        | number     | The maximum number of cups that can be ordered in a single order.                                 |
+| `maximum-cups-per-day`          | number     | The maximum number of cups that can be ordered in a single day.                                   |
+| `maximum-balance`               | Decimal    | The maximum balance that a user can have.                                                         |
+| `balance-recharge-minimum`      | Decimal    | The minimum amount that can be recharged.                                                         |
+| `allow-pay-later`               | boolean    | Whether to allow Pay Later payment method.                                                        |
 
 ## Contribution
 

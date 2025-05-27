@@ -208,6 +208,10 @@ export async function payLaterBalance(id: number): Promise<boolean> {
 }
 
 export async function isStoreOpen(): Promise<boolean> {
+    const date = new Date()
+    if (await getConfigValue('availability-override-date') === `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`) {
+        return await getConfigValueAsBoolean('availability-override-value')
+    }
     if (await getConfigValueAsBoolean('enable-scheduled-availability')) {
         const now = new Date()
         const openTime = await getConfigValue('open-time')

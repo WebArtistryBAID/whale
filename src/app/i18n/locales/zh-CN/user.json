@@ -427,6 +427,10 @@
     "empty": "暂时没有订单。",
     "return": "返回订单管理",
     "ordersPane": "等待中订单",
-    "detailsPane": "订单详情"
+    "detailsPane": "订单详情",
+    "storeStatusOpen": "可接受订单",
+    "storeStatusClosed": "不可接受订单",
+    "openAction": "手动开业 (本日)",
+    "closeAction": "暂停营业 (本日)"
   }
 }
