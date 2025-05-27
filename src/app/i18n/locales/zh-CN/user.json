@@ -161,6 +161,7 @@
       "save": "保存",
       "revert": "回退",
       "types": {
+        "override": "强制开店/关店",
         "enable-scheduled-availability": "自动开店",
         "weekdays-only": "仅工作日开店",
         "open-time": "开店时间",
@@ -173,6 +174,7 @@
         "allow-pay-later": "允许「先喝后付」"
       },
       "descriptions": {
+        "override": "在一天内强制开店或关店。请注意，这会覆盖自动开关设置。请在「等待中订单」操作。",
         "enable-scheduled-availability": "当启用本设置时，店铺会自动开关，无需手动操作。",
         "weekdays-only": "只从星期一至星期五开店。不考虑调休。",
         "open-time": "开店时间，格式为 HH:mm。",

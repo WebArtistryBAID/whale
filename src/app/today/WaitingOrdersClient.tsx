@@ -55,12 +55,12 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
                 <Button color="yellow" as={Link} href="/user/manage/orders">{t('today.return')}</Button>
                 <div className="flex items-center gap-2">
                     <p className="mr-auto">{isOpen ? t('today.storeStatusOpen') : t('today.storeStatusClosed')}</p>
-                    <Button pill color="yellow" onClick={async () => {
+                    <Button color="yellow" onClick={async () => {
                         const date = new Date()
                         await setConfigValue('availability-override-date', `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`)
                         await setConfigValue('availability-override-value', isOpen ? 'false' : 'true')
                         setOpen(!isOpen)
-                    }}>{isOpen ? t('today.openAction') : t('today.closeAction')}</Button>
+                    }}>{isOpen ? t('today.closeAction') : t('today.openAction')}</Button>
                 </div>
             </div>
         </div>

@@ -161,6 +161,7 @@
       "save": "Save",
       "revert": "Revert",
       "types": {
+        "override": "Override Availability",
         "enable-scheduled-availability": "Enable Scheduled Availability",
         "weekdays-only": "Weekdays Only",
         "open-time": "Open Time",
@@ -173,6 +174,7 @@
         "allow-pay-later": "Allow Pay Later"
       },
       "descriptions": {
+        "override": "Force the store to be open or closed regardless of the schedule for one day. You may modify this in Waiting Orders.",
         "enable-scheduled-availability": "When this setting is turned on, the store opens on a schedule instead of manually.",
         "weekdays-only": "Only open the store from Monday to Friday.",
         "open-time": "The time (HH:mm) the store opens.",

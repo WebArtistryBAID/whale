@@ -113,6 +113,8 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
         return false
     }
 
+    const date = new Date()
+
     return <div className="container relative">
         <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-3">
             <BreadcrumbItem icon={HiCollection} href="/user">{t('breadcrumb.manage')}</BreadcrumbItem>
@@ -120,6 +122,18 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
         </Breadcrumb>
         <h1 className="mb-5">{t('manage.settings.title')}</h1>
         <div className="flex flex-col gap-3">
+            <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.override`)}>
+                <ToggleSwitch
+                    checked={tmpValues['availability-override-date'] === `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`}
+                    onChange={v => {
+                        if (!v) {
+                            setValue('availability-override-date', '')
+                        }
+                    }}
+                    label={t(`manage.settings.types.override`)} color="yellow"/>
+                <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.override`)}</p>
+            </div>
+
             {BooleanValue('enable-scheduled-availability')}
             <If condition={tmpValues['enable-scheduled-availability'] === 'true'}>
                 {BooleanValue('weekdays-only')}
