@@ -1,6 +1,6 @@
 'use server'
 
-import { PaymentStatus, PrismaClient } from '@prisma/client'
+import { PaymentMethod, PaymentStatus, PrismaClient } from '@prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 
@@ -121,7 +121,14 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
             where: {
                 itemTypeId: item.id,
                 order: {
-                    paymentStatus: PaymentStatus.paid
+                    OR: [
+                        {
+                            paymentStatus: PaymentStatus.paid
+                        },
+                        {
+                            paymentMethod: PaymentMethod.payLater
+                        }
+                    ]
                 }
             },
             select: {
@@ -203,7 +210,14 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
                 gte: start,
                 lt: end
             },
-            paymentStatus: PaymentStatus.paid
+            OR: [
+                {
+                    paymentStatus: PaymentStatus.paid
+                },
+                {
+                    paymentMethod: PaymentMethod.payLater
+                }
+            ]
         },
         select: {
             createdAt: true,
@@ -284,7 +298,14 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
                 gte: lastStart,
                 lt: start
             },
-            paymentStatus: PaymentStatus.paid
+            OR: [
+                {
+                    paymentStatus: PaymentStatus.paid
+                },
+                {
+                    paymentMethod: PaymentMethod.payLater
+                }
+            ]
         },
         select: {
             totalPrice: true,
@@ -326,7 +347,14 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
                 lt: end
             },
             order: {
-                paymentStatus: PaymentStatus.paid
+                OR: [
+                    {
+                        paymentStatus: PaymentStatus.paid
+                    },
+                    {
+                        paymentMethod: PaymentMethod.payLater
+                    }
+                ]
             }
         },
         select: {
