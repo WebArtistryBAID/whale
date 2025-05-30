@@ -18,6 +18,9 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
     const [ isOpen, setOpen ] = useState(false)
 
     useEffect(() => {
+        (async () => {
+            setOpen(await isStoreOpen())
+        })()
         setInterval(async () => {
             setOrders(await getWaitingOrders())
             setOpen(await isStoreOpen())
@@ -37,7 +40,7 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
 
     return <div className="flex h-[93vh] w-screen">
         <div className="w-1/5 h-full flex flex-col p-5" aria-label={t('today.ordersPane')}>
-            <div className="override-y-auto flex-grow">
+            <div className="override-y-auto flex flex-col gap-3 flex-grow">
                 {Object.keys(orders).map(id =>
                     <Button key={id} onClick={() => setSelected(parseInt(id))} className="w-full"
                             color={selected === parseInt(id) ? 'warning' : (orders[parseInt(id)].type === OrderType.pickUp ? 'gray' : 'green')}>

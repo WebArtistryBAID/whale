@@ -432,7 +432,7 @@
     "detailsPane": "订单详情",
     "storeStatusOpen": "可接受订单",
     "storeStatusClosed": "不可接受订单",
-    "openAction": "手动开业 (本日)",
-    "closeAction": "暂停营业 (本日)"
+    "openAction": "手动开业",
+    "closeAction": "暂停营业"
   }
 }

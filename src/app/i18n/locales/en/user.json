@@ -432,7 +432,7 @@
     "detailsPane": "Order Details",
     "storeStatusOpen": "Ready for ordering",
     "storeStatusClosed": "Store is closed",
-    "openAction": "Open For Rest of Day",
-    "closeAction": "Close For Rest of Day"
+    "openAction": "Open",
+    "closeAction": "Close"
   }
 }
