@@ -230,6 +230,7 @@
       "perDay": "按天统计",
       "perOrder": "按订单统计",
       "totalRevenue": "总收入",
+      "paidRevenue": "已入账收入",
       "totalOrders": "总订单数",
       "totalCups": "总杯数",
       "compared_week": "相较于上周",
