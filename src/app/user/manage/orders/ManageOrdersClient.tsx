@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Order } from '@prisma/client'
+import { Order } from '@/generated/prisma/browser'
 import Paginated from '@/app/lib/Paginated'
 import { useTranslationClient } from '@/app/i18n/client'
 import {

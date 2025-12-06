@@ -1,10 +1,9 @@
 'use server'
 
-import { PaymentMethod, PaymentStatus, PrismaClient } from '@prisma/client'
+import { PaymentMethod, PaymentStatus } from '@/generated/prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 export interface StatsAggregates {
     newItems: NewItemStats[]

@@ -8,10 +8,9 @@ import {
     OptionItem,
     OptionType,
     Prisma,
-    PrismaClient,
     Tag,
     UserAuditLogType
-} from '@prisma/client'
+} from '@/generated/prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedCategory, HydratedItemType, HydratedOptionType } from '@/app/lib/ui-data-actions'
 import Decimal from 'decimal.js'
@@ -21,8 +20,7 @@ import OptionItemCreateInput = Prisma.OptionItemCreateInput
 import TagCreateInput = Prisma.TagCreateInput
 import CouponCodeCreateInput = Prisma.CouponCodeCreateInput
 import AdCreateInput = Prisma.AdCreateInput
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 export async function getCategories(): Promise<Category[]> {
     await requireUserPermission('admin.manage')

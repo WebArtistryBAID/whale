@@ -1,10 +1,9 @@
-import { PaymentStatus, PrismaClient, UserAuditLogType } from '@prisma/client'
+import { PaymentStatus, UserAuditLogType } from '@/generated/prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import { getOrder } from '@/app/lib/ordering-actions'
 import Decimal from 'decimal.js'
 import signData from '@/app/lib/wx-pay-sign'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     const body = await request.formData()

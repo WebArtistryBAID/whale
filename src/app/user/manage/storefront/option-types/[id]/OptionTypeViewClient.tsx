@@ -23,7 +23,7 @@ import { useRouter } from 'next/navigation'
 import { deleteOptionType } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
 import { HydratedOptionType } from '@/app/lib/ui-data-actions'
-import { ItemType } from '@prisma/client'
+import { ItemType } from '@/generated/prisma/browser'
 
 export default function OptionTypeViewClient({ object, items }: { object: HydratedOptionType, items: ItemType[] }) {
     const { t } = useTranslationClient('user')

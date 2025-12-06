@@ -1,9 +1,7 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 void initialize()
 

@@ -1,6 +1,6 @@
 import { getOrder } from '@/app/lib/ordering-actions'
 import { redirect } from 'next/navigation'
-import { PaymentStatus } from '@prisma/client'
+import { PaymentStatus } from '@/generated/prisma/client'
 import { getMyUser } from '@/app/login/login-actions'
 import OrderPayClient from '@/app/order/checkout/wechat/pay/OrderPayClient'
 import CookiesBoundary from '@/app/lib/CookiesBoundary'

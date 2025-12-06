@@ -18,7 +18,7 @@ import {
     Popover,
     TextInput
 } from 'flowbite-react'
-import { CouponCode, PaymentMethod, PaymentStatus, User } from '@prisma/client'
+import { CouponCode, PaymentMethod, PaymentStatus, User } from '@/generated/prisma/browser'
 import {
     canPayWithBalance,
     canPayWithPayLater,

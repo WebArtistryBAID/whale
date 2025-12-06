@@ -1,6 +1,6 @@
 'use client'
 
-import { ItemType, OptionItem } from '@prisma/client'
+import { ItemType, OptionItem } from '@/generated/prisma/browser'
 import Decimal from 'decimal.js'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'

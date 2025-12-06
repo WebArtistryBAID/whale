@@ -1,11 +1,10 @@
 'use server'
 
-import { Notification, NotificationType, PrismaClient, User } from '@prisma/client'
+import { Notification, NotificationType, User } from '@/generated/prisma/client'
 import { getAccessToken, requireUser } from '@/app/login/login-actions'
 import { me } from '@/app/login/login'
 import Paginated from '@/app/lib/Paginated'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 export async function sendNotification(user: User, type: NotificationType, values: string[], order: number | null): Promise<void> {
     if (user.inboxNotifications.includes(type)) {

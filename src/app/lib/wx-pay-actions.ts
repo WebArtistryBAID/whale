@@ -1,7 +1,7 @@
 'use server'
 
 import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
-import { PaymentStatus } from '@prisma/client'
+import { PaymentStatus } from '@/generated/prisma/client'
 import signData from '@/app/lib/wx-pay-sign'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'

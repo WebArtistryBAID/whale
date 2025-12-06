@@ -1,6 +1,6 @@
 'use client'
 
-import { Ad } from '@prisma/client'
+import { Ad } from '@/generated/prisma/browser'
 import { Carousel } from 'flowbite-react'
 import If from '@/app/lib/If'
 import { useTranslationClient } from '@/app/i18n/client'

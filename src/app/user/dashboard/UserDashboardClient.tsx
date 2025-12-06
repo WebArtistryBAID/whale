@@ -1,6 +1,6 @@
 'use client'
 
-import { NotificationType, User } from '@prisma/client'
+import { NotificationType, User } from '@/generated/prisma/browser'
 import {
     Breadcrumb,
     BreadcrumbItem,

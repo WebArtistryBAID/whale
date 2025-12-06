@@ -1,6 +1,6 @@
 'use client'
 
-import { Ad, Category, CouponCode, OptionType, Tag } from '@prisma/client'
+import { Ad, Category, CouponCode, OptionType, Tag } from '@/generated/prisma/browser'
 import {
     Breadcrumb,
     BreadcrumbItem,

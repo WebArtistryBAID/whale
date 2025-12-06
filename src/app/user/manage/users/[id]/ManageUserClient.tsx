@@ -1,6 +1,6 @@
 'use client'
 
-import { Order, User } from '@prisma/client'
+import { Order, User } from '@/generated/prisma/browser'
 import {
     Badge,
     Breadcrumb,

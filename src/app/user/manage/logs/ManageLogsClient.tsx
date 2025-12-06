@@ -17,7 +17,7 @@ import {
 } from 'flowbite-react'
 import { HiCollection } from 'react-icons/hi'
 import If from '@/app/lib/If'
-import { UserAuditLogType } from '@prisma/client'
+import { UserAuditLogType } from '@/generated/prisma/browser'
 import { getAuditLogs } from '@/app/lib/order-manage-actions'
 import Link from 'next/link'
 

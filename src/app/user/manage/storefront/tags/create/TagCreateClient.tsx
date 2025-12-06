@@ -7,7 +7,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { upsertTag } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
-import { Tag } from '@prisma/client'
+import { Tag } from '@/generated/prisma/browser'
 
 export default function TagCreateClient({ editMode, existing }: {
     editMode: boolean,

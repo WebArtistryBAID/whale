@@ -1,10 +1,9 @@
 'use server'
 
 import Paginated from '@/app/lib/Paginated'
-import { Order, PrismaClient, User, UserAuditLogType } from '@prisma/client'
+import { Order, User, UserAuditLogType } from '@/generated/prisma/client'
 import { requireUser } from '@/app/login/login-actions'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 export interface HydratedUserAuditLog {
     id: number

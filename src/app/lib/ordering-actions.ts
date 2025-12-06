@@ -8,16 +8,14 @@ import {
     OrderType,
     PaymentMethod,
     PaymentStatus,
-    PrismaClient,
     User,
     UserAuditLogType
-} from '@prisma/client'
+} from '@/generated/prisma/client'
 import { OrderedItemTemplate } from '@/app/lib/shopping-cart'
 import { getMyUser } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 import { getConfigValue, getConfigValueAsBoolean, getConfigValueAsNumber } from '@/app/lib/settings-actions'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 export interface HydratedOrderedItem {
     id: number

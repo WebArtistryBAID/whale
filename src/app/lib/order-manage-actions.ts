@@ -7,9 +7,8 @@ import {
     OrderStatus,
     PaymentMethod,
     PaymentStatus,
-    PrismaClient,
     UserAuditLogType
-} from '@prisma/client'
+} from '@/generated/prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedUserAuditLog } from '@/app/lib/user-actions'
 import Decimal from 'decimal.js'
@@ -17,8 +16,8 @@ import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
 import { sendNotification } from '@/app/lib/notification-actions'
 import { me } from '@/app/login/login'
 import signData from '@/app/lib/wx-pay-sign'
+import { prisma } from '@/app/lib/prisma'
 
-const prisma = new PrismaClient()
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
 
 export async function getAuditLogs(page: number): Promise<Paginated<HydratedUserAuditLog>> {

@@ -3,7 +3,7 @@
 import { HydratedOrder } from '@/app/lib/ordering-actions'
 import { Badge, Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react'
 import If from '@/app/lib/If'
-import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@prisma/client'
+import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@/generated/prisma/browser'
 import { markOrderDone, refundOrder } from '@/app/lib/order-manage-actions'
 import { HiCheck, HiClock, HiHashtag } from 'react-icons/hi'
 import Link from 'next/link'

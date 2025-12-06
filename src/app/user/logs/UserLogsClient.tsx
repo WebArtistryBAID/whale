@@ -17,7 +17,7 @@ import {
 } from 'flowbite-react'
 import { HiUser } from 'react-icons/hi'
 import If from '@/app/lib/If'
-import { UserAuditLogType } from '@prisma/client'
+import { UserAuditLogType } from '@/generated/prisma/browser'
 
 export default function UserLogsClient({ init }: { init: Paginated<HydratedUserAuditLog> }) {
     const { t } = useTranslationClient('user')

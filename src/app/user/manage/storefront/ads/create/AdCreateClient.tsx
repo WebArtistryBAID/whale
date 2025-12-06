@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { upsertAd } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
-import { Ad } from '@prisma/client'
+import { Ad } from '@/generated/prisma/browser'
 import UploadAreaClient from '@/app/user/manage/storefront/upload/UploadAreaClient'
 
 export default function AdCreateClient({ editMode, existing, uploadPrefix }: {

@@ -1,11 +1,10 @@
 'use server'
 
-import { PrismaClient, User, UserAuditLogType } from '@prisma/client'
+import { User, UserAuditLogType } from '@/generated/prisma/client'
 import { me } from '@/app/login/login'
 import { decodeJwt } from 'jose'
 import Paginated from '@/app/lib/Paginated'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 export async function getLoginTarget(redirect: string): Promise<string> {
     // We are really abusing state here... But it works.

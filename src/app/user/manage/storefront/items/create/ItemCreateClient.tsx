@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { upsertItemType } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
-import { Category, Tag } from '@prisma/client'
+import { Category, Tag } from '@/generated/prisma/browser'
 import { HydratedItemType, HydratedOptionType } from '@/app/lib/ui-data-actions'
 import UploadAreaClient from '@/app/user/manage/storefront/upload/UploadAreaClient'
 

@@ -1,7 +1,6 @@
-import { PrismaClient, UserAuditLogType } from '@prisma/client'
+import { UserAuditLogType } from '@/generated/prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 // Remove all balance transactions that are older than 1 hour and aren't paid
 export async function GET(request: NextRequest): Promise<NextResponse> {

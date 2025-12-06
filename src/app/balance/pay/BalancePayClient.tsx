@@ -12,7 +12,7 @@ import {
     getWeChatOAuthRedirect,
     isTransactionFinished
 } from '@/app/lib/balance-actions'
-import { UserAuditLog } from '@prisma/client'
+import { UserAuditLog } from '@/generated/prisma/browser'
 import QRCode from 'react-qr-code'
 import { Trans } from 'react-i18next/TransWithoutContext'
 

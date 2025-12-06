@@ -1,6 +1,6 @@
 'use client'
 
-import { User } from '@prisma/client'
+import { User } from '@/generated/prisma/browser'
 import { useTranslationClient } from '@/app/i18n/client'
 import { useEffect, useState } from 'react'
 import { getUsers } from '@/app/login/login-actions'

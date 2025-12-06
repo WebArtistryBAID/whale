@@ -13,7 +13,7 @@ import {
     getPaymentQRCode,
     getWeChatOAuthRedirect
 } from '@/app/lib/wx-pay-actions'
-import { PaymentMethod, PaymentStatus } from '@prisma/client'
+import { PaymentMethod, PaymentStatus } from '@/generated/prisma/browser'
 import QRCode from 'react-qr-code'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { Trans } from 'react-i18next/TransWithoutContext'

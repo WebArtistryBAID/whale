@@ -28,7 +28,7 @@ import {
 } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
-import { User } from '@prisma/client'
+import { User } from '@/generated/prisma/browser'
 import { getMyUser } from '@/app/login/login-actions'
 import { useCookies } from 'react-cookie'
 import { useRouter } from 'next/navigation'

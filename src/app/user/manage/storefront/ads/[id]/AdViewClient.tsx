@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteAd } from '@/app/lib/ui-manage-actions'
 import { Trans } from 'react-i18next/TransWithoutContext'
-import { Ad } from '@prisma/client'
+import { Ad } from '@/generated/prisma/browser'
 
 export default function AdViewClient({ object, uploadPrefix }: { object: Ad, uploadPrefix: string }) {
     const { t } = useTranslationClient('user')

@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { upsertCouponCode } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
-import { CouponCode } from '@prisma/client'
+import { CouponCode } from '@/generated/prisma/browser'
 
 export default function CouponCodeCreateClient({ editMode, existing }: {
     editMode: boolean,

@@ -4,7 +4,7 @@ import { HydratedCategory } from '@/app/lib/ui-data-actions'
 import UICategory from '@/app/order/UICategory'
 import UIShoppingCartDesktop from '@/app/order/UIShoppingCartDesktop'
 import { useTranslationClient } from '@/app/i18n/client'
-import { Ad } from '@prisma/client'
+import { Ad } from '@/generated/prisma/browser'
 import UIAdsClient from '@/app/core-components/UIAdsClient'
 
 export default function OrderDesktop({ categories, ads, uploadPrefix }: {

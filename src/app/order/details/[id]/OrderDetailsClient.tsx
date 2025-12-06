@@ -12,7 +12,7 @@ import {
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
-import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@prisma/client'
+import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@/generated/prisma/browser'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import { useEffect, useState } from 'react'
 import { Alert, Badge, Button, Modal, ModalBody, ModalFooter, ModalHeader, Popover, Spinner } from 'flowbite-react'

@@ -1,6 +1,6 @@
 'use client'
 
-import { ItemType, Tag } from '@prisma/client'
+import { ItemType, Tag } from '@/generated/prisma/browser'
 import {
     Breadcrumb,
     BreadcrumbItem,

@@ -1,8 +1,7 @@
-import { NotificationType, PaymentMethod, PaymentStatus, PrismaClient } from '@prisma/client'
+import { NotificationType, PaymentMethod, PaymentStatus } from '@/generated/prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import { sendNotification } from '@/app/lib/notification-actions'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/app/lib/prisma'
 
 // Send notifications to Pay Later order customers
 export async function GET(request: NextRequest): Promise<NextResponse> {

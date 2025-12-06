@@ -1,16 +1,15 @@
 'use server'
 
-import { PrismaClient, UserAuditLog, UserAuditLogType } from '@prisma/client'
+import { UserAuditLog, UserAuditLogType } from '@/generated/prisma/client'
 import { getMyUser } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 import { getConfigValue } from '@/app/lib/settings-actions'
 import { me } from '@/app/login/login'
 import signData from '@/app/lib/wx-pay-sign'
+import { prisma } from '@/app/lib/prisma'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
 const orderBody = '白鲸咖啡余额充值 Whale Cafe Balance Recharge'
-
-const prisma = new PrismaClient()
 
 function getTransactionNo(auditLog: UserAuditLog): string {
     return `${auditLog.id}-BALANCE${auditLog.time.getTime()}`

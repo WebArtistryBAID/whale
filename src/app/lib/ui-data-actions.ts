@@ -1,8 +1,7 @@
 'use server'
 
-import { Ad, OptionItem, PrismaClient, Tag } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { Ad, OptionItem, Tag } from '@/generated/prisma/client'
+import { prisma } from '@/app/lib/prisma'
 
 export interface HydratedCategory {
     id: number

@@ -1,6 +1,6 @@
 'use client'
 
-import { CouponCode } from '@prisma/client'
+import { CouponCode } from '@/generated/prisma/browser'
 import { Breadcrumb, BreadcrumbItem, Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react'
 import { HiCollection } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'

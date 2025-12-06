@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { upsertOptionItem } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
-import { OptionItem, OptionType } from '@prisma/client'
+import { OptionItem, OptionType } from '@/generated/prisma/browser'
 
 export default function OptionItemCreateClient({ editMode, existing, currentType, availableTypes }: {
     editMode: boolean,

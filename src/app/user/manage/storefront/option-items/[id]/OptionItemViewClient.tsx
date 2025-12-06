@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteOptionItem } from '@/app/lib/ui-manage-actions'
-import { OptionItem } from '@prisma/client'
+import { OptionItem } from '@/generated/prisma/browser'
 
 export default function OptionItemViewClient({ object, typeName }: { object: OptionItem, typeName: string }) {
     const { t } = useTranslationClient('user')

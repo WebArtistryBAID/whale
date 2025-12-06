@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { upsertCategory } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
-import { Category } from '@prisma/client'
+import { Category } from '@/generated/prisma/browser'
 
 export default function CategoryCreateClient({ editMode, existing }: {
     editMode: boolean,
