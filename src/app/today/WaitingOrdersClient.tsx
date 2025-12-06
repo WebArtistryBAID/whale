@@ -34,7 +34,9 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
             <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                  className="hidden dark:block w-72" alt=""/>
             <p className="mb-3">{t('today.empty')}</p>
-            <Button color="warning" as={Link} href="/user/manage/orders">{t('today.return')}</Button>
+            <Link href="/user/manage/orders">
+                <Button color="warning">{t('today.return')}</Button>
+            </Link>
         </div>
     }
 
@@ -55,7 +57,9 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
                 )}
             </div>
             <div className="flex-shrink flex flex-col gap-3">
-                <Button color="yellow" as={Link} href="/user/manage/orders">{t('today.return')}</Button>
+                <Link href="/user/manage/orders">
+                    <Button color="yellow">{t('today.return')}</Button>
+                </Link>
                 <div className="flex items-center gap-2">
                     <p className="mr-auto">{isOpen ? t('today.storeStatusOpen') : t('today.storeStatusClosed')}</p>
                     <Button color="yellow" onClick={async () => {

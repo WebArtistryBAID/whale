@@ -80,9 +80,11 @@ export default function OrderNags() {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Button pill color="warning" as={Link} href="/login?redirect=%2Forder">
-                            {t('login')}
-                        </Button>
+                        <Link href="/login?redirect=%2Forder">
+                            <Button pill color="warning">
+                                {t('login')}
+                            </Button>
+                        </Link>
                         <Button pill color="gray" onClick={() => setLoginModal(false)}>
                             {t('cancel')}
                         </Button>

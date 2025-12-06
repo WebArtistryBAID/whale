@@ -87,9 +87,13 @@ export default function CategoryViewClient({ object }: { object: HydratedCategor
                             {object.items.map(item => <TableRow className="tr" key={item.id}>
                                 <TableCell className="th">{item.id}</TableCell>
                                 <TableCell>{item.name}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/items/${item.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/items/${item.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -97,17 +101,19 @@ export default function CategoryViewClient({ object }: { object: HydratedCategor
             </If>
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
-                <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/items/create?category=${object.id}`}
-                        className="inline-block">
-                    {t('manage.storefront.categoryD.createItem')}
-                </Button>
+                <Link href={`/user/manage/storefront/items/create?category=${object.id}`}>
+                    <Button pill color="warning"
+                            className="inline-block">
+                        {t('manage.storefront.categoryD.createItem')}
+                    </Button>
+                </Link>
 
-                <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/categories/create?id=${object.id}`}
-                        className="inline-block">
-                    {t('manage.storefront.edit')}
-                </Button>
+                <Link href={`/user/manage/storefront/categories/create?id=${object.id}`}>
+                    <Button pill color="warning"
+                            className="inline-block">
+                        {t('manage.storefront.edit')}
+                    </Button>
+                </Link>
 
                 <Button pill color="failure" onClick={() => setDeleteModal(true)} className="inline-block">
                     {t('manage.storefront.delete')}

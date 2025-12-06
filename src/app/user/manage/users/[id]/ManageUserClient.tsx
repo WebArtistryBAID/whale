@@ -162,8 +162,9 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
                                         {order.createdAt.toLocaleString()}
                                     </TableCell>
                                     <TableCell>
-                                        <Button pill color="warning" size="xs" as={Link}
-                                                href={`/user/manage/orders/${order.id}`}>{t('orders.view')}</Button>
+                                        <Link href={`/user/manage/orders/${order.id}`}>
+                                            <Button pill color="warning" size="xs">{t('orders.view')}</Button>
+                                        </Link>
                                     </TableCell>
                                 </TableRow>
                             )}

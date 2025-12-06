@@ -48,7 +48,9 @@ export default function UserOrdersClient({ init }: { init: Paginated<Order> }) {
                 <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                      className="hidden dark:block w-72" alt=""/>
                 <p className="mb-3">{t('orders.empty')}</p>
-                <Button color="warning" as={Link} href="/order">{t('orders.cta')}</Button>
+                <Link href="/order">
+                    <Button color="warning">{t('orders.cta')}</Button>
+                </Link>
             </div>
         </If>
         <If condition={page.pages >= 1}>
@@ -78,8 +80,9 @@ export default function UserOrdersClient({ init }: { init: Paginated<Order> }) {
                                 {order.createdAt.toLocaleString()}
                             </TableCell>
                             <TableCell>
-                                <Button pill color="warning" size="xs" as={Link}
-                                        href={`/order/details/${order.id}`}>{t('orders.view')}</Button>
+                                <Link href={`/order/details/${order.id}`}>
+                                    <Button pill color="warning" size="xs">{t('orders.view')}</Button>
+                                </Link>
                             </TableCell>
                         </TableRow>
                     )}

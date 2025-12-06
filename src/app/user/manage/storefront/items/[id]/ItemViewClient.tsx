@@ -112,9 +112,13 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
                             {object.tags.map(item => <TableRow className="tr" key={item.id}>
                                 <TableCell className="th">{item.id}</TableCell>
                                 <TableCell>{item.name}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/tags/${item.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/tags/${item.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -135,9 +139,13 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
                             {object.options.map(item => <TableRow className="tr" key={item.id}>
                                 <TableCell className="th">{item.id}</TableCell>
                                 <TableCell>{item.name}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/option-types/${item.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/option-types/${item.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -145,17 +153,19 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
             </If>
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
-                <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/categories/${object.categoryId}`}
-                        className="inline-block">
-                    {t('manage.storefront.itemD.back')}
-                </Button>
+                <Link href={`/user/manage/storefront/categories/${object.categoryId}`}>
+                    <Button pill color="warning"
+                            className="inline-block">
+                        {t('manage.storefront.itemD.back')}
+                    </Button>
+                </Link>
 
-                <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/items/create?id=${object.id}&category=${object.categoryId}`}
-                        className="inline-block">
-                    {t('manage.storefront.edit')}
-                </Button>
+                <Link href={`/user/manage/storefront/items/create?id=${object.id}&category=${object.categoryId}`}>
+                    <Button pill color="warning"
+                            className="inline-block">
+                        {t('manage.storefront.edit')}
+                    </Button>
+                </Link>
 
                 <Button pill color="failure" onClick={() => setDeleteModal(true)} className="inline-block">
                     {t('manage.storefront.delete')}

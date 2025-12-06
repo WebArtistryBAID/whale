@@ -66,17 +66,19 @@ export default function OptionItemViewClient({ object, typeName }: { object: Opt
             </div>
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
-                <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/option-types/${object.typeId}`}
-                        className="inline-block">
-                    {t('manage.storefront.optionItemD.back')}
-                </Button>
+                <Link href={`/user/manage/storefront/option-types/${object.typeId}`}>
+                    <Button pill color="warning"
+                            className="inline-block">
+                        {t('manage.storefront.optionItemD.back')}
+                    </Button>
+                </Link>
 
-                <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/option-items/create?id=${object.id}&type=${object.typeId}`}
-                        className="inline-block">
-                    {t('manage.storefront.edit')}
-                </Button>
+                <Link href={`/user/manage/storefront/option-items/create?id=${object.id}&type=${object.typeId}`}>
+                    <Button pill color="warning"
+                            className="inline-block">
+                        {t('manage.storefront.edit')}
+                    </Button>
+                </Link>
 
                 <Button pill color="failure" onClick={() => setDeleteModal(true)} className="inline-block">
                     {t('manage.storefront.delete')}

@@ -3,8 +3,13 @@
 import { useTranslationClient } from '@/app/i18n/client'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { Button } from 'flowbite-react'
+import { CookiesProvider } from 'react-cookie'
 
 export default function OnSiteOrder() {
+    return <CookiesProvider><WrappedOnSiteOrder/></CookiesProvider>
+}
+
+function WrappedOnSiteOrder() {
     const { t } = useTranslationClient('user')
     const shoppingCart = useShoppingCart()
 

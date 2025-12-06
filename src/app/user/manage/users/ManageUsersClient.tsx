@@ -48,10 +48,11 @@ export default function ManageUsersClient({ users }: { users: Paginated<User> })
                 {page.items.map(user => <TableRow className="tr" key={user.id}>
                     <TableCell className="th w-4/5">{user.name}</TableCell>
                     <TableCell className="w-1/5">
-                        <Button className="inline-block" color="warning" as={Link}
-                                href={`/user/manage/users/${user.id}`}
-                                pill
-                                size="xs">{t('manage.users.view')}</Button>
+                        <Link href={`/user/manage/users/${user.id}`}>
+                            <Button className="inline-block" color="warning"
+                                    pill
+                                    size="xs">{t('manage.users.view')}</Button>
+                        </Link>
                     </TableCell>
                 </TableRow>)}
             </TableBody>

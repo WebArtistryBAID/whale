@@ -58,10 +58,11 @@ export default function CouponCodeViewClient({ object }: { object: CouponCode })
             </div>
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
-                <Button pill color="warning" as={Link} href={`/user/manage/storefront/coupons/create?id=${object.id}`}
-                        className="inline-block">
-                    {t('manage.storefront.edit')}
-                </Button>
+                <Link href={`/user/manage/storefront/coupons/create?id=${object.id}`}>
+                    <Button pill color="warning" className="inline-block">
+                        {t('manage.storefront.edit')}
+                    </Button>
+                </Link>
 
                 <Button pill color="failure" onClick={() => setDeleteModal(true)} className="inline-block">
                     {t('manage.storefront.delete')}

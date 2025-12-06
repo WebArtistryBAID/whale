@@ -84,9 +84,13 @@ export default function OptionTypeViewClient({ object, items }: { object: Hydrat
                             {items.map(item => <TableRow className="tr" key={item.id}>
                                 <TableCell className="th">{item.id}</TableCell>
                                 <TableCell>{item.name}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/items/${item.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/items/${item.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -107,9 +111,13 @@ export default function OptionTypeViewClient({ object, items }: { object: Hydrat
                             {object.items.map(item => <TableRow className="tr" key={item.id}>
                                 <TableCell className="th">{item.id}</TableCell>
                                 <TableCell>{item.name}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/option-items/${item.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/option-items/${item.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -117,17 +125,19 @@ export default function OptionTypeViewClient({ object, items }: { object: Hydrat
             </If>
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
-                <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/option-items/create?type=${object.id}`}
-                        className="inline-block">
-                    {t('manage.storefront.optionTypeD.createOptionItem')}
-                </Button>
+                <Link href={`/user/manage/storefront/option-items/create?type=${object.id}`}>
+                    <Button pill color="warning"
+                            className="inline-block">
+                        {t('manage.storefront.optionTypeD.createOptionItem')}
+                    </Button>
+                </Link>
 
-                <Button pill color="warning" as={Link}
-                        href={`/user/manage/storefront/option-types/create?id=${object.id}`}
-                        className="inline-block">
-                    {t('manage.storefront.edit')}
-                </Button>
+                <Link href={`/user/manage/storefront/option-types/create?id=${object.id}`}>
+                    <Button pill color="warning"
+                            className="inline-block">
+                        {t('manage.storefront.edit')}
+                    </Button>
+                </Link>
 
                 <Button pill color="failure" onClick={() => setDeleteModal(true)} className="inline-block">
                     {t('manage.storefront.delete')}

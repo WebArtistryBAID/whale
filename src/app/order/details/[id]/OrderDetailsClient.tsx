@@ -74,8 +74,9 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                 <p className="text-lg">{t('total', { price: order.totalPrice })}</p>
             </ModalBody>
             <ModalFooter>
-                <Button pill color="yellow" as={Link}
-                        href={`/order/checkout/wechat/pay?id=${order.id}`}>{t('checkout.wxPay')}</Button>
+                <Link href={`/order/checkout/wechat/pay?id=${order.id}`}>
+                    <Button pill color="yellow">{t('checkout.wxPay')}</Button>
+                </Link>
                 <Button pill color="yellow" disabled={!canUseBalance || loading} onClick={async () => {
                     setLoading(true)
                     await payLaterBalance(order.id)
@@ -162,9 +163,10 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                         <Alert additionalContent={<div className="text-left">
                             <p className="mb-1">{t('details.paymentPrompt')}</p>
                             <div className="flex gap-3">
-                                <Button size="xs" as={Link} href={`/order/checkout/wechat/pay?id=${order.id}`} pill
-                                        color="warning"
-                                        className="inline-block">{t('details.payNow')}</Button>
+                                <Link href={`/order/checkout/wechat/pay?id=${order.id}`}>
+                                    <Button size="xs" pill color="warning"
+                                            className="inline-block">{t('details.payNow')}</Button>
+                                </Link>
                                 <Button size="xs" pill color="failure" onClick={cancel}
                                         className="inline-block">{t('details.cancelOrder')}</Button>
                             </div>
@@ -176,8 +178,9 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                 </If>
 
                 <If condition={shoppingCart.onSiteOrderMode}>
-                    <Button as={Link} href="/order" color="warning" pill
-                            className="mb-3">{t('details.onSiteContinue')}</Button>
+                    <Link href="/order">
+                        <Button color="warning" pill className="mb-3">{t('details.onSiteContinue')}</Button>
+                    </Link>
                 </If>
 
                 <If condition={order.paymentStatus === PaymentStatus.paid}>

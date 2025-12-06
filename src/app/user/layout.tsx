@@ -64,45 +64,59 @@ function UserLayout({ children }: { children: ReactNode }) {
             className="font-display">{t('brand')}</span></SidebarLogo>
         <SidebarItems color="yellow">
             <SidebarItemGroup>
-                <SidebarItem as={Link} href="/user" icon={HiChartPie} onClick={() => setDrawerOpen(false)}>
-                    {t('nav.dashboard')}
-                </SidebarItem>
-                <SidebarItem as={Link} href="/user/orders" icon={HiCake} onClick={() => setDrawerOpen(false)}>
-                    {t('nav.orders')}
-                </SidebarItem>
-                <SidebarItem as={Link} href="/user/logs" icon={HiCash} onClick={() => setDrawerOpen(false)}>
-                    {t('nav.auditLogs')}
-                </SidebarItem>
-                <SidebarItem as={Link} href="/user/inbox" icon={HiInbox} onClick={() => setDrawerOpen(false)}
-                             label={notifications > 0 ? notifications.toString() : undefined}>
-                    {t('nav.inbox')}
-                </SidebarItem>
+                <Link href="/user" onClick={() => setDrawerOpen(false)}>
+                    <SidebarItem as="span" icon={HiChartPie}>
+                        {t('nav.dashboard')}
+                    </SidebarItem>
+                </Link>
+                <Link href="/user/orders" onClick={() => setDrawerOpen(false)}>
+                    <SidebarItem as="span" icon={HiCake}>
+                        {t('nav.orders')}
+                    </SidebarItem>
+                </Link>
+                <Link href="/user/logs" onClick={() => setDrawerOpen(false)}>
+                    <SidebarItem as="span" icon={HiCash}>
+                        {t('nav.auditLogs')}
+                    </SidebarItem>
+                </Link>
+                <Link href="/user/inbox" onClick={() => setDrawerOpen(false)}>
+                    <SidebarItem as="span" icon={HiInbox}
+                                 label={notifications > 0 ? notifications.toString() : undefined}>
+                        {t('nav.inbox')}
+                    </SidebarItem>
+                </Link>
                 <If condition={myUser?.permissions.includes('admin.manage')}>
                     <SidebarCollapse label={t('nav.manageCategory')} icon={HiCollection}>
-                        <SidebarItem as={Link} href="/user/manage/storefront" icon={HiShoppingCart}
-                                     onClick={() => setDrawerOpen(false)}>
-                            {t('nav.manageStore')}
-                        </SidebarItem>
-                        <SidebarItem as={Link} href="/user/manage/logs" icon={HiCash}
-                                     onClick={() => setDrawerOpen(false)}>
-                            {t('nav.manageAuditLogs')}
-                        </SidebarItem>
-                        <SidebarItem as={Link} href="/user/manage/stats" icon={HiChartPie}
-                                     onClick={() => setDrawerOpen(false)}>
-                            {t('nav.manageStats')}
-                        </SidebarItem>
-                        <SidebarItem as={Link} href="/user/manage/orders" icon={HiCake}
-                                     onClick={() => setDrawerOpen(false)}>
-                            {t('nav.manageOrders')}
-                        </SidebarItem>
-                        <SidebarItem as={Link} href="/user/manage/users" icon={HiUsers}
-                                     onClick={() => setDrawerOpen(false)}>
-                            {t('nav.manageUsers')}
-                        </SidebarItem>
-                        <SidebarItem as={Link} href="/user/manage/settings" icon={HiCog}
-                                     onClick={() => setDrawerOpen(false)}>
-                            {t('nav.manageSettings')}
-                        </SidebarItem>
+                        <Link href="/user/manage/storefront" onClick={() => setDrawerOpen(false)}>
+                            <SidebarItem as="span" icon={HiShoppingCart}>
+                                {t('nav.manageStore')}
+                            </SidebarItem>
+                        </Link>
+                        <Link href="/user/manage/logs" onClick={() => setDrawerOpen(false)}>
+                            <SidebarItem as="span" icon={HiCash}>
+                                {t('nav.manageAuditLogs')}
+                            </SidebarItem>
+                        </Link>
+                        <Link href="/user/manage/stats" onClick={() => setDrawerOpen(false)}>
+                            <SidebarItem as="span" icon={HiChartPie}>
+                                {t('nav.manageStats')}
+                            </SidebarItem>
+                        </Link>
+                        <Link href="/user/manage/orders" onClick={() => setDrawerOpen(false)}>
+                            <SidebarItem as="span" icon={HiCake}>
+                                {t('nav.manageOrders')}
+                            </SidebarItem>
+                        </Link>
+                        <Link href="/user/manage/users" onClick={() => setDrawerOpen(false)}>
+                            <SidebarItem as="span" icon={HiUsers}>
+                                {t('nav.manageUsers')}
+                            </SidebarItem>
+                        </Link>
+                        <Link href="/user/manage/settings" onClick={() => setDrawerOpen(false)}>
+                            <SidebarItem as="span" icon={HiCog}>
+                                {t('nav.manageSettings')}
+                            </SidebarItem>
+                        </Link>
                     </SidebarCollapse>
                 </If>
             </SidebarItemGroup>

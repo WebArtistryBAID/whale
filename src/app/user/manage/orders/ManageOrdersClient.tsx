@@ -46,7 +46,9 @@ export default function ManageOrdersClient({ init }: { init: Paginated<Order> })
         </Breadcrumb>
         <h1 className="mb-5">{t('orders.title')}</h1>
         <div className="flex gap-3 mb-5">
-            <Button pill color="warning" as={Link} href="/today">{t('orders.today')}</Button>
+            <Link href="/today">
+                <Button pill color="warning">{t('orders.today')}</Button>
+            </Link>
             <Button pill color="warning" onClick={() => {
                 shoppingCart.setOnSiteOrderMode(true)
                 router.push('/order')
@@ -88,8 +90,9 @@ export default function ManageOrdersClient({ init }: { init: Paginated<Order> })
                                 {order.createdAt.toLocaleString()}
                             </TableCell>
                             <TableCell>
-                                <Button pill color="warning" size="xs" as={Link}
-                                        href={`/user/manage/orders/${order.id}`}>{t('orders.view')}</Button>
+                                <Link href={`/user/manage/orders/${order.id}`}>
+                                    <Button pill color="warning" size="xs">{t('orders.view')}</Button>
+                                </Link>
                             </TableCell>
                         </TableRow>
                     )}

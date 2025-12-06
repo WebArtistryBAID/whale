@@ -39,8 +39,10 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
             <TabItem title={t('manage.storefront.categories')} color="warning" className="inline-block"
                      icon={HiCollection}>
                 <If condition={categories.length > 0}>
-                    <Button color="warning" pill as={Link} href="/user/manage/storefront/categories/create"
-                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Link href="/user/manage/storefront/categories/create">
+                        <Button color="warning" pill
+                                className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    </Link>
                     <Table className="mb-5">
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
@@ -52,9 +54,13 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                             {categories.map(category => <TableRow className="tr" key={category.id}>
                                 <TableCell className="th">{category.id}</TableCell>
                                 <TableCell>{category.name}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/categories/${category.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/categories/${category.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -66,16 +72,20 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                         <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                              className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
-                        <Button color="warning" pill as={Link} href="/user/manage/storefront/categories/create"
-                                className="inline-block">{t('manage.storefront.create')}</Button>
+                        <Link href="/user/manage/storefront/categories/create">
+                            <Button color="warning" pill
+                                    className="inline-block">{t('manage.storefront.create')}</Button>
+                        </Link>
                     </div>
                 </If>
 
             </TabItem>
             <TabItem title={t('manage.storefront.optionTypes')} icon={HiCog}>
                 <If condition={optionTypes.length > 0}>
-                    <Button color="warning" pill as={Link} href="/user/manage/storefront/option-types/create"
-                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Link href="/user/manage/storefront/option-types/create">
+                        <Button color="warning" pill
+                                className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    </Link>
                     <Table className="mb-5">
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
@@ -87,9 +97,13 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                             {optionTypes.map(option => <TableRow className="tr" key={option.id}>
                                 <TableCell className="th">{option.id}</TableCell>
                                 <TableCell>{option.name}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/option-types/${option.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/option-types/${option.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -102,15 +116,19 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                         <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                              className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
-                        <Button color="warning" pill as={Link} href="/user/manage/storefront/option-types/create"
-                                className="inline-block">{t('manage.storefront.create')}</Button>
+                        <Link href="/user/manage/storefront/option-types/create">
+                            <Button color="warning" pill
+                                    className="inline-block">{t('manage.storefront.create')}</Button>
+                        </Link>
                     </div>
                 </If>
             </TabItem>
             <TabItem title={t('manage.storefront.couponCodes')} icon={HiCash}>
                 <If condition={couponCodes.length > 0}>
-                    <Button color="warning" pill as={Link} href="/user/manage/storefront/coupons/create"
-                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Link href="/user/manage/storefront/coupons/create">
+                        <Button color="warning" pill
+                                className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    </Link>
                     <Table className="mb-5">
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
@@ -122,9 +140,13 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                             {couponCodes.map(coupon => <TableRow className="tr" key={coupon.id}>
                                 <TableCell className="th">{coupon.id}</TableCell>
                                 <TableCell>¥{coupon.value}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/coupons/${coupon.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/coupons/${coupon.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -137,15 +159,19 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                         <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                              className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
-                        <Button color="warning" pill as={Link} href="/user/manage/storefront/coupons/create"
-                                className="inline-block">{t('manage.storefront.create')}</Button>
+                        <Link href="/user/manage/storefront/coupons/create">
+                            <Button color="warning" pill
+                                    className="inline-block">{t('manage.storefront.create')}</Button>
+                        </Link>
                     </div>
                 </If>
             </TabItem>
             <TabItem title={t('manage.storefront.tags')} icon={HiTag}>
                 <If condition={tags.length > 0}>
-                    <Button color="warning" pill as={Link} href="/user/manage/storefront/tags/create"
-                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Link href="/user/manage/storefront/tags/create">
+                        <Button color="warning" pill
+                                className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    </Link>
                     <Table className="mb-5">
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
@@ -157,9 +183,13 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                             {tags.map(tag => <TableRow className="tr" key={tag.id}>
                                 <TableCell className="th">{tag.id}</TableCell>
                                 <TableCell>{tag.name}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/tags/${tag.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/tags/${tag.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -172,15 +202,19 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                         <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                              className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
-                        <Button color="warning" pill as={Link} href="/user/manage/storefront/tags/create"
-                                className="inline-block">{t('manage.storefront.create')}</Button>
+                        <Link href="/user/manage/storefront/tags/create">
+                            <Button color="warning" pill
+                                    className="inline-block">{t('manage.storefront.create')}</Button>
+                        </Link>
                     </div>
                 </If>
             </TabItem>
             <TabItem title={t('manage.storefront.ads')} icon={HiGift}>
                 <If condition={ads.length > 0}>
-                    <Button color="warning" pill as={Link} href="/user/manage/storefront/ads/create"
-                            className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    <Link href="/user/manage/storefront/ads/create">
+                        <Button color="warning" pill
+                                className="inline-block mb-8">{t('manage.storefront.create')}</Button>
+                    </Link>
                     <Table className="mb-5">
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
@@ -190,9 +224,13 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                         <TableBody className="divide-y mb-3">
                             {ads.map(ad => <TableRow className="tr" key={ad.id}>
                                 <TableCell className="th">{ad.id}</TableCell>
-                                <TableCell><Button size="xs" pill color="warning" className="inline-block" as={Link}
-                                                   href={`/user/manage/storefront/ads/${ad.id}`}>
-                                    {t('manage.storefront.view')}</Button></TableCell>
+                                <TableCell>
+                                    <Link href={`/user/manage/storefront/ads/${ad.id}`}>
+                                        <Button size="xs" pill color="warning" className="inline-block">
+                                            {t('manage.storefront.view')}
+                                        </Button>
+                                    </Link>
+                                </TableCell>
                             </TableRow>)}
                         </TableBody>
                     </Table>
@@ -205,8 +243,10 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                         <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                              className="hidden dark:block w-72" alt=""/>
                         <p className="mb-3">{t('manage.storefront.empty')}</p>
-                        <Button color="warning" pill as={Link} href="/user/manage/storefront/ads/create"
-                                className="inline-block">{t('manage.storefront.create')}</Button>
+                        <Link href="/user/manage/storefront/ads/create">
+                            <Button color="warning" pill
+                                    className="inline-block">{t('manage.storefront.create')}</Button>
+                        </Link>
                     </div>
                 </If>
             </TabItem>
