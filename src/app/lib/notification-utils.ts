@@ -1,4 +1,4 @@
-import { Notification, NotificationType } from '@/generated/prisma/client'
+import { Notification, NotificationType } from '@/generated/prisma/browser'
 
 export function getNotificationMessageParams(notification: Notification): { [key: string]: string } {
     const messageParams: { [key: string]: string } = Object()
