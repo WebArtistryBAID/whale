@@ -7,6 +7,7 @@ import If from '@/app/lib/If'
 import RecentOrder from '@/app/core-components/RecentOrder'
 import { IconType } from 'react-icons'
 import { Trans } from 'react-i18next/TransWithoutContext'
+import CookiesBoundary from '@/app/lib/CookiesBoundary'
 
 function HomeBlock({ title, subtitle, icon, href }: { title: string, subtitle: string, icon: IconType, href: string }) {
     return <Link aria-label={title} className="w-40 lg:w-72 h-40 rounded-3xl bg-amber-50 dark:bg-amber-800
@@ -48,7 +49,7 @@ export default async function Home() {
                         <HomeBlock title={t('user')} subtitle={t('userSub')} href="/user" icon={HiUser}/>
                     </If>
 
-                    <RecentOrder/>
+                    <CookiesBoundary><RecentOrder/></CookiesBoundary>
                 </div>
             </div>
         </div>

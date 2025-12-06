@@ -26,7 +26,6 @@ import {
     HiUser,
     HiUsers
 } from 'react-icons/hi'
-import Link from 'next/link'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { User } from '@prisma/client'
@@ -34,8 +33,14 @@ import { getMyUser } from '@/app/login/login-actions'
 import { useCookies } from 'react-cookie'
 import { useRouter } from 'next/navigation'
 import { getMyNotificationsCount } from '@/app/lib/notification-actions'
+import CookiesBoundary from '@/app/lib/CookiesBoundary'
+import Link from 'next/link'
 
-export default function UserLayout({ children }: { children: ReactNode }) {
+export default function WrappedUserLayout({ children }: { children: ReactNode }) {
+    return <CookiesBoundary><UserLayout>{children}</UserLayout></CookiesBoundary>
+}
+
+function UserLayout({ children }: { children: ReactNode }) {
     const { t } = useTranslationClient('user')
     const [ myUser, setMyUser ] = useState<User>()
     const deleteCookie = useCookies()[2]

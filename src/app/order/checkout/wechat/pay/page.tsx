@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { PaymentStatus } from '@prisma/client'
 import { getMyUser } from '@/app/login/login-actions'
 import OrderPayClient from '@/app/order/checkout/wechat/pay/OrderPayClient'
+import CookiesBoundary from '@/app/lib/CookiesBoundary'
 
 export default async function OrderPayBase({ searchParams }: {
     searchParams?: Promise<{ [_: string]: string | string[] | undefined }>
@@ -19,5 +20,5 @@ export default async function OrderPayBase({ searchParams }: {
     if (order.userId != null && order.userId !== me?.id) {
         redirect('/')
     }
-    return <OrderPayClient order={order}/>
+    return <CookiesBoundary><OrderPayClient order={order}/></CookiesBoundary>
 }
