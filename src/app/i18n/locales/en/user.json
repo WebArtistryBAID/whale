@@ -230,6 +230,7 @@
       "perDay": "Per Day",
       "perOrder": "Per Order",
       "totalRevenue": "Total Revenue",
+      "paidRevenue": "Paid Revenue",
       "totalOrders": "Total Orders",
       "totalCups": "Total Cups",
       "compared_week": "compared to last week",
@@ -432,7 +433,7 @@
     "detailsPane": "Order Details",
     "storeStatusOpen": "Ready for ordering",
     "storeStatusClosed": "Store is closed",
-    "openAction": "Open For Rest of Day",
-    "closeAction": "Close For Rest of Day"
+    "openAction": "Open",
+    "closeAction": "Close"
   }
 }

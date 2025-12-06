@@ -1,6 +1,6 @@
 'use server'
 
-import { PaymentStatus, PrismaClient } from '@prisma/client'
+import { PaymentMethod, PaymentStatus, PrismaClient } from '@prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 
@@ -9,9 +9,11 @@ const prisma = new PrismaClient()
 export interface StatsAggregates {
     newItems: NewItemStats[]
     totalRevenue: string
+    paidRevenue: string
     totalOrders: number
     totalCups: number
     lastTotalRevenue: string | null
+    lastPaidRevenue: string | null
     lastTotalOrders: number | null
     lastTotalCups: number | null
 
@@ -121,7 +123,14 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
             where: {
                 itemTypeId: item.id,
                 order: {
-                    paymentStatus: PaymentStatus.paid
+                    OR: [
+                        {
+                            paymentStatus: PaymentStatus.paid
+                        },
+                        {
+                            paymentMethod: PaymentMethod.payLater
+                        }
+                    ]
                 }
             },
             select: {
@@ -151,6 +160,7 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
 
     // 2. Fill total revenue, orders, and cups
     let totalRevenue = Decimal(0)
+    let paidRevenue = Decimal(0)
     let totalOrders = 0
     let totalCups = 0
 
@@ -203,7 +213,14 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
                 gte: start,
                 lt: end
             },
-            paymentStatus: PaymentStatus.paid
+            OR: [
+                {
+                    paymentStatus: PaymentStatus.paid
+                },
+                {
+                    paymentMethod: PaymentMethod.payLater
+                }
+            ]
         },
         select: {
             createdAt: true,
@@ -237,6 +254,10 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
         }
         if (Decimal(order.totalPrice).lt(minOrderValuePerUnit[thisOrderIndex])) {
             minOrderValuePerUnit[thisOrderIndex] = Decimal(order.totalPrice)
+        }
+
+        if (order.paymentStatus === PaymentStatus.paid) {
+            paidRevenue = paidRevenue.add(order.totalPrice)
         }
 
         totalOrders++
@@ -276,6 +297,7 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
 
     // 3. Fill total revenue, orders, and cups from last unit
     let lastTotalRevenue: Decimal | null = Decimal(0)
+    let lastPaidRevenue: Decimal | null = Decimal(0)
     let lastTotalOrders: number | null = 0
     let lastTotalCups: number | null = 0
     for (const order of await prisma.order.findMany({
@@ -284,10 +306,18 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
                 gte: lastStart,
                 lt: start
             },
-            paymentStatus: PaymentStatus.paid
+            OR: [
+                {
+                    paymentStatus: PaymentStatus.paid
+                },
+                {
+                    paymentMethod: PaymentMethod.payLater
+                }
+            ]
         },
         select: {
             totalPrice: true,
+            paymentStatus: true,
             items: {
                 select: {
                     amount: true
@@ -296,6 +326,10 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
         }
     })) {
         lastTotalRevenue = lastTotalRevenue.add(order.totalPrice)
+        if (order.paymentStatus === PaymentStatus.paid) {
+            lastPaidRevenue = lastPaidRevenue.add(order.totalPrice)
+        }
+
         lastTotalOrders++
         for (const orderedItem of order.items) {
             lastTotalCups += orderedItem.amount
@@ -303,6 +337,9 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
     }
     if (lastTotalRevenue.eq(0)) {
         lastTotalRevenue = null
+    }
+    if (lastPaidRevenue.eq(0)) {
+        lastPaidRevenue = null
     }
     if (lastTotalOrders === 0) {
         lastTotalOrders = null
@@ -326,7 +363,14 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
                 lt: end
             },
             order: {
-                paymentStatus: PaymentStatus.paid
+                OR: [
+                    {
+                        paymentStatus: PaymentStatus.paid
+                    },
+                    {
+                        paymentMethod: PaymentMethod.payLater
+                    }
+                ]
             }
         },
         select: {
@@ -371,9 +415,11 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
             revenueGenderDistribution: Object.fromEntries(Object.entries(item.revenueGenderDistribution).map(([ k, v ]) => [ k, v.toString() ]))
         })),
         totalRevenue: totalRevenue.toString(),
+        paidRevenue: paidRevenue.toString(),
         totalOrders,
         totalCups,
         lastTotalRevenue: lastTotalRevenue?.toString() ?? null,
+        lastPaidRevenue: lastPaidRevenue?.toString() ?? null,
         lastTotalOrders: lastTotalOrders ?? null,
         lastTotalCups: lastTotalCups ?? null,
         ordersPerUnit,

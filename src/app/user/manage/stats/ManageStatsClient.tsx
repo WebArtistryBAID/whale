@@ -124,7 +124,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                 <Spinner color="warning"/>
             </div>
             : <>
-                <div aria-label={t('manage.stats.basic')} className="mb-8 grid gap-3 grid-cols-1 lg:grid-cols-3">
+                <div aria-label={t('manage.stats.basic')} className="mb-8 grid gap-3 grid-cols-1 lg:grid-cols-4">
                     <Block title={t('manage.stats.totalRevenue')}>
                         <p className="text-2xl mb-1">¥{data.totalRevenue}</p>
                         <If condition={data.lastTotalRevenue != null}>
@@ -137,6 +137,23 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             <If condition={Decimal(data.lastTotalRevenue ?? 0).lt(data.totalRevenue)}>
                                 <Badge color="success" className="inline-flex" icon={HiArrowUp}>
                                     +{Decimal(data.totalRevenue).minus(data.lastTotalRevenue ?? 0).div(data.lastTotalRevenue ?? 1).times(100).round().toString()}%
+                                    <span className="sr-only">{t(`manage.stats.compared_${range}`)}</span>
+                                </Badge>
+                            </If>
+                        </If>
+                    </Block>
+                    <Block title={t('manage.stats.paidRevenue')}>
+                        <p className="text-2xl mb-1">¥{data.paidRevenue}</p>
+                        <If condition={data.lastPaidRevenue != null}>
+                            <If condition={Decimal(data.lastPaidRevenue ?? 0).gt(data.paidRevenue)}>
+                                <Badge color="failure" className="inline-flex" icon={HiArrowDown}>
+                                    {Decimal(data.paidRevenue).minus(data.lastPaidRevenue ?? 0).div(data.lastPaidRevenue ?? 1).times(100).round().toString()}%
+                                    <span className="sr-only">{t(`manage.stats.compared_${range}`)}</span>
+                                </Badge>
+                            </If>
+                            <If condition={Decimal(data.lastPaidRevenue ?? 0).lt(data.paidRevenue)}>
+                                <Badge color="success" className="inline-flex" icon={HiArrowUp}>
+                                    +{Decimal(data.paidRevenue).minus(data.lastPaidRevenue ?? 0).div(data.lastPaidRevenue ?? 1).times(100).round().toString()}%
                                     <span className="sr-only">{t(`manage.stats.compared_${range}`)}</span>
                                 </Badge>
                             </If>

@@ -230,6 +230,7 @@
       "perDay": "按天统计",
       "perOrder": "按订单统计",
       "totalRevenue": "总收入",
+      "paidRevenue": "已入账收入",
       "totalOrders": "总订单数",
       "totalCups": "总杯数",
       "compared_week": "相较于上周",
@@ -432,7 +433,7 @@
     "detailsPane": "订单详情",
     "storeStatusOpen": "可接受订单",
     "storeStatusClosed": "不可接受订单",
-    "openAction": "手动开业 (本日)",
-    "closeAction": "暂停营业 (本日)"
+    "openAction": "手动开业",
+    "closeAction": "暂停营业"
   }
 }
