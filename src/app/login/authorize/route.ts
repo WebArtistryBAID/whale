@@ -26,6 +26,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             'Content-Type': 'application/x-www-form-urlencoded',
             Authorization: `Basic ${Buffer.from(`${process.env.ONELOGIN_CLIENT_ID}:${process.env.ONELOGIN_CLIENT_SECRET}`).toString('base64')}`
         },
+        signal: AbortSignal.timeout(30000),
         body: new URLSearchParams({
             grant_type: 'authorization_code',
             code: search.get('code')!,
@@ -42,7 +43,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const me = await fetch(`${process.env.ONELOGIN_HOST}/api/v1/me`, {
         headers: {
             Authorization: `Bearer ${accessToken}`
-        }
+        },
+        signal: AbortSignal.timeout(30000)
     })
     const meJson = await me.json()
     const user = await prisma.user.upsert({
