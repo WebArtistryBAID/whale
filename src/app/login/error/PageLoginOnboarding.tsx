@@ -8,12 +8,12 @@ export default function PageLoginOnboarding() {
 
     return <div className="messagebox-container">
         <div className="messagebox">
-            <h1 className="mb-1">{t('error')}</h1>
-            <p className="text-sm mb-5">
-                {t('details')}
+            <h1 className="mb-1 text-black">{t('error')}</h1>
+            <p className="text-sm text-black mb-5">
+                {t('details')} (LinkBAID Integrator)
             </p>
             <button onClick={async () => {
-                location.href = await getLoginTarget('/core')
+                location.href = await getLoginTarget('/')
             }} className="btn">{t('tryAgain')}</button>
         </div>
     </div>
