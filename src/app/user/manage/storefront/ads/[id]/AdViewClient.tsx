@@ -33,7 +33,7 @@ export default function AdViewClient({ object, uploadPrefix }: { object: Ad, upl
                             await deleteAd(object.id)
                             setLoading(false)
                             setDeleteModal(false)
-                            router.push('/user/manage/storefront')
+                            router.replace('/user/manage/storefront')
                         }}>{t('confirm')}</Button>
                 <Button pill color="gray" onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
             </ModalFooter>

@@ -29,7 +29,7 @@ export default function CouponCodeViewClient({ object }: { object: CouponCode })
                             await deleteCouponCode(object.id)
                             setLoading(false)
                             setDeleteModal(false)
-                            router.push('/user/manage/storefront')
+                            router.replace('/user/manage/storefront')
                         }}>{t('confirm')}</Button>
                 <Button pill color="gray" onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
             </ModalFooter>

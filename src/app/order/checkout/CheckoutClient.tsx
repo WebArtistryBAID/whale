@@ -78,8 +78,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
     const [ showLoginNag, setShowLoginNag ] = useState(false)
 
     useEffect(() => {
+        router.prefetch('/order/checkout/wechat/pay')
         if (shoppingCart.items.length < 1) {
-            router.push('/order')
+            router.replace('/order')
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ router ])
@@ -150,11 +151,11 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
             // Redirect to check page directly
             setRedirectTarget(`/order/details/${order.id}`)
-            router.push(`/order/details/${order.id}`)
+            router.replace(`/order/details/${order.id}`)
         } else {
             // Start payment process
             setRedirectTarget(`/order/checkout/wechat/pay?id=${order.id}`)
-            router.push(`/order/checkout/wechat/pay?id=${order.id}`)
+            router.replace(`/order/checkout/wechat/pay?id=${order.id}`)
         }
     }
 

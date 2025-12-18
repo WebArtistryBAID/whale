@@ -41,7 +41,7 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
                              disabled={!storeOpen || atCapacity || shoppingCart.getAmount() > maxCups || shoppingCart.items.length < 1}
                              color="yellow" onClick={() => {
         if (shoppingCart.items.length > 0) {
-            router.push('/order/checkout')
+            router.replace('/order/checkout')
         }
     }}>{t('checkout.title')}</Button>
 

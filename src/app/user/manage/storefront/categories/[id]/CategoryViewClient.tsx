@@ -48,7 +48,7 @@ export default function CategoryViewClient({ object }: { object: HydratedCategor
                             await deleteCategory(object.id)
                             setLoading(false)
                             setDeleteModal(false)
-                            router.push('/user/manage/storefront')
+                            router.replace('/user/manage/storefront')
                         }}>{t('confirm')}</Button>
                 <Button pill color="gray" onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
             </ModalFooter>

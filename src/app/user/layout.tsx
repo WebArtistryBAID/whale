@@ -124,7 +124,7 @@ function UserLayout({ children }: { children: ReactNode }) {
         <div className="mr-3 mb-3 absolute bottom-0 hidden lg:block">
             <button onClick={() => {
                 deleteCookie('access_token', { path: '/' })
-                router.push('/')
+                router.replace('/')
             }}
                     className="flex items-center gap-3 w-full rounded-full p-3 hover:bg-yellow-100 dark:hover:bg-yellow-800 transition-colors duration-100">
                 <Badge color="yellow" icon={HiUser}/>

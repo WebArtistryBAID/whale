@@ -183,7 +183,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
                     <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
                         <Button pill color="warning" className="mb-3" onClick={() => {
                             removeCookie('access_token', { path: '/' })
-                            router.push('/')
+                            router.replace('/')
                         }}>{t('dashboard.others.logOut')}</Button>
                         <p className="text-sm secondary">{t('dashboard.others.credits')}</p>
                     </div>
