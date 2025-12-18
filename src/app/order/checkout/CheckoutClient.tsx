@@ -70,6 +70,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
     const [ orderFailed, setOrderFailed ] = useState(false)
     const [ loading, setLoading ] = useState(false)
     const [ awaitRedirect, setAwaitRedirect ] = useState(false)
+    const [ redirectTarget, setRedirectTarget ] = useState('#')
     const [ balanceEnabled, setBalanceEnabled ] = useState(false)
     const [ payLaterEnabled, setPayLaterEnabled ] = useState(false)
     const [ deliveryEnabled, setDeliveryEnabled ] = useState(false)
@@ -148,9 +149,11 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         setAwaitRedirect(true)
         if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
             // Redirect to check page directly
+            setRedirectTarget(`/order/details/${order.id}`)
             router.push(`/order/details/${order.id}`)
         } else {
             // Start payment process
+            setRedirectTarget(`/order/checkout/wechat/pay?id=${order.id}`)
             router.push(`/order/checkout/wechat/pay?id=${order.id}`)
         }
     }
@@ -160,7 +163,11 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
             <div className="p-8 h-full lg:h-96 flex justify-center flex-col items-center">
                 <Spinner className="mb-3" size="xl" color="warning"/>
 
-                <p className="text-sm text-center">{t('checkout.loadingText')}</p>
+                <p className="text-sm text-center mb-3">{t('checkout.loadingText')}</p>
+
+                <Link href={redirectTarget}>
+                    <Button pill color="yellow" as="div">{t('checkout.loadingContinue')}</Button>
+                </Link>
             </div>
         </Modal>
 
