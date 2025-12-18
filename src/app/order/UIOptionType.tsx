@@ -16,7 +16,7 @@ export default function UIOptionType({ optionType, selected, onChange }: {
         <p className="mb-1 text-sm">{optionType.name}</p>
         <div className="flex gap-3 flex-wrap">
             {optionType.items.map(item =>
-                item.soldOut ? null :
+                item.soldOut ? <Button key={item.id} color="gray" pill size="xs" disabled={true}>{item.name}</Button> :
                     <Button key={item.id} color={selected === item.id ? 'warning' : 'gray'} pill size="xs"
                             onClick={() => onChange(item.id)}>
                         {item.name}
