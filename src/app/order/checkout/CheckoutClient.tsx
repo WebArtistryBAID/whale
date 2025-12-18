@@ -127,6 +127,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
     }
 
     async function order() {
+        if (shoppingCart.items.length < 1) {
+            return
+        }
         setLoading(true)
         const order = await createOrder(shoppingCart.items, coupon.length > 0 ? coupon : null, shoppingCart.onSiteOrderMode,
             useDelivery ? deliveryRoom : null, paymentMethod)

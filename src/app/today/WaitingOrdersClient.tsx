@@ -34,9 +34,16 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
             <img width={400} height={322} src="/assets/illustrations/unboxing-dark.png"
                  className="hidden dark:block w-72" alt=""/>
             <p className="mb-3">{t('today.empty')}</p>
-            <Link href="/user/manage/orders">
+            <Link href="/user/manage/orders" className="mb-3">
                 <Button color="warning">{t('today.return')}</Button>
             </Link>
+
+            <Button color="yellow" onClick={async () => {
+                const date = new Date()
+                await setConfigValue('availability-override-date', `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`)
+                await setConfigValue('availability-override-value', isOpen ? 'false' : 'true')
+                setOpen(!isOpen)
+            }}>{isOpen ? t('today.closeAction') : t('today.openAction')}</Button>
         </div>
     }
 
