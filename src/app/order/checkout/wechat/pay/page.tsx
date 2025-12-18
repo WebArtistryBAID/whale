@@ -17,8 +17,5 @@ export default async function OrderPayBase({ searchParams }: {
     if (order.paymentStatus !== PaymentStatus.notPaid) {
         redirect('/')
     }
-    if (order.userId != null && order.userId !== me?.id) {
-        redirect('/')
-    }
     return <CookiesBoundary><OrderPayClient order={order}/></CookiesBoundary>
 }

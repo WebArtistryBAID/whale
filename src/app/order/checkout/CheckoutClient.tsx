@@ -157,10 +157,10 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
 
     return <>
         <Modal show={awaitRedirect}>
-            <div className="p-8 h-96 flex justify-center flex-col items-center">
+            <div className="p-8 h-full lg:h-96 flex justify-center flex-col items-center">
                 <Spinner className="mb-3" size="xl" color="warning"/>
 
-                <p className="text-sm">{t('checkout.loadingText')}</p>
+                <p className="text-sm text-center">{t('checkout.loadingText')}</p>
             </div>
         </Modal>
 
