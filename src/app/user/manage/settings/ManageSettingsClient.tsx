@@ -150,6 +150,7 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
             {NumberValue('maximum-balance', Decimal(0))}
             {NumberValue('balance-recharge-minimum', Decimal(0))}
             {BooleanValue('allow-pay-later')}
+            {BooleanValue('allow-delivery')}
         </div>
 
         <If condition={hasChanges()}>

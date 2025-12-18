@@ -30,6 +30,7 @@ import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
+import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 
 function isMobileOriPad(): boolean {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
@@ -67,8 +68,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
     const [ deliveryRoom, setDeliveryRoom ] = useState('')
     const [ orderFailed, setOrderFailed ] = useState(false)
     const [ loading, setLoading ] = useState(false)
-    const [ balanceEnabled, setBalanceEnabled ] = useState(true)
-    const [ payLaterEnabled, setPayLaterEnabled ] = useState(true)
+    const [ balanceEnabled, setBalanceEnabled ] = useState(false)
+    const [ payLaterEnabled, setPayLaterEnabled ] = useState(false)
+    const [ deliveryEnabled, setDeliveryEnabled ] = useState(false)
     const [ waitTime, setWaitTime ] = useState(-1)
     const [ showLoginNag, setShowLoginNag ] = useState(false)
 
@@ -104,6 +106,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         (async () => {
             setBalanceEnabled(await canPayWithBalance(getRealTotal().toString()))
             setPayLaterEnabled(await canPayWithPayLater())
+            setDeliveryEnabled(await getConfigValueAsBoolean('allow-delivery'))
         })()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ shoppingCart.items, foundCoupon ])
@@ -139,7 +142,6 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         }
         storedOrder.setOrder(order.id)
         shoppingCart.clear()
-        setLoading(false)
         if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
             // Redirect to check page directly
             router.push(`/order/details/${order.id}`)
@@ -147,6 +149,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
             // Start payment process
             router.push(`/order/checkout/wechat/pay?id=${order.id}`)
         }
+        setTimeout(() => {
+            setLoading(false)
+        }, 20000)
     }
 
     return <>
@@ -178,21 +183,23 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                  aria-label={t('checkout.title')}>
                 <h1 className="mb-5">{t('checkout.title')}</h1>
 
-                <ButtonGroup className="mb-3">
-                    <Button color={useDelivery ? 'gray' : 'warning'} onClick={() => setUseDelivery(false)}>
-                        {t('checkout.pickUp')}
-                        <If condition={!useDelivery}>
-                            <span className="sr-only">{t('a11y.selected')}</span>
-                        </If>
-                    </Button>
+                <If condition={deliveryEnabled}>
+                    <ButtonGroup className="mb-3">
+                        <Button color={useDelivery ? 'gray' : 'warning'} onClick={() => setUseDelivery(false)}>
+                            {t('checkout.pickUp')}
+                            <If condition={!useDelivery}>
+                                <span className="sr-only">{t('a11y.selected')}</span>
+                            </If>
+                        </Button>
 
-                    <Button color={useDelivery ? 'warning' : 'gray'} onClick={() => setUseDelivery(true)}>
-                        {t('checkout.delivery')}
-                        <If condition={useDelivery}>
-                            <span className="sr-only">{t('a11y.selected')}</span>
-                        </If>
-                    </Button>
-                </ButtonGroup>
+                        <Button color={useDelivery ? 'warning' : 'gray'} onClick={() => setUseDelivery(true)}>
+                            {t('checkout.delivery')}
+                            <If condition={useDelivery}>
+                                <span className="sr-only">{t('a11y.selected')}</span>
+                            </If>
+                        </Button>
+                    </ButtonGroup>
+                </If>
 
                 <p className="mb-1">{t('checkout.orderDetails')}</p>
                 <div className="mb-5 text-sm p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl"

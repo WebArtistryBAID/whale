@@ -59,6 +59,7 @@ For each task, you need to pass the query parameter `key={CRON_KEY}`.
 | `maximum-cups-per-day`          | number     | The maximum number of cups that can be ordered in a single day.                                   |
 | `maximum-balance`               | Decimal    | The maximum balance that a user can have.                                                         |
 | `balance-recharge-minimum`      | Decimal    | The minimum amount that can be recharged.                                                         |
+| `allow-delivery`                | boolean    | Whether to allow delivery service.                                                                |
 | `allow-pay-later`               | boolean    | Whether to allow Pay Later payment method.                                                        |
 
 ## Contribution

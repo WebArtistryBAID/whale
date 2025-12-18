@@ -108,7 +108,7 @@ export async function canPayWithPayLater(): Promise<boolean> {
             userId: me.id,
             paymentStatus: PaymentStatus.notPaid
         }
-    }) === 0
+    }) === 0 && await getConfigValueAsBoolean('allow-pay-later')
 }
 
 export async function getUnpaidPayLaterOrder(): Promise<number> {
@@ -271,6 +271,10 @@ export async function createOrder(items: OrderedItemTemplate[],
     // Ensure we didn't go over maximum cups per order
     const totalAmount = items.reduce((acc, item) => acc + item.amount, 0)
     if (totalAmount < 0 || totalAmount > await getConfigValueAsNumber('maximum-cups-per-order')) {
+        return null
+    }
+
+    if (!(await getConfigValueAsBoolean('allow-delivery')) && deliveryRoom != null && deliveryRoom != '') {
         return null
     }
 
