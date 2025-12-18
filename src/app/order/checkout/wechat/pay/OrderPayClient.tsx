@@ -194,12 +194,12 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                 </h1>
                 <p className="text-2xl">CN<span className="font-bold">¥{order.totalPrice}</span></p>
             </div>
-            <If condition={error}>
-                <p className="mb-3"><Trans t={t} i18nKey="wechatPay.error"
-                                           components={{ 1: <span className="font-bold" key="bold"/> }}/></p>
-                <Button onClick={() => location.reload()} pill color="warning">{t('wechatPay.restart')}</Button>
-            </If>
             <div className="w-full flex justify-center items-center text-center flex-col">
+                <If condition={error}>
+                    <p className="mb-3"><Trans t={t} i18nKey="wechatPay.error"
+                                               components={{ 1: <span className="font-bold" key="bold"/> }}/></p>
+                    <Button onClick={() => location.reload()} pill color="success">{t('wechatPay.restart')}</Button>
+                </If>
                 <If condition={!error}>
                     <If condition={isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode}>
                         <If condition={qrCode == null}>

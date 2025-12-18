@@ -105,7 +105,7 @@
     "error": "Payment failed. Please try again.",
     "restart": "Restart Payment",
     "share": "Ask Friend to Pay",
-    "cancel": "Cancel or Change Payment Method",
+    "cancel": "Cancel",
     "shareTitle": "Help me pay for my order at Whale Cafe",
     "shareText": "I need help paying for my order at Whale Cafe. Can you help me out?",
     "mobile": "You will be redirected to WeChat to complete the payment."
