@@ -22,7 +22,11 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
             setOpen(await isStoreOpen())
         })()
         setInterval(async () => {
-            setOrders(await getWaitingOrders())
+            const newOrders = await getWaitingOrders()
+            if (!(selected in newOrders)) {
+                setSelected(-1)
+            }
+            setOrders(newOrders)
             setOpen(await isStoreOpen())
         }, 10000)
     }, [])
