@@ -16,8 +16,9 @@ export default function OrderDesktop({ categories, ads, uploadPrefix }: {
 
     return <div className="flex w-screen h-[93vh]">
         <div className="w-1/2 p-8 xl:p-16 h-full overflow-y-auto relative" aria-label={t('a11y.products')}>
-            {categories.map(category => <UICategory category={category} key={category.id}
-                                                    uploadPrefix={uploadPrefix}/>)}
+            {categories.map(category => <div className="mb-5" key={category.id}>
+                <UICategory category={category} uploadPrefix={uploadPrefix}/>
+            </div>)}
         </div>
         <div className="w-1/2 p-8 xl:p-16 h-full border-l border-amber-100 dark:border-amber-800">
             <div className="h-full flex flex-col gap-8">

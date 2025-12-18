@@ -13,8 +13,9 @@ export default function OrderMobile({ categories, uploadPrefix }: {
 
     return <>
         <div className="p-5 pb-36" aria-label={t('a11y.products')}>
-            {categories.map(category => <UICategory category={category} key={category.id}
-                                                    uploadPrefix={uploadPrefix}/>)}
+            {categories.map(category => <div className="mb-3" key={category.id}>
+                <UICategory category={category} uploadPrefix={uploadPrefix}/>
+            </div>)}
         </div>
         <UIShoppingCartMobile uploadPrefix={uploadPrefix}/>
     </>
