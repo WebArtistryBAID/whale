@@ -69,6 +69,7 @@
   "checkout": {
     "title": "Checkout",
     "orderDetails": "Order Details",
+    "loadingText": "Please wait while we process your order. This may take up to 30 seconds.",
     "total": "Total",
     "wait": "Estimated Wait Time",
     "waitTime_one": "{{count}} minute",

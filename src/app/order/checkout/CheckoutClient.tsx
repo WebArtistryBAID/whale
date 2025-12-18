@@ -16,6 +16,7 @@ import {
     ModalFooter,
     ModalHeader,
     Popover,
+    Spinner,
     TextInput
 } from 'flowbite-react'
 import { CouponCode, PaymentMethod, PaymentStatus, User } from '@/generated/prisma/browser'
@@ -68,6 +69,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
     const [ deliveryRoom, setDeliveryRoom ] = useState('')
     const [ orderFailed, setOrderFailed ] = useState(false)
     const [ loading, setLoading ] = useState(false)
+    const [ awaitRedirect, setAwaitRedirect ] = useState(false)
     const [ balanceEnabled, setBalanceEnabled ] = useState(false)
     const [ payLaterEnabled, setPayLaterEnabled ] = useState(false)
     const [ deliveryEnabled, setDeliveryEnabled ] = useState(false)
@@ -142,6 +144,8 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         }
         storedOrder.setOrder(order.id)
         shoppingCart.clear()
+        setLoading(false)
+        setAwaitRedirect(true)
         if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
             // Redirect to check page directly
             router.push(`/order/details/${order.id}`)
@@ -149,12 +153,17 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
             // Start payment process
             router.push(`/order/checkout/wechat/pay?id=${order.id}`)
         }
-        setTimeout(() => {
-            setLoading(false)
-        }, 20000)
     }
 
     return <>
+        <Modal show={awaitRedirect}>
+            <div className="p-8 h-96 flex justify-center items-center">
+                <Spinner className="h-16 w-16" color="yellow"/>
+
+                <p className="text-xs">{t('checkout.loadingText')}</p>
+            </div>
+        </Modal>
+
         <Modal show={showLoginNag} onClose={() => setShowLoginNag(false)}>
             <ModalHeader>{t('checkout.loginNagModal.title')}</ModalHeader>
             <ModalBody>
