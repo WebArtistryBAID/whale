@@ -114,11 +114,9 @@ export default function OrderNags() {
                 </Modal>
             ) : payLaterModal ? (
                 <Modal show={payLaterModal} onClose={() => setPayLaterModal(false)}>
-                    <ModalHeader>{t('payLaterModal.title')}</ModalHeader>
                     <ModalBody>
-                        <p>{t('payLaterModal.message')}</p>
-                    </ModalBody>
-                    <ModalFooter>
+                        <h3 className="text-2xl mb-3">{t('payLaterModal.title')}</h3>
+                        <p className="mb-3">{t('payLaterModal.message')}</p>
                         <Button
                             pill
                             color="warning"
@@ -129,7 +127,7 @@ export default function OrderNags() {
                         >
                             {t('payLaterModal.cta')}
                         </Button>
-                    </ModalFooter>
+                    </ModalBody>
                 </Modal>
             ) : atCapacityModal ? (
                 <Modal show={atCapacityModal} onClose={() => setAtCapacityModal(false)}>
