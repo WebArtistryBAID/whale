@@ -18,17 +18,20 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
     const [ isOpen, setOpen ] = useState(false)
 
     useEffect(() => {
-        (async () => {
-            setOpen(await isStoreOpen())
-        })()
-        setInterval(async () => {
+        const tick = async () => {
             const newOrders = await getWaitingOrders()
-            if (!(selected in newOrders)) {
-                setSelected(-1)
-            }
+
             setOrders(newOrders)
             setOpen(await isStoreOpen())
-        }, 10000)
+
+            setSelected(prev =>
+                Object.prototype.hasOwnProperty.call(newOrders, String(prev)) ? prev : -1
+            )
+        }
+
+        void tick()
+        const id = setInterval(tick, 10000)
+        return () => clearInterval(id)
     }, [])
 
     if (Object.keys(orders).length < 1) {
@@ -85,7 +88,7 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
         <div className="w-4/5 p-8 h-full overflow-y-auto" aria-label={t('today.detailsPane')}>
             {selected !== -1 ?
                 <OrderWithData order={orders[selected]} close={() => setSelected(-1)} forceUpdate={async () => {
-                setOrders(await getWaitingOrders())
+                    setOrders(await getWaitingOrders())
                 }}/> : null}
         </div>
     </div>
