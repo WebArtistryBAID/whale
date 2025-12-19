@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getMyUser } from '@/app/login/login-actions'
 import { getMyTransaction } from '@/app/lib/balance-actions'
 import BalancePayClient from '@/app/balance/pay/BalancePayClient'
+import CookiesBoundary from '@/app/lib/CookiesBoundary'
 
 export default async function BalancePayBase({ searchParams }: {
     searchParams?: Promise<{ [_: string]: string | string[] | undefined }>
@@ -12,5 +13,5 @@ export default async function BalancePayBase({ searchParams }: {
     if (trans == null || me == null || trans.values[1] !== 'await' || trans.userId !== me.id) {
         redirect('/')
     }
-    return <BalancePayClient trans={trans}/>
+    return <CookiesBoundary><BalancePayClient trans={trans}/></CookiesBoundary>
 }
