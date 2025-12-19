@@ -69,7 +69,7 @@
   "checkout": {
     "title": "Checkout",
     "orderDetails": "Order Details",
-    "loadingText": "Please wait while we process your order. This may take up to 30 seconds.",
+    "loadingText": "Please tap on the button to verify that you are not a bot.",
     "loadingContinue": "Continue",
     "total": "Total",
     "wait": "Estimated Wait Time",

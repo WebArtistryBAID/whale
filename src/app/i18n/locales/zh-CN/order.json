@@ -69,7 +69,7 @@
   "checkout": {
     "title": "结账",
     "orderDetails": "订单详情",
-    "loadingText": "请等待，我们正在处理您的订单。这最多需要 30 秒。",
+    "loadingText": "请点击按钮，验证您不是机器人。",
     "loadingContinue": "继续",
     "total": "总价",
     "wait": "预计等待时间",
