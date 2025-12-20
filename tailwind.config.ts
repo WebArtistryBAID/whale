@@ -12,7 +12,6 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                serif: [ 'Libre Baskerville', 'serif' ],
                 display: [ 'system-ui', 'sans-serif' ],
                 body: [ 'system-ui', 'sans-serif' ]
             },

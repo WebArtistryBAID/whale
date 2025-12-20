@@ -5,16 +5,11 @@ import NextTopLoader from 'nextjs-toploader'
 import { CustomFlowbiteTheme, Flowbite, ThemeModeScript } from 'flowbite-react'
 import Toaster from '@/app/core-components/Toaster'
 import CookiesBoundary from '@/app/lib/CookiesBoundary'
-import { Libre_Baskerville } from 'next/font/google'
-
 
 export const metadata: Metadata = {
     title: 'The Whale Café',
     description: 'The ordering management platform for Whale Cafe'
 }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const font = Libre_Baskerville({ weight: [ '400', '700' ], subsets: [ 'latin' ] })
 
 const customTheme: CustomFlowbiteTheme = {
     sidebar: {
