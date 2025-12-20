@@ -198,7 +198,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
             <div id="primary-content" className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto"
                  aria-label={t('checkout.title')}>
-                <h1 className="mb-5">{t('checkout.title')}</h1>
+                <h1 className="mb-5 font-serif">{t('checkout.title')}</h1>
 
                 <If condition={deliveryEnabled}>
                     <ButtonGroup className="mb-3">

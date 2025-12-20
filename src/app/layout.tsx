@@ -5,12 +5,16 @@ import NextTopLoader from 'nextjs-toploader'
 import { CustomFlowbiteTheme, Flowbite, ThemeModeScript } from 'flowbite-react'
 import Toaster from '@/app/core-components/Toaster'
 import CookiesBoundary from '@/app/lib/CookiesBoundary'
+import { Playfair_Display } from 'next/font/google'
 
 
 export const metadata: Metadata = {
-    title: 'Whale Cafe',
+    title: 'The Whale Café',
     description: 'The ordering management platform for Whale Cafe'
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const font = Playfair_Display({ subsets: [ 'latin' ] })
 
 const customTheme: CustomFlowbiteTheme = {
     sidebar: {
@@ -56,6 +60,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <html lang="en" suppressHydrationWarning>
         <head>
             <ThemeModeScript mode="auto"/>
+            <link rel="icon" href="/assets/logo.png" sizes="any"/>
         </head>
         <body className="antialiased">
         <NextTopLoader showSpinner={false} color="#ff6900"/>

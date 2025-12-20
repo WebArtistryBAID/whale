@@ -27,7 +27,7 @@ export default function UIItemType({ item, uploadPrefix }: { item: HydratedItemT
                      className={`w-16 lg:w-24 rounded-full ${item.soldOut ? 'grayscale' : ''}`}/>
             </div>
             <div className="flex-grow">
-                <p className="font-bold font-display text-lg">{item.name}</p>
+                <p className="font-bold font-serif text-lg">{item.name}</p>
                 <p className="text-sm secondary mb-2">{item.shortDescription}</p>
                 <div className="flex gap-3 items-center w-full">
                     <If condition={Decimal(item.salePercent).eq(1) && !item.soldOut}>

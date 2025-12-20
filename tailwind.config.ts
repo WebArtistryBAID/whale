@@ -12,6 +12,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
+                serif: [ 'Playfair Display', 'serif' ],
                 display: [ 'system-ui', 'sans-serif' ],
                 body: [ 'system-ui', 'sans-serif' ]
             },

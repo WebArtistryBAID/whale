@@ -1,5 +1,5 @@
 {
-  "brand": "Whale Cafe",
+  "brand": "The Whale Café",
   "login": "Log In",
   "today": "Waiting Orders",
   "confirm": "Confirm",
@@ -107,8 +107,8 @@
     "restart": "Restart Payment",
     "share": "Ask Friend to Pay",
     "cancel": "Cancel",
-    "shareTitle": "Help me pay for my order at Whale Cafe",
-    "shareText": "I need help paying for my order at Whale Cafe. Can you help me out?",
+    "shareTitle": "Help me pay for my order at The Whale Café",
+    "shareText": "I need help paying for my order at The Whale Café. Can you help me out?",
     "mobile": "You will be redirected to WeChat to complete the payment."
   },
   "details": {
@@ -123,7 +123,7 @@
     },
     "onSiteContinue": "Continue On-Site Ordering",
     "orderNumberPrompt": "Please remember your order number. You will need it when picking up.",
-    "contactPrompt": "Please contact Li Jiarui if you have any questions or need a refund. WebArtistry is not responsible for Whale Cafe's operations.",
+    "contactPrompt": "Please contact Li Jiarui if you have any questions or need a refund. WebArtistry is not responsible for The Whale Café's operations.",
     "pickUpPrompt": "You must pick up your order at the counter in the lobby. <1>You will NOT be refunded if you do not pick up.</1>",
     "paymentTitle": "Payment",
     "paymentPromptPayLater": "This Pay Later order hasn't been paid for yet.",

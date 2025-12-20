@@ -92,7 +92,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
             <div id="primary-content"
                  className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full flex text-center flex-col justify-center items-center overflow-y-auto"
                  aria-label={t('a11y.waitTime')}>
-                <h1 className="text-7xl font-display mb-3 flex items-center">
+                <h1 className="text-7xl font-serif mb-3 flex items-center">
                     <Badge className="mr-3 rounded-full h-12 w-12 flex justify-center items-center" color="warning">
                         <HiHashtag className="text-2xl"/>
                     </Badge>

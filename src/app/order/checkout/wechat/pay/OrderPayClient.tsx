@@ -40,7 +40,6 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
     const [ error, setError ] = useState(false)
     const [ qrCode, setQRCode ] = useState<string | null>(null)
     const [ qrCodeShowProcessing, setQRCodeShowProcessing ] = useState(false)
-    const [ shareCopied, setShareCopied ] = useState(false)
     const shoppingCart = useShoppingCart()
 
     useEffect(() => {
@@ -72,30 +71,6 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
         // We don't want any more dependencies
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
-
-    async function share() {
-        if (navigator.canShare()) {
-            try {
-                await navigator.share({
-                    title: t('wechatPay.shareTitle'),
-                    text: t('wechatPay.shareText'),
-                    url: location.href
-                })
-            } catch {
-                await navigator.clipboard.writeText(location.href)
-                setShareCopied(true)
-                setTimeout(() => {
-                    setShareCopied(false)
-                }, 3000)
-            }
-        } else {
-            await navigator.clipboard.writeText(location.href)
-            setShareCopied(true)
-            setTimeout(() => {
-                setShareCopied(false)
-            }, 3000)
-        }
-    }
 
     async function cancel() {
         const result = await cancelUnpaidOrder(order.id)
@@ -229,8 +204,6 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                                     <Button disabled={!canRestart} onClick={() => location.reload()} pill
                                             color="green" className="inline-block">{t('wechatPay.restart')}</Button>
                                 </If>
-                                <Button className="inline-block" pill color="green"
-                                        onClick={share}>{shareCopied ? t('copied') : t('wechatPay.share')}</Button>
                             </div>
                         </If>
                     </If>
@@ -240,8 +213,6 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                         <div className="flex gap-3">
                             <Button disabled={!canRestart} onClick={launchWeChat} pill className="inline-block"
                                     color="green">{t('wechatPay.restart')}</Button>
-                            <Button className="inline-block" pill color="green"
-                                    onClick={share}>{shareCopied ? t('copied') : t('wechatPay.share')}</Button>
                         </div>
                     </If>
                 </If>

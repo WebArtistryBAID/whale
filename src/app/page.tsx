@@ -19,7 +19,7 @@ function HomeBlock({ title, subtitle, icon, href }: { title: string, subtitle: s
             })}
         </div>
         <div>
-            <p className="font-bold text-lg" aria-hidden>{title}</p>
+            <p className="font-bold text-lg font-serif" aria-hidden>{title}</p>
             <p className="secondary text-xs" aria-hidden>{subtitle}</p>
         </div>
     </Link>
@@ -34,7 +34,7 @@ export default async function Home() {
         <div id="primary-content" className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
             <div className="w-full text-center items-center
             flex flex-col justify-center p-8 xl:p-16 lg:h-full overflow-y-auto" aria-label={t('welcome')}>
-                <h1 className="mb-8">
+                <h1 className="mb-8 font-serif">
                     <Trans t={t} i18nKey="title" components={{ 1: <span key="soft-break">&shy;</span> }}/>
                 </h1>
 

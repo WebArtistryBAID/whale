@@ -15,7 +15,7 @@ export default async function SimpleNav() {
             <NavbarBrand as="div">
                 <img width={32} height={32} src="/assets/logo.png" className="mr-3 w-8 h-8 lg:w-10 lg:h-10"
                      alt="Whale Logo"/>
-                <span className="font-bold font-display text-xl hidden lg:block">{t('brand')}</span>
+                <span className="font-bold font-serif text-xl hidden lg:block">{t('brand')}</span>
             </NavbarBrand>
         </Link>
 

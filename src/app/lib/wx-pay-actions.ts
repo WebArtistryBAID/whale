@@ -5,7 +5,7 @@ import { PaymentStatus } from '@/generated/prisma/client'
 import signData from '@/app/lib/wx-pay-sign'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
-const orderBody = '白鲸咖啡订单 Whale Cafe Order'
+const orderBody = '白鲸咖啡馆订单 The Whale Café Order'
 
 async function requireUnpaidOrder(order: number): Promise<HydratedOrder> {
     const o = await getOrder(order)

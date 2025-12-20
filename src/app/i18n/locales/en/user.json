@@ -1,5 +1,5 @@
 {
-  "brand": "Whale Cafe",
+  "brand": "The Whale Café",
   "anonymous": "Anonymous",
   "confirm": "Confirm",
   "close": "Close",
@@ -79,7 +79,7 @@
     "others": {
       "title": "Others",
       "logOut": "Log Out",
-      "credits": "Project Whale is developed with a collaboration between WebArtistry and Whale Cafe. Thank you to all contributors."
+      "credits": "Project Whale is developed with a collaboration between WebArtistry and The Whale Café. Thank you to all contributors."
     }
   },
   "orders": {

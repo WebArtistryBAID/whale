@@ -1,6 +1,6 @@
 # Project Whale / Next
 
-The ordering management platform of Whale Cafe. Built with Next.js.
+The ordering management platform of The Whale Café. Built with Next.js.
 
 ## Get Started
 
@@ -69,8 +69,8 @@ To contribute, simply open a pull request.
 ## License
 
 ```
-    The ordering management platform for Whale Cafe.
-    Copyright (C) 2025  Team WebArtistry
+    The ordering management platform for The Whale Café.
+    Copyright (C) 2026  Team WebArtistry
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

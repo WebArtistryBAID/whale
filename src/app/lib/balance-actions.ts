@@ -9,7 +9,7 @@ import signData from '@/app/lib/wx-pay-sign'
 import { prisma } from '@/app/lib/prisma'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
-const orderBody = '白鲸咖啡余额充值 Whale Cafe Balance Recharge'
+const orderBody = '白鲸咖啡馆余额充值 The Whale Café Balance Recharge'
 
 function getTransactionNo(auditLog: UserAuditLog): string {
     return `${auditLog.id}-BALANCE${auditLog.time.getTime()}`
