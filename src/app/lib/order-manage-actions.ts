@@ -161,6 +161,9 @@ export async function refundOrder(id: number): Promise<boolean> {
     if (new Date().getTime() - order.createdAt.getTime() > 90 * 24 * 60 * 60 * 1000) {
         return false
     }
+    if (order.paymentStatus !== PaymentStatus.paid) {
+        return false
+    }
 
     if (order.paymentMethod === PaymentMethod.cash) {
         await finishRefunding(order)
@@ -171,7 +174,7 @@ export async function refundOrder(id: number): Promise<boolean> {
         await finishRefunding(order)
         return true
     }
-    if (order.paymentMethod === PaymentMethod.wxPay || order.paymentMethod === PaymentMethod.payForMe) {
+    if (order.paymentMethod === PaymentMethod.wxPay || (order.paymentMethod === PaymentMethod.payLater && order.wxPayId != null) || order.paymentMethod === PaymentMethod.payForMe) {
         if (!(await refundWeixinPay(order))) {
             return false
         }
