@@ -122,6 +122,7 @@ export default function OrderWithData({ order, forceUpdate, close }: {
             <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5 col-span-1 flex-col gap-3 flex"
                  aria-label={t('today.items')}>
                 {order.items.map(item => <UIOrderedItem item={item} key={item.id}/>)}
+                {order.items.length < 1 && <p className="secondary text-center">{t('today.noItems')}</p>}
             </div>
 
             <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5 col-span-1" aria-label={t('today.actions')}>

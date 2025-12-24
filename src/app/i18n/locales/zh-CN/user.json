@@ -398,6 +398,7 @@
   "today": {
     "orderNumber": "(订单号)",
     "delivery": " (外送)",
+    "noItems": "无法获得本订单的内容，因为产品已被删除。",
     "info": "订单信息",
     "items": "订单内容",
     "status": "订单状态",

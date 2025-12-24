@@ -398,6 +398,7 @@
   "today": {
     "orderNumber": "(Order Number)",
     "delivery": " (Delivery)",
+    "noItems": "The data for this order is unavailable because items have been deleted.",
     "info": "Order Information",
     "items": "Order Items",
     "status": "Order Status",
