@@ -435,8 +435,16 @@
     "ordersPane": "等待中订单",
     "detailsPane": "订单详情",
     "storeStatusOpen": "可接受订单",
-    "storeStatusClosed": "不可接受订单",
-    "openAction": "手动开业",
-    "closeAction": "暂停营业"
+    "storeStatusAtCapacity": "已达订单限额",
+    "storeStatusClosed": "未开业",
+    "openActionFull": "手动开业",
+    "closeActionFull": "暂停营业",
+    "capacityAction": "更改限额",
+    "capacityModal": {
+      "title": "更改限额",
+      "message": "请输入新的每日最大杯数。",
+      "placeholder": "杯数...",
+      "minimum": "必须至少为 1。"
+    }
   }
 }

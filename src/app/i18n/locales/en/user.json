@@ -435,8 +435,16 @@
     "ordersPane": "Waiting Orders",
     "detailsPane": "Order Details",
     "storeStatusOpen": "Ready for ordering",
+    "storeStatusAtCapacity": "At capacity",
     "storeStatusClosed": "Store is closed",
-    "openAction": "Open",
-    "closeAction": "Close"
+    "openActionFull": "Open Storefront",
+    "closeActionFull": "Close Storefront",
+    "capacityAction": "Change Capacity",
+    "capacityModal": {
+      "title": "Change Capacity",
+      "message": "Please enter the new maximum amount of cups that can be processed in a day.",
+      "placeholder": "Cups...",
+      "minimum": "Must be at least 1."
+    }
   }
 }
