@@ -290,13 +290,6 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                             </If>
                         </If>
 
-                        <If condition={isMobileOriPad() && !shoppingCart.onSiteOrderMode}>
-                            <PaymentMethodButton paymentMethod={PaymentMethod.payForMe}
-                                                 disabled={loading}
-                                                 selected={paymentMethod === PaymentMethod.payForMe}
-                                                 select={() => setPaymentMethod(PaymentMethod.payForMe)}/>
-                        </If>
-
                         <Popover trigger="hover" aria-hidden content={<div className="p-3">
                             <If condition={!shoppingCart.onSiteOrderMode}>
                                 <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
