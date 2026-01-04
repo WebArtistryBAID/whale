@@ -416,6 +416,7 @@
     "refunded": "Refunded",
     "paymentMethod": "Payment Method",
     "wxPay": "Weixin Pay",
+    "stripe": "Stripe",
     "balance": "Balance",
     "cash": "Cash",
     "payLater": "Pay Later",
