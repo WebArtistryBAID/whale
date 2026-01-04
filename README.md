@@ -19,20 +19,23 @@ To run in development:
 
 ## Environment Variables
 
-| Name                     | Description                                                                                                     |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `DATABASE_URI`           | The database URI to use. PostgreSQL is required.                                                                |
-| `JWT_SECRET`             | The JWT secret key to use. You can generate one with `openssl rand -hex 32`.                                    |
-| `HOST`                   | The location where this service is hosted. No trailing slashes.                                                 |
-| `UPLOAD_PATH`            | The directory where uploaded files are stored. In development, this is `public/uploads`.                        |
-| `UPLOAD_SERVE_PATH`      | The path where uploaded files are served. In development, this is `uploads`.                                    |
-| `BOTTOM_TEXT`            | In case you need this.                                                                                          |
-| `ONELOGIN_HOST`          | The location where [OneLogin](https://github.com/WebArtistryBAID/baid-onelogin) is hosted. No trailing slashes. |
-| `ONELOGIN_CLIENT_ID`     | OneLogin client ID. `basic`, `phone`, and `sms` scopes are required.                                            |
-| `ONELOGIN_CLIENT_SECRET` | OneLogin client secret.                                                                                         |
-| `WX_PAY_MCH_ID`          | Weixin Pay merchant ID.                                                                                         |
-| `WX_PAY_MCH_KEY`         | Weixin Pay signature key.                                                                                       |
-| `CRON_KEY`               | Cron task verification key.                                                                                     |
+| Name                             | Description                                                                                                     |
+|----------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `DATABASE_URI`                   | The database URI to use. PostgreSQL is required.                                                                |
+| `JWT_SECRET`                     | The JWT secret key to use. You can generate one with `openssl rand -hex 32`.                                    |
+| `HOST`                           | The location where this service is hosted. No trailing slashes.                                                 |
+| `UPLOAD_PATH`                    | The directory where uploaded files are stored. In development, this is `public/uploads`.                        |
+| `UPLOAD_SERVE_PATH`              | The path where uploaded files are served. In development, this is `uploads`.                                    |
+| `BOTTOM_TEXT`                    | In case you need this.                                                                                          |
+| `ONELOGIN_HOST`                  | The location where [OneLogin](https://github.com/WebArtistryBAID/baid-onelogin) is hosted. No trailing slashes. |
+| `ONELOGIN_CLIENT_ID`             | OneLogin client ID. `basic`, `phone`, and `sms` scopes are required.                                            |
+| `ONELOGIN_CLIENT_SECRET`         | OneLogin client secret.                                                                                         |
+| `WX_PAY_MCH_ID`                  | Weixin Pay merchant ID.                                                                                         |
+| `WX_PAY_MCH_KEY`                 | Weixin Pay signature key.                                                                                       |
+| `STRIPE_KEY`                     | Stripe key.                                                                                                     |
+| `STRIPE_PRODUCT`                 | Stripe product ID.                                                                                              |
+| `STRIPE_WEBHOOK_ENDPOINT_SECRET` | Stripe webhook endpoint secret.                                                                                 |
+| `CRON_KEY`                       | Cron task verification key.                                                                                     |
 
 ## Cron Tasks
 

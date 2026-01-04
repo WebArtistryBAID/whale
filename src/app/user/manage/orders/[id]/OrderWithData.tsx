@@ -134,6 +134,11 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                     <p className="text-xl mb-3">{order.wxPayId}</p>
                 </If>
 
+                <If condition={order.stripeSession != null}>
+                    <p className="secondary text-sm font-display">{t('today.stripeSession')}</p>
+                    <p className="text-xl mb-3">{order.stripeSession}</p>
+                </If>
+
                 <If condition={order.paymentStatus === PaymentStatus.paid && new Date().getTime() - order.createdAt.getTime() <= 90 * 24 * 60 * 60 * 1000}>
                     <Button className="mb-3" color="failure" pill
                             onClick={() => setRefundModal(true)}>{t('today.refund')}</Button>

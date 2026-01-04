@@ -41,6 +41,7 @@ enum Gender {
 
 enum PaymentMethod {
   wxPay
+  stripe
   balance
   cash
   payLater
@@ -174,6 +175,7 @@ model Order {
   userId        Int?
   paymentStatus PaymentStatus @default(notPaid)
   paymentMethod PaymentMethod
+  stripeSession String?
   wxPayId       String?
 
   notiRel Notification[]

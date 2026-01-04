@@ -32,6 +32,7 @@ import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
+import { getStripeRedirectURI } from '@/app/lib/stripe-actions'
 
 function isMobileOriPad(): boolean {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
@@ -116,10 +117,16 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
     }, [ shoppingCart.items, foundCoupon ])
 
     function getRealTotal(): Decimal {
+        let currentPrice: Decimal
         if (foundCoupon == null) {
-            return shoppingCart.getTotalPrice()
+            currentPrice = shoppingCart.getTotalPrice()
+        } else {
+            currentPrice = Decimal.max(0, shoppingCart.getTotalPrice().minus(Decimal(foundCoupon?.value ?? '0')))
         }
-        return Decimal.max(0, shoppingCart.getTotalPrice().minus(Decimal(foundCoupon?.value ?? '0')))
+        if (paymentMethod === PaymentMethod.stripe) {
+            currentPrice = currentPrice.mul(1.04)
+        }
+        return currentPrice
     }
 
     function getActualCouponValue(): Decimal {
@@ -146,17 +153,23 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         }
         storedOrder.setOrder(order.id)
         shoppingCart.clear()
-        setLoading(false)
-        setAwaitRedirect(true)
         if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
             // Redirect to check page directly
             setRedirectTarget(`/order/details/${order.id}`)
             router.replace(`/order/details/${order.id}`)
         } else {
             // Start payment process
-            setRedirectTarget(`/order/checkout/wechat/pay?id=${order.id}`)
-            router.replace(`/order/checkout/wechat/pay?id=${order.id}`)
+            if (paymentMethod === PaymentMethod.stripe) {
+                const redirect = await getStripeRedirectURI(order.id)
+                setRedirectTarget(redirect)
+                location.href = redirect
+            } else if (paymentMethod === PaymentMethod.wxPay) {
+                setRedirectTarget(`/order/checkout/wechat/pay?id=${order.id}`)
+                router.replace(`/order/checkout/wechat/pay?id=${order.id}`)
+            }
         }
+        setLoading(false)
+        setAwaitRedirect(true)
     }
 
     return <>
@@ -166,9 +179,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
 
                 <p className="text-sm text-center mb-3">{t('checkout.loadingText')}</p>
 
-                <Link href={redirectTarget}>
+                <a href={redirectTarget}>
                     <Button pill color="yellow" as="div">{t('checkout.loadingContinue')}</Button>
-                </Link>
+                </a>
             </div>
         </Modal>
 
@@ -238,6 +251,10 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                         <span className="sr-only"
                               aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
                     </If>
+                    <If condition={paymentMethod === PaymentMethod.stripe}>
+                        <p className="text-sm mt-3">{t('checkout.stripeFees')}</p>
+                        <p className="text-lg">4%</p>
+                    </If>
                 </div>
 
                 <p className="mb-1">{t('checkout.paymentMethod')}</p>
@@ -247,6 +264,11 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                                              selected={paymentMethod === PaymentMethod.wxPay}
                                              disabled={loading}
                                              select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
+
+                        <PaymentMethodButton paymentMethod={PaymentMethod.stripe}
+                                             selected={paymentMethod === PaymentMethod.stripe}
+                                             disabled={loading}
+                                             select={() => setPaymentMethod(PaymentMethod.stripe)}/>
 
                         <If condition={shoppingCart.onSiteOrderMode}>
                             <PaymentMethodButton paymentMethod={PaymentMethod.cash}

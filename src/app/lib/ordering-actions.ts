@@ -41,6 +41,7 @@ export interface HydratedOrder {
     userId: number | null
     paymentStatus: PaymentStatus
     paymentMethod: PaymentMethod
+    stripeSession: string | null
     wxPayId: string | null
 }
 
@@ -48,6 +49,14 @@ export interface EstimatedWaitTimeResponse {
     time: number
     cups: number
     orders: number
+}
+
+export async function requireUnpaidOrder(order: number): Promise<HydratedOrder> {
+    const o = await getOrder(order)
+    if (o == null || o.paymentStatus !== PaymentStatus.notPaid) {
+        throw 'Bad request'
+    }
+    return o
 }
 
 export async function couponQuickValidate(code: string): Promise<CouponCode | null> {
@@ -315,6 +324,11 @@ export async function createOrder(items: OrderedItemTemplate[],
             }
         })
         usedCoupon = true
+    }
+
+    // Add Stripe processing fees
+    if (paymentMethod === PaymentMethod.stripe) {
+        totalPrice = totalPrice.mul(1.04)
     }
 
     // Cash payment is only available with on-site

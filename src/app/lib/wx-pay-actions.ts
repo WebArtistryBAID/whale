@@ -1,19 +1,11 @@
 'use server'
 
-import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
+import { getOrder, HydratedOrder, requireUnpaidOrder } from '@/app/lib/ordering-actions'
 import { PaymentStatus } from '@/generated/prisma/client'
 import signData from '@/app/lib/wx-pay-sign'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
 const orderBody = '白鲸咖啡馆订单 The Whale Café Order'
-
-async function requireUnpaidOrder(order: number): Promise<HydratedOrder> {
-    const o = await getOrder(order)
-    if (o == null || o.paymentStatus !== PaymentStatus.notPaid) {
-        throw 'Bad request'
-    }
-    return o
-}
 
 function getOrderTransactionNo(order: HydratedOrder): string {
     return `${order.id}-ORDER${order.createdAt.getTime()}`

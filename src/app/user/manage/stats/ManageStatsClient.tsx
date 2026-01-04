@@ -517,10 +517,11 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                     <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <Block title={t('manage.stats.paymentMethod')} center aria-hidden>
                             <ReactApexChart width={380} type="pie" options={{
-                                labels: [ t('manage.stats.wxPay'), t('manage.stats.balance'), t('manage.stats.cash'), t('manage.stats.payLater'), t('manage.stats.payForMe') ],
+                                labels: [ t('manage.stats.wxPay'), t('manage.stats.stripe'), t('manage.stats.balance'), t('manage.stats.cash'), t('manage.stats.payLater'), t('manage.stats.payForMe') ],
                                 theme: theme() as never
                             }} series={[
                                 data.paymentMethodDistribution.wxPay ?? 0,
+                                data.paymentMethodDistribution.stripe ?? 0,
                                 data.paymentMethodDistribution.balance ?? 0,
                                 data.paymentMethodDistribution.cash ?? 0,
                                 data.paymentMethodDistribution.payLater ?? 0,
