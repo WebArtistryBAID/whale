@@ -35,7 +35,7 @@ export async function getStripeRedirectURI(id: number): Promise<string> {
     return session.url!
 }
 
-export async function fulfillStripePayment(id: string): Promise<void> {
+export async function fulfillStripePayment(id: string, paymentIntentId: string, customerId: string | null): Promise<void> {
     const order = await prisma.order.findFirst({
         where: { stripeSession: id }
     })
@@ -51,7 +51,9 @@ export async function fulfillStripePayment(id: string): Promise<void> {
                 id: order.id
             },
             data: {
-                paymentStatus: PaymentStatus.paid
+                paymentStatus: PaymentStatus.paid,
+                stripePaymentIntent: paymentIntentId,
+                stripeCustomerId: customerId
             }
         })
 

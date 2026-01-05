@@ -162,21 +162,23 @@ enum PaymentStatus {
 }
 
 model Order {
-  id            Int           @id @default(autoincrement())
-  items         OrderedItem[]
-  totalPrice    String
-  totalPriceRaw String
-  status        OrderStatus
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  type          OrderType
-  deliveryRoom  String?
-  user          User?         @relation(fields: [userId], references: [id])
-  userId        Int?
-  paymentStatus PaymentStatus @default(notPaid)
-  paymentMethod PaymentMethod
-  stripeSession String?
-  wxPayId       String?
+  id                  Int           @id @default(autoincrement())
+  items               OrderedItem[]
+  totalPrice          String
+  totalPriceRaw       String
+  status              OrderStatus
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  type                OrderType
+  deliveryRoom        String?
+  user                User?         @relation(fields: [userId], references: [id])
+  userId              Int?
+  paymentStatus       PaymentStatus @default(notPaid)
+  paymentMethod       PaymentMethod
+  stripeSession       String?
+  stripePaymentIntent String?
+  stripeCustomerId    String?
+  wxPayId             String?
 
   notiRel Notification[]
   logRel  UserAuditLog[]

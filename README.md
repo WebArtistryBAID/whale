@@ -47,6 +47,15 @@ For each task, you need to pass the query parameter `key={CRON_KEY}`.
 | `/balance/prune`   | Every 30 minutes  | Delete unpaid balance transactions.       |
 | `/order/pay-later` | Everyday at 20:00 | Remind users to pay for Pay Later orders. |
 
+## Stripe Webhook
+
+A Stripe webhook must be created at `/order/checkout/stripe/fulfill`.
+
+The following events must be listened to:
+
+* `checkout.session.completed`
+* `checkout.session.async_payment_succeeded`
+
 ## Settings
 
 | Key                             | Type       | Description                                                                                       |

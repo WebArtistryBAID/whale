@@ -16,7 +16,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
-        await fulfillStripePayment(event.data.object.id)
+        await fulfillStripePayment(event.data.object.id, event.data.object.payment_intent, event.data.object.customer)
     }
     return new NextResponse('Success', { status: 200 })
 }

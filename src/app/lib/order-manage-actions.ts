@@ -17,6 +17,7 @@ import { sendNotification } from '@/app/lib/notification-actions'
 import { me } from '@/app/login/login'
 import signData from '@/app/lib/wx-pay-sign'
 import { prisma } from '@/app/lib/prisma'
+import { stripe } from '@/app/lib/stripe'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
 
@@ -174,8 +175,15 @@ export async function refundOrder(id: number): Promise<boolean> {
         await finishRefunding(order)
         return true
     }
-    if (order.paymentMethod === PaymentMethod.wxPay || (order.paymentMethod === PaymentMethod.payLater && order.wxPayId != null) || order.paymentMethod === PaymentMethod.payForMe) {
+    if (order.paymentMethod === PaymentMethod.wxPay || (order.paymentMethod === PaymentMethod.payLater && order.wxPayId != null)) {
         if (!(await refundWeixinPay(order))) {
+            return false
+        }
+        await finishRefunding(order)
+        return true
+    }
+    if (order.paymentMethod === PaymentMethod.stripe || (order.paymentMethod === PaymentMethod.payLater && order.stripeSession != null)) {
+        if (!(await refundStripe(order))) {
             return false
         }
         await finishRefunding(order)
@@ -216,6 +224,20 @@ async function finishRefunding(order: HydratedOrder): Promise<void> {
 
 function getOrderTransactionNo(order: HydratedOrder): string {
     return `${order.id}-ORDER${order.createdAt.getTime()}`
+}
+
+async function refundStripe(order: HydratedOrder): Promise<boolean> {
+    if (order.stripeSession == null) {
+        return false
+    }
+    try {
+        await stripe.refunds.create({
+            payment_intent: order.stripePaymentIntent
+        })
+    } catch {
+        return false
+    }
+    return true
 }
 
 async function refundWeixinPay(order: HydratedOrder): Promise<boolean> {

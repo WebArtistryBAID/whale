@@ -42,6 +42,8 @@ export interface HydratedOrder {
     paymentStatus: PaymentStatus
     paymentMethod: PaymentMethod
     stripeSession: string | null
+    stripePaymentIntent: string | null
+    stripeCustomerId: string | null
     wxPayId: string | null
 }
 
