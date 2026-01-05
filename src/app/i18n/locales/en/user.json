@@ -55,7 +55,7 @@
       "placeholder": "Amount...",
       "minimum": "Minimum recharge amount is ¥{{value}}.",
       "maximum": "Maximum recharge amount is ¥{{value}}.",
-      "cta": "Pay with Weixin Pay"
+      "cta": "Pay"
     },
     "points": {
       "title": "Points",
@@ -111,7 +111,7 @@
       "blocked": "{{user}} blocked {{v0}}.",
       "unblocked": "{{user}} unblocked {{v0}}.",
       "permissionsUpdated": "{{user}} updated {{v0}}'s permissions: {{v1}}.",
-      "balanceTransaction": "{{user}} recharged their balance with ¥{{v0}}. Weixin Pay transaction ID: {{v1}}.",
+      "balanceTransaction": "{{user}} recharged their balance with ¥{{v0}}. Weixin Pay/Stripe transaction ID: {{v1}}.",
       "balanceUsed": "{{user}} used balance ¥{{v0}} to pay for order {{order}}. New balance: ¥{{v1}}.",
       "pointsUpdated": "{{user}}'s points is updated by {{v0}}. New points: {{v1}}.",
       "orderCreated": "Order {{order}} is created by user {{user}}.",

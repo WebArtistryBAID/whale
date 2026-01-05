@@ -311,9 +311,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 <div className="mb-5 text-sm p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl"
                      aria-label={t('checkout.orderDetails')}>
                     <p className="text-sm">{t('checkout.total')}</p>
-                    <p className="mb-3 text-lg">¥{getRealTotal().toString()}</p>
+                    <p className="text-lg">¥{getRealTotal().toString()}</p>
                     <If condition={mode !== 'recharge'}>
-                        <p className="text-sm">{t('checkout.wait')}</p>
+                        <p className="mt-3 text-sm">{t('checkout.wait')}</p>
                         <p className="text-lg">
                             <If condition={waitTime === -1}>
                                 ...
@@ -337,7 +337,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
 
                 <p className="mb-1">{t('checkout.paymentMethod')}</p>
                 <div className="mb-5" aria-label={t('checkout.paymentMethod')}>
-                    <div className="flex flex-wrap gap-3 items-center">
+                    <div className="flex flex-wrap gap-3 items-center mb-1">
                         <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
                                              selected={paymentMethod === PaymentMethod.wxPay}
                                              disabled={loading}
@@ -412,6 +412,8 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                             <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
                         </If>
                     </div>
+
+                    <p className="secondary text-sm">{t('checkout.stripeInfo')}</p>
                 </div>
 
                 <If condition={mode === 'cart'}>
@@ -472,12 +474,6 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                             amount: item.amount,
                             options: item.appliedOptions
                         }} index={-1} uploadPrefix={uploadPrefix} price={item.price}/>)}
-                </If>
-                <If condition={mode === 'recharge' && rechargeTransaction != null}>
-                    <div className="p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl">
-                        <p className="text-sm">{t('checkout.recharge')}</p>
-                        <p className="text-lg">¥{rechargeTransaction?.values[0]}</p>
-                    </div>
                 </If>
             </div>
         </div>

@@ -49,7 +49,7 @@
   },
   "payLaterModal": {
     "title": "订单尚未付款",
-    "message": "您有一个「先喝后付」订单尚未付款。请先付款，再下单。",
+    "message": "您有一个订单尚未付款。请先付款，再下单。",
     "cta": "现在付款"
   },
   "maximumCupsPerOrder_one": "一单只能购买 {{count}} 杯。",
@@ -73,6 +73,7 @@
     "loadingText": "请点击按钮，验证您不是机器人。",
     "loadingContinue": "继续",
     "stripePollText": "正在处理您的订单中，请稍候。",
+    "stripeInfo": "Stripe 支持一系列国际付款方式，包括储蓄/信用卡、支付宝、Apple Pay、Google Pay、Link 等。",
     "total": "总价",
     "wait": "预计等待时间",
     "waitTime_one": "{{count}} 分钟",
@@ -80,7 +81,7 @@
     "paymentMethod": "支付方式",
     "stripeFees": "Stripe 付款手续费",
     "wxPay": "微信支付",
-    "stripe": "银行卡或 Apple Pay",
+    "stripe": "Stripe",
     "balance": "余额",
     "cash": "现金",
     "payLater": "先喝后付",
