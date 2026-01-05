@@ -68,6 +68,7 @@
   "empty": "购物车为空",
   "checkout": {
     "title": "结账",
+    "recharge": "余额充值",
     "orderDetails": "订单详情",
     "loadingText": "请点击按钮，验证您不是机器人。",
     "loadingContinue": "继续",

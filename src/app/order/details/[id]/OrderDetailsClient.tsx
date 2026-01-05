@@ -123,8 +123,10 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                                 <Button size="xs" pill color="warning"
                                         className="inline-block">{t('details.payNow')}</Button>
                             </Link>
-                            <Button size="xs" pill color="failure" onClick={cancel}
-                                    className="inline-block">{t('details.cancelOrder')}</Button>
+                            <If condition={order.paymentMethod !== PaymentMethod.payLater}>
+                                <Button size="xs" pill color="failure" onClick={cancel}
+                                        className="inline-block">{t('details.cancelOrder')}</Button>
+                            </If>
                         </div>
                     </div>}
                            color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>

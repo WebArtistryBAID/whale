@@ -68,6 +68,7 @@
   "empty": "No items",
   "checkout": {
     "title": "Checkout",
+    "recharge": "Balance Recharge",
     "orderDetails": "Order Details",
     "loadingText": "Please tap on the button to verify that you are not a bot.",
     "loadingContinue": "Continue",

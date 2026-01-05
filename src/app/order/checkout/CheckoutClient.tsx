@@ -20,6 +20,7 @@ import {
     TextInput
 } from 'flowbite-react'
 import { CouponCode, PaymentMethod, PaymentStatus, User, UserAuditLog } from '@/generated/prisma/browser'
+import type { HydratedOrder } from '@/app/lib/ordering-actions'
 import {
     canPayWithBalance,
     canPayWithPayLater,
@@ -35,7 +36,6 @@ import Link from 'next/link'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import { getStripeRedirectURI } from '@/app/lib/stripe-actions'
-import type { HydratedOrder } from '@/app/lib/ordering-actions'
 
 function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     paymentMethod: PaymentMethod,
@@ -287,7 +287,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
         <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
             <div id="primary-content" className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto"
                  aria-label={t('checkout.title')}>
-                <h1 className="mb-5 font-serif">{mode === 'recharge' ? 'Balance recharge' : t('checkout.title')}</h1>
+                <h1 className="mb-5 font-serif">{mode === 'recharge' ? t('checkout.recharge') : t('checkout.title')}</h1>
 
                 <If condition={deliveryEnabled && mode === 'cart'}>
                     <ButtonGroup className="mb-3">
@@ -466,7 +466,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                                                                 uploadPrefix={uploadPrefix}/>)}
                 </If>
                 <If condition={mode === 'order' && existingOrder != null}>
-                    {existingOrder.items.map((item, index) =>
+                    {existingOrder?.items.map((item, index) =>
                         <UIOrderedItemTemplate key={index} item={{
                             item: item.itemType,
                             amount: item.amount,
@@ -475,8 +475,8 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 </If>
                 <If condition={mode === 'recharge' && rechargeTransaction != null}>
                     <div className="p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl">
-                        <p className="text-sm">Balance recharge</p>
-                        <p className="text-lg">¥{rechargeTransaction.values[0]}</p>
+                        <p className="text-sm">{t('checkout.recharge')}</p>
+                        <p className="text-lg">¥{rechargeTransaction?.values[0]}</p>
                     </div>
                 </If>
             </div>
