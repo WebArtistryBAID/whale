@@ -53,6 +53,23 @@ export interface EstimatedWaitTimeResponse {
     orders: number
 }
 
+export async function setOrderPaymentMethod(id: number, paymentMethod: PaymentMethod): Promise<boolean> {
+    const order = await prisma.order.findUnique({
+        where: {
+            id,
+            paymentStatus: PaymentStatus.notPaid
+        }
+    })
+    if (order == null) {
+        return false
+    }
+    await prisma.order.update({
+        where: { id },
+        data: { paymentMethod }
+    })
+    return true
+}
+
 export async function requireUnpaidOrder(order: number): Promise<HydratedOrder> {
     const o = await getOrder(order)
     if (o == null || o.paymentStatus !== PaymentStatus.notPaid) {
@@ -137,6 +154,10 @@ export async function getUnpaidPayLaterOrder(): Promise<number> {
 }
 
 export async function payLaterBalance(id: number): Promise<boolean> {
+    return payOrderWithBalance(id)
+}
+
+export async function payOrderWithBalance(id: number): Promise<boolean> {
     const me = await getMyUser()
     if (me == null) {
         return false
@@ -149,6 +170,9 @@ export async function payLaterBalance(id: number): Promise<boolean> {
     })
     if (order == null) {
         return false
+    }
+    if (order.paymentStatus !== PaymentStatus.notPaid) {
+        return true
     }
     if (Decimal(me.balance).lt(order.totalPrice)) {
         return false
@@ -184,7 +208,8 @@ export async function payLaterBalance(id: number): Promise<boolean> {
             id
         },
         data: {
-            paymentStatus: PaymentStatus.paid
+            paymentStatus: PaymentStatus.paid,
+            paymentMethod: PaymentMethod.balance
         }
     })
 

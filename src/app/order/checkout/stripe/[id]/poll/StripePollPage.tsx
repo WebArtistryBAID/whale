@@ -1,26 +1,31 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { getOrder } from '@/app/lib/ordering-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 import { Spinner } from 'flowbite-react'
 import { getOrderPaymentStatus } from '@/app/lib/wx-pay-actions'
 import { PaymentStatus } from '@/generated/prisma/enums'
+import { isTransactionFinished } from '@/app/lib/balance-actions'
 
 export default function StripePollPage() {
     const { t } = useTranslationClient('order')
     const { id } = useParams<{ id: string }>()
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const mode = searchParams.get('type') === 'balance' ? 'balance' : 'order'
 
     useEffect(() => {
-        (async () => {
-            const order = await getOrder(parseInt(id))
-            if (order == null) {
-                router.replace('/')
-            }
-        })()
-    }, [ id, router ])
+        if (mode === 'order') {
+            (async () => {
+                const order = await getOrder(parseInt(id))
+                if (order == null) {
+                    router.replace('/')
+                }
+            })()
+        }
+    }, [ id, router, mode ])
 
     useEffect(() => {
         void pollPaymentStatus()
@@ -30,6 +35,12 @@ export default function StripePollPage() {
     }, [])
 
     async function pollPaymentStatus() {
+        if (mode === 'balance') {
+            if (await isTransactionFinished(parseInt(id))) {
+                location.href = '/user'
+            }
+            return
+        }
         if (await getOrderPaymentStatus(parseInt(id)) === PaymentStatus.paid) {
             location.href = `/order/details/${id}`
         }
