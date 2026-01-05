@@ -3,7 +3,7 @@
 import { useTranslationClient } from '@/app/i18n/client'
 import { useShoppingCart, useStoredOrder } from '@/app/lib/shopping-cart'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
@@ -19,13 +19,15 @@ import {
     Spinner,
     TextInput
 } from 'flowbite-react'
-import { CouponCode, PaymentMethod, PaymentStatus, User } from '@/generated/prisma/browser'
+import { CouponCode, PaymentMethod, PaymentStatus, User, UserAuditLog } from '@/generated/prisma/browser'
 import {
     canPayWithBalance,
     canPayWithPayLater,
     couponQuickValidate,
     createOrder,
-    getEstimatedWaitTime
+    getEstimatedWaitTime,
+    payOrderWithBalance,
+    setOrderPaymentMethod
 } from '@/app/lib/ordering-actions'
 import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
@@ -33,10 +35,7 @@ import Link from 'next/link'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import { getStripeRedirectURI } from '@/app/lib/stripe-actions'
-
-function isMobileOriPad(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
-}
+import type { HydratedOrder } from '@/app/lib/ordering-actions'
 
 function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     paymentMethod: PaymentMethod,
@@ -54,15 +53,20 @@ function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     </Button>
 }
 
-export default function CheckoutClient({ showPayLater, uploadPrefix }: {
+type CheckoutMode = 'cart' | 'order' | 'recharge'
+
+export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrder, rechargeTransaction }: {
     showPayLater: boolean,
-    uploadPrefix: string
+    uploadPrefix: string,
+    existingOrder?: HydratedOrder | null,
+    rechargeTransaction?: UserAuditLog | null
 }) {
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     const storedOrder = useStoredOrder()
     const router = useRouter()
-    const [ paymentMethod, setPaymentMethod ] = useState<PaymentMethod>(PaymentMethod.wxPay)
+    const mode: CheckoutMode = rechargeTransaction != null ? 'recharge' : (existingOrder != null ? 'order' : 'cart')
+    const [ paymentMethod, setPaymentMethod ] = useState<PaymentMethod>(existingOrder?.paymentStatus === PaymentStatus.notPaid && existingOrder.paymentMethod !== PaymentMethod.payLater ? existingOrder.paymentMethod : PaymentMethod.wxPay)
     const [ coupon, setCoupon ] = useState('')
     const [ foundCoupon, setFoundCoupon ] = useState<CouponCode | null>(null)
     const [ me, setMe ] = useState<User | null>(null)
@@ -80,14 +84,17 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
 
     useEffect(() => {
         router.prefetch('/order/checkout/wechat/pay')
-        if (shoppingCart.items.length < 1) {
+        if (mode === 'cart' && shoppingCart.items.length < 1) {
             router.replace('/order')
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ router ])
+    }, [ router, mode ])
 
     useEffect(() => {
         (async () => {
+            if (mode !== 'cart') {
+                return
+            }
             if (coupon.length < 1) {
                 setFoundCoupon(null)
             } else {
@@ -96,81 +103,150 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                 setLoading(false)
             }
         })()
-    }, [ coupon ])
+    }, [ coupon, mode ])
 
     useEffect(() => {
         (async () => {
             setLoading(true)
             setMe(await getMyUser())
-            setWaitTime((await getEstimatedWaitTime()).time)
+            if (mode === 'cart') {
+                setWaitTime((await getEstimatedWaitTime()).time)
+            }
             setLoading(false)
         })()
-    }, [])
+    }, [ mode ])
 
     useEffect(() => {
         (async () => {
-            setBalanceEnabled(await canPayWithBalance(getRealTotal().toString()))
-            setPayLaterEnabled(await canPayWithPayLater())
-            setDeliveryEnabled(await getConfigValueAsBoolean('allow-delivery'))
+            if (mode === 'cart') {
+                setBalanceEnabled(await canPayWithBalance(getRealTotal().toString()))
+                setPayLaterEnabled(await canPayWithPayLater())
+                setDeliveryEnabled(await getConfigValueAsBoolean('allow-delivery'))
+            } else if (mode === 'order' && existingOrder != null) {
+                setBalanceEnabled(await canPayWithBalance(existingOrder.totalPrice))
+                setPayLaterEnabled(false)
+                setDeliveryEnabled(false)
+            } else {
+                setBalanceEnabled(false)
+                setPayLaterEnabled(false)
+                setDeliveryEnabled(false)
+            }
         })()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ shoppingCart.items, foundCoupon ])
+    }, [ shoppingCart.items, foundCoupon, mode, existingOrder?.totalPrice, rechargeTransaction?.id, paymentMethod ])
+
+    const hasCartCouponIssue = useMemo(() => mode === 'cart' && coupon.length > 0 && foundCoupon == null, [ coupon.length, foundCoupon, mode ])
 
     function getRealTotal(): Decimal {
-        let currentPrice: Decimal
-        if (foundCoupon == null) {
-            currentPrice = shoppingCart.getTotalPrice()
-        } else {
-            currentPrice = Decimal.max(0, shoppingCart.getTotalPrice().minus(Decimal(foundCoupon?.value ?? '0')))
+        if (mode === 'cart') {
+            let currentPrice: Decimal
+            if (foundCoupon == null) {
+                currentPrice = shoppingCart.getTotalPrice()
+            } else {
+                currentPrice = Decimal.max(0, shoppingCart.getTotalPrice().minus(Decimal(foundCoupon?.value ?? '0')))
+            }
+            if (paymentMethod === PaymentMethod.stripe) {
+                currentPrice = currentPrice.mul(1.04)
+            }
+            return currentPrice
         }
-        if (paymentMethod === PaymentMethod.stripe) {
-            currentPrice = currentPrice.mul(1.04)
+        if (mode === 'order' && existingOrder != null) {
+            return Decimal(existingOrder.totalPrice)
         }
-        return currentPrice
+        return Decimal(rechargeTransaction?.values[0] ?? 0)
     }
 
     function getActualCouponValue(): Decimal {
-        return shoppingCart.getTotalPrice().minus(getRealTotal())
+        if (mode === 'cart') {
+            return shoppingCart.getTotalPrice().minus(getRealTotal())
+        }
+        return Decimal(0)
     }
 
     function isCouponTooBig(): boolean {
-        if (foundCoupon == null) {
+        if (mode !== 'cart' || foundCoupon == null) {
             return false
         }
         return Decimal(foundCoupon.value).greaterThan(shoppingCart.getTotalPrice())
     }
 
     async function order() {
-        if (shoppingCart.items.length < 1) {
-            return
-        }
         setLoading(true)
-        const order = await createOrder(shoppingCart.items, coupon.length > 0 ? coupon : null, shoppingCart.onSiteOrderMode,
-            useDelivery ? deliveryRoom : null, paymentMethod)
-        if (order == null) {
-            setOrderFailed(true)
+        if (mode === 'cart') {
+            if (shoppingCart.items.length < 1) {
+                setLoading(false)
+                return
+            }
+            const order = await createOrder(shoppingCart.items, coupon.length > 0 ? coupon : null, shoppingCart.onSiteOrderMode,
+                useDelivery ? deliveryRoom : null, paymentMethod)
+            if (order == null) {
+                setOrderFailed(true)
+                setLoading(false)
+                return
+            }
+            storedOrder.setOrder(order.id)
+            shoppingCart.clear()
+            if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
+                setRedirectTarget(`/order/details/${order.id}`)
+                router.replace(`/order/details/${order.id}`)
+            } else {
+                if (paymentMethod === PaymentMethod.stripe) {
+                    const redirect = await getStripeRedirectURI(order.id)
+                    setRedirectTarget(redirect)
+                    location.href = redirect
+                } else if (paymentMethod === PaymentMethod.wxPay) {
+                    setRedirectTarget(`/order/checkout/wechat/pay?id=${order.id}`)
+                    router.replace(`/order/checkout/wechat/pay?id=${order.id}`)
+                }
+            }
+            setLoading(false)
+            setAwaitRedirect(true)
             return
         }
-        storedOrder.setOrder(order.id)
-        shoppingCart.clear()
-        if (order.paymentStatus === PaymentStatus.paid || paymentMethod === PaymentMethod.payLater) {
-            // Redirect to check page directly
-            setRedirectTarget(`/order/details/${order.id}`)
-            router.replace(`/order/details/${order.id}`)
-        } else {
-            // Start payment process
+
+        if (mode === 'order' && existingOrder != null) {
+            if (paymentMethod === PaymentMethod.balance) {
+                const success = await payOrderWithBalance(existingOrder.id)
+                setLoading(false)
+                if (!success) {
+                    setOrderFailed(true)
+                    return
+                }
+                setRedirectTarget(`/order/details/${existingOrder.id}`)
+                router.replace(`/order/details/${existingOrder.id}`)
+                setAwaitRedirect(true)
+                return
+            }
+
+            await setOrderPaymentMethod(existingOrder.id, paymentMethod)
             if (paymentMethod === PaymentMethod.stripe) {
-                const redirect = await getStripeRedirectURI(order.id)
+                const redirect = await getStripeRedirectURI(existingOrder.id)
                 setRedirectTarget(redirect)
                 location.href = redirect
             } else if (paymentMethod === PaymentMethod.wxPay) {
-                setRedirectTarget(`/order/checkout/wechat/pay?id=${order.id}`)
-                router.replace(`/order/checkout/wechat/pay?id=${order.id}`)
+                setRedirectTarget(`/order/checkout/wechat/pay?id=${existingOrder.id}`)
+                router.replace(`/order/checkout/wechat/pay?id=${existingOrder.id}`)
             }
+            setLoading(false)
+            setAwaitRedirect(true)
+            return
         }
-        setLoading(false)
-        setAwaitRedirect(true)
+
+        if (mode === 'recharge' && rechargeTransaction != null) {
+            if (paymentMethod === PaymentMethod.stripe) {
+                const redirect = await getStripeRedirectURI(rechargeTransaction.id, 'balance')
+                setRedirectTarget(redirect)
+                location.href = redirect
+            } else if (paymentMethod === PaymentMethod.wxPay) {
+                setRedirectTarget(`/order/checkout/wechat/pay?id=${rechargeTransaction.id}&type=balance`)
+                router.replace(`/order/checkout/wechat/pay?id=${rechargeTransaction.id}&type=balance`)
+            }
+            setLoading(false)
+            setAwaitRedirect(true)
+        }
     }
+
+    const shouldShowOnSiteNag = !shoppingCart.onSiteOrderMode && mode === 'cart'
 
     return <>
         <Modal show={awaitRedirect}>
@@ -211,9 +287,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
         <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
             <div id="primary-content" className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto"
                  aria-label={t('checkout.title')}>
-                <h1 className="mb-5 font-serif">{t('checkout.title')}</h1>
+                <h1 className="mb-5 font-serif">{mode === 'recharge' ? 'Balance recharge' : t('checkout.title')}</h1>
 
-                <If condition={deliveryEnabled}>
+                <If condition={deliveryEnabled && mode === 'cart'}>
                     <ButtonGroup className="mb-3">
                         <Button color={useDelivery ? 'gray' : 'warning'} onClick={() => setUseDelivery(false)}>
                             {t('checkout.pickUp')}
@@ -236,22 +312,24 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                      aria-label={t('checkout.orderDetails')}>
                     <p className="text-sm">{t('checkout.total')}</p>
                     <p className="mb-3 text-lg">¥{getRealTotal().toString()}</p>
-                    <p className="text-sm">{t('checkout.wait')}</p>
-                    <p className="text-lg">
-                        <If condition={waitTime === -1}>
-                            ...
-                        </If>
-                        <If condition={waitTime !== -1}>
-                            <Trans t={t} i18nKey="checkout.waitTime" count={waitTime + shoppingCart.getAmount() * 2}/>
-                        </If>
-                    </p>
-                    <If condition={foundCoupon != null}>
+                    <If condition={mode !== 'recharge'}>
+                        <p className="text-sm">{t('checkout.wait')}</p>
+                        <p className="text-lg">
+                            <If condition={waitTime === -1}>
+                                ...
+                            </If>
+                            <If condition={waitTime !== -1}>
+                                <Trans t={t} i18nKey="checkout.waitTime" count={waitTime + shoppingCart.getAmount() * 2}/>
+                            </If>
+                        </p>
+                    </If>
+                    <If condition={foundCoupon != null && mode === 'cart'}>
                         <p className="text-sm mt-3" aria-hidden>{t('checkout.coupon')}</p>
                         <p className="text-lg" aria-hidden>-¥{getActualCouponValue().toString()}</p>
                         <span className="sr-only"
                               aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
                     </If>
-                    <If condition={paymentMethod === PaymentMethod.stripe}>
+                    <If condition={paymentMethod === PaymentMethod.stripe && mode === 'cart'}>
                         <p className="text-sm mt-3">{t('checkout.stripeFees')}</p>
                         <p className="text-lg">4%</p>
                     </If>
@@ -270,19 +348,19 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                                              disabled={loading}
                                              select={() => setPaymentMethod(PaymentMethod.stripe)}/>
 
-                        <If condition={shoppingCart.onSiteOrderMode}>
+                        <If condition={mode === 'cart' && shoppingCart.onSiteOrderMode}>
                             <PaymentMethodButton paymentMethod={PaymentMethod.cash}
                                                  selected={paymentMethod === PaymentMethod.cash}
                                                  disabled={loading}
                                                  select={() => setPaymentMethod(PaymentMethod.cash)}/>
                         </If>
 
-                        <If condition={me != null && !shoppingCart.onSiteOrderMode}>
+                        <If condition={me != null && !shoppingCart.onSiteOrderMode && mode !== 'recharge'}>
                             <PaymentMethodButton paymentMethod={PaymentMethod.balance}
                                                  disabled={!balanceEnabled || loading}
                                                  selected={paymentMethod === PaymentMethod.balance}
                                                  select={() => setPaymentMethod(PaymentMethod.balance)}/>
-                            <If condition={showPayLater}>
+                            <If condition={showPayLater && mode === 'cart'}>
                                 <PaymentMethodButton paymentMethod={PaymentMethod.payLater}
                                                      disabled={!payLaterEnabled || loading}
                                                      selected={paymentMethod === PaymentMethod.payLater}
@@ -291,10 +369,10 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                         </If>
 
                         <Popover trigger="hover" aria-hidden content={<div className="p-3">
-                            <If condition={!shoppingCart.onSiteOrderMode}>
+                            <If condition={shouldShowOnSiteNag}>
                                 <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
                             </If>
-                            <If condition={me == null && !shoppingCart.onSiteOrderMode}>
+                            <If condition={me == null && shouldShowOnSiteNag}>
                                 <p className="text-sm">
                                     <Trans t={t} i18nKey="checkout.loginNag"
                                            components={{
@@ -303,10 +381,10 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                                            }}/>
                                 </p>
                             </If>
-                            <If condition={me != null && !balanceEnabled}>
+                            <If condition={me != null && !balanceEnabled && mode !== 'recharge'}>
                                 <p className="mt-1 text-sm">{t('checkout.balanceDisabled')}</p>
                             </If>
-                            <If condition={me != null && !payLaterEnabled}>
+                            <If condition={me != null && !payLaterEnabled && mode === 'cart'}>
                                 <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
                             </If>
                         </div>}>
@@ -315,10 +393,10 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                     </div>
 
                     <div aria-label={t('a11y.paymentMethods')} className="sr-only">
-                        <If condition={!shoppingCart.onSiteOrderMode}>
+                        <If condition={shouldShowOnSiteNag}>
                             <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
                         </If>
-                        <If condition={me == null && !shoppingCart.onSiteOrderMode}>
+                        <If condition={me == null && shouldShowOnSiteNag}>
                             <p className="text-sm">
                                 <Trans t={t} i18nKey="checkout.loginNag"
                                        components={{
@@ -327,30 +405,32 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                                        }}/>
                             </p>
                         </If>
-                        <If condition={me != null && !balanceEnabled}>
+                        <If condition={me != null && !balanceEnabled && mode !== 'recharge'}>
                             <p className="mt-1 text-sm">{t('checkout.balanceDisabled')}</p>
                         </If>
-                        <If condition={me != null && !payLaterEnabled}>
+                        <If condition={me != null && !payLaterEnabled && mode === 'cart'}>
                             <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
                         </If>
                     </div>
                 </div>
 
-                <p className="mb-1">{t('checkout.coupon')}</p>
-                <TextInput className="w-full" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
-                           onChange={e => setCoupon(e.currentTarget.value)}/>
-                <p className="mt-1 text-sm text-red-500" aria-live="polite">
-                    <If condition={coupon.length > 0 && foundCoupon == null}>
-                        {t('checkout.couponInvalid')}
-                    </If>
-                </p>
-                <p className="mt-1 text-sm" aria-live="polite">
-                    <If condition={foundCoupon != null && isCouponTooBig()}>
-                        {t('checkout.couponTooBig', { original: foundCoupon?.value })}
-                    </If>
-                </p>
+                <If condition={mode === 'cart'}>
+                    <p className="mb-1">{t('checkout.coupon')}</p>
+                    <TextInput className="w-full" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
+                               onChange={e => setCoupon(e.currentTarget.value)}/>
+                    <p className="mt-1 text-sm text-red-500" aria-live="polite">
+                        <If condition={hasCartCouponIssue}>
+                            {t('checkout.couponInvalid')}
+                        </If>
+                    </p>
+                    <p className="mt-1 text-sm" aria-live="polite">
+                        <If condition={foundCoupon != null && isCouponTooBig()}>
+                            {t('checkout.couponTooBig', { original: foundCoupon?.value })}
+                        </If>
+                    </p>
+                </If>
 
-                <If condition={useDelivery}>
+                <If condition={useDelivery && mode === 'cart'}>
                     <p className="mt-5 mb-1">{t('checkout.deliveryRoom')}</p>
                     <TextInput className="w-full" type="text" value={deliveryRoom}
                                placeholder={t('checkout.deliveryRoom') + '...'}
@@ -358,13 +438,13 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                 </If>
 
                 <Button fullSized className="mt-8" color="warning" onClick={() => {
-                    if (me == null && !shoppingCart.onSiteOrderMode) {
+                    if (mode === 'cart' && me == null && !shoppingCart.onSiteOrderMode) {
                         setShowLoginNag(true)
                         return
                     }
                     void order()
                 }}
-                        disabled={(coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3) || loading}>
+                        disabled={(mode === 'cart' && ((coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3))) || loading}>
                     <If condition={orderFailed}>
                         {t('tryAgain')}
                     </If>
@@ -381,8 +461,24 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
             <div
                 className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto border-l border-yellow-100 dark:border-yellow-800 flex flex-col gap-5"
                 aria-label={t('a11y.orderedItems')}>
-                {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate key={index} item={item} index={-1}
+                <If condition={mode === 'cart'}>
+                    {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate key={index} item={item} index={-1}
                                                                                 uploadPrefix={uploadPrefix}/>)}
+                </If>
+                <If condition={mode === 'order' && existingOrder != null}>
+                    {existingOrder.items.map((item, index) =>
+                        <UIOrderedItemTemplate key={index} item={{
+                            item: item.itemType,
+                            amount: item.amount,
+                            options: item.appliedOptions
+                        }} index={-1} uploadPrefix={uploadPrefix} price={item.price}/>)}
+                </If>
+                <If condition={mode === 'recharge' && rechargeTransaction != null}>
+                    <div className="p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl">
+                        <p className="text-sm">Balance recharge</p>
+                        <p className="text-lg">¥{rechargeTransaction.values[0]}</p>
+                    </div>
+                </If>
             </div>
         </div>
     </>

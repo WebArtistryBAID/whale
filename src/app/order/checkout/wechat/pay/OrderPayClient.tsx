@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { Button, Spinner } from 'flowbite-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
     getExternalPaymentRedirect,
     getOAPaymentPackage,
@@ -13,7 +13,14 @@ import {
     getPaymentQRCode,
     getWeChatOAuthRedirect
 } from '@/app/lib/wx-pay-actions'
-import { PaymentMethod, PaymentStatus } from '@/generated/prisma/browser'
+import {
+    getExternalPaymentRedirect as getBalanceExternalPaymentRedirect,
+    getOAPaymentPackage as getBalanceOAPaymentPackage,
+    getPaymentQRCode as getBalancePaymentQRCode,
+    getWeChatOAuthRedirect as getBalanceWeChatOAuthRedirect,
+    isTransactionFinished
+} from '@/app/lib/balance-actions'
+import { PaymentMethod, PaymentStatus, UserAuditLog } from '@/generated/prisma/browser'
 import QRCode from 'react-qr-code'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { Trans } from 'react-i18next/TransWithoutContext'
@@ -30,10 +37,15 @@ function isWeChat(): boolean {
     return /MicroMessenger/i.test(navigator.userAgent)
 }
 
+interface PaymentClientProps {
+    order?: HydratedOrder | null
+    transaction?: UserAuditLog | null
+}
+
 // If using "payForMe" or desktop device (not iPad) or on site order, show QR code
 // If using (mobile device or iPad) AND inside WeChat, use official account payment
 // If using (mobile device or iPad) AND outside WeChat, use external payment
-export default function OrderPayClient({ order }: { order: HydratedOrder }) {
+export default function OrderPayClient({ order, transaction }: PaymentClientProps) {
     const { t } = useTranslationClient('order')
     const searchParams = useSearchParams()
     const [ canRestart, setCanRestart ] = useState(false)
@@ -41,44 +53,50 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
     const [ qrCode, setQRCode ] = useState<string | null>(null)
     const [ qrCodeShowProcessing, setQRCodeShowProcessing ] = useState(false)
     const shoppingCart = useShoppingCart()
+    const isOrder = order != null
+    const payForMe = order?.paymentMethod === PaymentMethod.payForMe
+    const amount = useMemo(() => isOrder ? order!.totalPrice : transaction?.values[0] ?? '0', [ isOrder, order?.totalPrice, transaction?.values ])
+    const redirectTarget = isOrder ? `/order/details/${order!.id}` : '/user'
 
     useEffect(() => {
-        if (!searchParams.has('oaready')) { // Do not launch again if user already paid
-            if (isMobileOriPad() && order.paymentMethod !== PaymentMethod.payForMe && !shoppingCart.onSiteOrderMode) {
+        if (!searchParams.has('oaready')) {
+            if (isMobileOriPad() && !payForMe && !shoppingCart.onSiteOrderMode) {
                 void launchWeChat()
             }
-            if (isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode) {
+            if (isDesktop() || payForMe || shoppingCart.onSiteOrderMode) {
                 (async () => {
-                    const qr = await getPaymentQRCode(order.id)
+                    const qr = await (isOrder ? getPaymentQRCode(order!.id) : getBalancePaymentQRCode(transaction!.id))
                     if (qr == null) {
                         setError(true)
                         return
                     }
                     setQRCode(qr)
                     setTimeout(() => {
-                        setQRCodeShowProcessing(true) // We don't actually know if the user finished paying or not, but we pretend we do
+                        setQRCodeShowProcessing(true)
                     }, 10000)
                 })()
             }
         }
         setTimeout(() => {
-            setCanRestart(true) // Make sure the user don't restart right away
+            setCanRestart(true)
         }, 10000)
 
         setInterval(() => {
             void pollPaymentStatus()
         }, 3000)
-        // We don't want any more dependencies
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     async function cancel() {
+        if (order == null) {
+            location.href = redirectTarget
+            return
+        }
         const result = await cancelUnpaidOrder(order.id)
         if (result.length < 1) {
             location.href = '/'
         } else {
             shoppingCart.clear()
-            // Reinstate the shopping cart and return to check out page
             for (const item of result) {
                 shoppingCart.addItem(item)
             }
@@ -87,8 +105,12 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
     }
 
     async function pollPaymentStatus() {
-        if (await getOrderPaymentStatus(order.id) === PaymentStatus.paid) {
-            location.href = `/order/details/${order.id}`
+        if (isOrder) {
+            if (await getOrderPaymentStatus(order!.id) === PaymentStatus.paid) {
+                location.href = redirectTarget
+            }
+        } else if (transaction != null && await isTransactionFinished(transaction.id)) {
+            location.href = redirectTarget
         }
     }
 
@@ -97,14 +119,14 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
             return
         }
         if (isWeChat()) {
-            // Use WeChat official account payment method
             if (searchParams.has('openid')) {
                 if (searchParams.get('openid') === 'error') {
                     setError(true)
                     return
                 }
-                // We have authorized with WeChat, can continue
-                const paymentPackage = await getOAPaymentPackage(order.id, searchParams.get('openid')!)
+                const paymentPackage = isOrder
+                    ? await getOAPaymentPackage(order!.id, searchParams.get('openid')!)
+                    : await getBalanceOAPaymentPackage(transaction!.id, searchParams.get('openid')!)
                 if (paymentPackage == null) {
                     setError(true)
                     return
@@ -127,7 +149,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                         document.addEventListener('WeixinJSBridgeReady', launchOAPayment, false)
                     } else {
                         // @ts-expect-error legacy
-                        if (document.attachEvent) { // Legacy support
+                        if (document.attachEvent) {
                             // @ts-expect-error legacy
                             document.attachEvent('WeixinJSBridgeReady', launchOAPayment)
                             // @ts-expect-error legacy
@@ -138,8 +160,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                     launchOAPayment()
                 }
             } else {
-                // We haven't authorized with WeChat yet, redirect to authorize
-                const redir = await getWeChatOAuthRedirect(order.id)
+                const redir = isOrder ? await getWeChatOAuthRedirect(order!.id) : await getBalanceWeChatOAuthRedirect(transaction!.id)
                 if (redir == null) {
                     setError(true)
                     return
@@ -147,8 +168,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                 location.href = redir
             }
         } else {
-            // Use WAP payment
-            const redir = await getExternalPaymentRedirect(order.id)
+            const redir = isOrder ? await getExternalPaymentRedirect(order!.id) : await getBalanceExternalPaymentRedirect(transaction!.id)
             if (redir == null) {
                 setError(true)
                 return
@@ -167,7 +187,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                     <img src="/assets/brand/wx-pay-dark.svg" alt={t('wechatPay.title')}
                          className="hidden dark:block h-8"/>
                 </h1>
-                <p className="text-2xl">CN<span className="font-bold">¥{order.totalPrice}</span></p>
+                <p className="text-2xl">CN<span className="font-bold">¥{amount}</span></p>
             </div>
             <div className="w-full flex justify-center items-center text-center flex-col">
                 <If condition={error}>
@@ -176,7 +196,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                     <Button onClick={() => location.reload()} pill color="success">{t('wechatPay.restart')}</Button>
                 </If>
                 <If condition={!error}>
-                    <If condition={isDesktop() || order.paymentMethod === PaymentMethod.payForMe || shoppingCart.onSiteOrderMode}>
+                    <If condition={isDesktop() || payForMe || shoppingCart.onSiteOrderMode}>
                         <If condition={qrCode == null}>
                             <div className="lg:h-96 flex justify-center items-center">
                                 <Spinner color="success"/>
@@ -208,7 +228,7 @@ export default function OrderPayClient({ order }: { order: HydratedOrder }) {
                         </If>
                     </If>
 
-                    <If condition={isMobileOriPad() && order.paymentMethod !== PaymentMethod.payForMe && !shoppingCart.onSiteOrderMode}>
+                    <If condition={isMobileOriPad() && !payForMe && !shoppingCart.onSiteOrderMode}>
                         <p className="mb-3">{t('wechatPay.mobile')}</p>
                         <div className="flex gap-3">
                             <Button disabled={!canRestart} onClick={launchWeChat} pill className="inline-block"

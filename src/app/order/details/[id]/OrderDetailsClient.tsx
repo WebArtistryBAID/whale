@@ -2,12 +2,10 @@
 
 import {
     cancelUnpaidOrder,
-    canPayWithBalance,
     EstimatedWaitTimeResponse,
     getEstimatedWaitTimeFor,
     getOrder,
-    HydratedOrder,
-    payLaterBalance
+    HydratedOrder
 } from '@/app/lib/ordering-actions'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { useTranslationClient } from '@/app/i18n/client'
@@ -15,12 +13,11 @@ import If from '@/app/lib/If'
 import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@/generated/prisma/browser'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import { useEffect, useState } from 'react'
-import { Alert, Badge, Button, Modal, ModalBody, ModalFooter, ModalHeader, Popover, Spinner } from 'flowbite-react'
+import { Alert, Badge, Button, Popover, Spinner } from 'flowbite-react'
 import { HiHashtag, HiInformationCircle } from 'react-icons/hi'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
     initialOrder: HydratedOrder,
@@ -29,10 +26,6 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
     const { t } = useTranslationClient('order')
     const [ order, setOrder ] = useState(initialOrder)
     const [ estimate, setEstimate ] = useState<EstimatedWaitTimeResponse | null>(null)
-    const [ payModal, setPayModal ] = useState(false)
-    const [ canUseBalance, setCanUseBalance ] = useState(true)
-    const [ loading, setLoading ] = useState(false)
-    const router = useRouter()
     const shoppingCart = useShoppingCart()
 
     useEffect(() => {
@@ -44,10 +37,6 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
     }, [ order.id, order.status ])
 
     useEffect(() => {
-        (async () => {
-            setCanUseBalance(await canPayWithBalance(order.totalPrice))
-        })()
-
         setInterval(async () => {
             const o = await getOrder(order.id)
             if (o == null) {
@@ -67,27 +56,6 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
     }
 
     return <>
-        <Modal show={payModal} onClose={() => setPayModal(false)}>
-            <ModalHeader>{t('details.paymentMethod')}</ModalHeader>
-            <ModalBody>
-                <p className="mb-1">{t('details.paymentMethodMessage')}</p>
-                <p className="text-lg">{t('total', { price: order.totalPrice })}</p>
-            </ModalBody>
-            <ModalFooter>
-                <Link href={`/order/checkout/wechat/pay?id=${order.id}`}>
-                    <Button pill color="yellow">{t('checkout.wxPay')}</Button>
-                </Link>
-                <Button pill color="yellow" disabled={!canUseBalance || loading} onClick={async () => {
-                    setLoading(true)
-                    await payLaterBalance(order.id)
-                    setLoading(false)
-                    setPayModal(false)
-                    router.refresh()
-                }}>
-                    {canUseBalance ? t('checkout.balance') : t('details.insufficientBalance')}</Button>
-            </ModalFooter>
-        </Modal>
-
         <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
             <div id="primary-content"
                  className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full flex text-center flex-col justify-center items-center overflow-y-auto"
@@ -148,33 +116,20 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                 </If>
 
                 <If condition={order.paymentStatus === PaymentStatus.notPaid}>
-                    <If condition={order.paymentMethod === PaymentMethod.payLater}>
-                        <Alert additionalContent={<div className="text-left">
-                            <p className="mb-1">{t('details.paymentPromptPayLater')}</p>
-                            <Button size="xs" pill color="warning"
-                                    className="inline-block"
-                                    onClick={() => setPayModal(true)}>{t('details.payNow')}</Button>
-                        </div>}
-                               color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
-                            <span className="font-bold">{t('details.paymentTitle')}</span>
-                        </Alert>
-                    </If>
-                    <If condition={order.paymentMethod !== PaymentMethod.payLater}>
-                        <Alert additionalContent={<div className="text-left">
-                            <p className="mb-1">{t('details.paymentPrompt')}</p>
-                            <div className="flex gap-3">
-                                <Link href={`/order/checkout/wechat/pay?id=${order.id}`}>
-                                    <Button size="xs" pill color="warning"
-                                            className="inline-block">{t('details.payNow')}</Button>
-                                </Link>
-                                <Button size="xs" pill color="failure" onClick={cancel}
-                                        className="inline-block">{t('details.cancelOrder')}</Button>
-                            </div>
-                        </div>}
-                               color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
-                            <span className="font-bold">{t('details.paymentTitle')}</span>
-                        </Alert>
-                    </If>
+                    <Alert additionalContent={<div className="text-left">
+                        <p className="mb-1">{order.paymentMethod === PaymentMethod.payLater ? t('details.paymentPromptPayLater') : t('details.paymentPrompt')}</p>
+                        <div className="flex gap-3">
+                            <Link href={`/order/checkout?order=${order.id}`}>
+                                <Button size="xs" pill color="warning"
+                                        className="inline-block">{t('details.payNow')}</Button>
+                            </Link>
+                            <Button size="xs" pill color="failure" onClick={cancel}
+                                    className="inline-block">{t('details.cancelOrder')}</Button>
+                        </div>
+                    </div>}
+                           color="yellow" rounded className="mb-3 w-full text-left" icon={HiInformationCircle}>
+                        <span className="font-bold">{t('details.paymentTitle')}</span>
+                    </Alert>
                 </If>
 
                 <If condition={shoppingCart.onSiteOrderMode}>
