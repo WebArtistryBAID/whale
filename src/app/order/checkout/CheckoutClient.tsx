@@ -265,12 +265,10 @@ export default function CheckoutClient({ showPayLater, uploadPrefix }: {
                                              disabled={loading}
                                              select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
 
-                        <If condition={false}>
-                            <PaymentMethodButton paymentMethod={PaymentMethod.stripe}
-                                                 selected={paymentMethod === PaymentMethod.stripe}
-                                                 disabled={loading}
-                                                 select={() => setPaymentMethod(PaymentMethod.stripe)}/>
-                        </If>
+                        <PaymentMethodButton paymentMethod={PaymentMethod.stripe}
+                                             selected={paymentMethod === PaymentMethod.stripe}
+                                             disabled={loading}
+                                             select={() => setPaymentMethod(PaymentMethod.stripe)}/>
 
                         <If condition={shoppingCart.onSiteOrderMode}>
                             <PaymentMethodButton paymentMethod={PaymentMethod.cash}
