@@ -458,7 +458,7 @@ export async function createOrder(items: OrderedItemTemplate[],
     }
 
     // Add points to user
-    if (me != null && order.paymentStatus === PaymentStatus.paid) {
+    if (me != null && !onSiteOrderMode && order.paymentStatus === PaymentStatus.paid) {
         await prisma.user.update({
             where: {
                 id: me.id
