@@ -295,56 +295,75 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
     }
 
     // 3. Fill total revenue, orders, and cups from last unit
-    let lastTotalRevenue: Decimal | null = Decimal(0)
-    let lastPaidRevenue: Decimal | null = Decimal(0)
-    let lastTotalOrders: number | null = 0
-    let lastTotalCups: number | null = 0
-    for (const order of await prisma.order.findMany({
-        where: {
-            createdAt: {
-                gte: lastStart,
-                lt: start
-            },
-            OR: [
-                {
-                    paymentStatus: PaymentStatus.paid
+    let lastTotalRevenue: Decimal | null = null
+    let lastPaidRevenue: Decimal | null = null
+    let lastTotalOrders: number | null = null
+    let lastTotalCups: number | null = null
+
+    const maxDayLookback = 30
+    let attempts = 0
+    let thisLastStart = new Date(lastStart)
+    let thisLastEnd = new Date(start)
+    const maxAttempts = range === 'day' ? maxDayLookback : 1
+
+    while (attempts < maxAttempts) {
+        let lastRevenueCandidate = Decimal(0)
+        let lastPaidRevenueCandidate = Decimal(0)
+        let lastOrdersCandidate = 0
+        let lastCupsCandidate = 0
+
+        for (const order of await prisma.order.findMany({
+            where: {
+                createdAt: {
+                    gte: thisLastStart,
+                    lt: thisLastEnd
                 },
-                {
-                    paymentMethod: PaymentMethod.payLater
-                }
-            ]
-        },
-        select: {
-            totalPrice: true,
-            paymentStatus: true,
-            items: {
-                select: {
-                    amount: true
+                OR: [
+                    {
+                        paymentStatus: PaymentStatus.paid
+                    },
+                    {
+                        paymentMethod: PaymentMethod.payLater
+                    }
+                ]
+            },
+            select: {
+                totalPrice: true,
+                paymentStatus: true,
+                items: {
+                    select: {
+                        amount: true
+                    }
                 }
             }
-        }
-    })) {
-        lastTotalRevenue = lastTotalRevenue.add(order.totalPrice)
-        if (order.paymentStatus === PaymentStatus.paid) {
-            lastPaidRevenue = lastPaidRevenue.add(order.totalPrice)
+        })) {
+            lastRevenueCandidate = lastRevenueCandidate.add(order.totalPrice)
+            if (order.paymentStatus === PaymentStatus.paid) {
+                lastPaidRevenueCandidate = lastPaidRevenueCandidate.add(order.totalPrice)
+            }
+
+            lastOrdersCandidate++
+            for (const orderedItem of order.items) {
+                lastCupsCandidate += orderedItem.amount
+            }
         }
 
-        lastTotalOrders++
-        for (const orderedItem of order.items) {
-            lastTotalCups += orderedItem.amount
+        if (!lastRevenueCandidate.eq(0)) {
+            lastTotalRevenue = lastRevenueCandidate
+            lastPaidRevenue = lastPaidRevenueCandidate
+            lastTotalOrders = lastOrdersCandidate
+            lastTotalCups = lastCupsCandidate
+            break
         }
-    }
-    if (lastTotalRevenue.eq(0)) {
-        lastTotalRevenue = null
-    }
-    if (lastPaidRevenue.eq(0)) {
-        lastPaidRevenue = null
-    }
-    if (lastTotalOrders === 0) {
-        lastTotalOrders = null
-    }
-    if (lastTotalCups === 0) {
-        lastTotalCups = null
+
+        attempts++
+        if (attempts >= maxAttempts) {
+            break
+        }
+
+        thisLastEnd = new Date(thisLastStart)
+        thisLastStart = new Date(thisLastStart)
+        thisLastStart.setDate(thisLastStart.getDate() - 1)
     }
 
     // 4. Identify categories

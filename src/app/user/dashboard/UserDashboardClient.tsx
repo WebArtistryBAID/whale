@@ -67,7 +67,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
                             if (trans == null) {
                                 return
                             }
-                            router.push(`/balance/pay?id=${trans.id}`)
+                            router.push(`/order/checkout?recharge=${trans.id}`)
                         }}>{t('dashboard.rechargeModal.cta')}</Button>
                 <Button pill color="gray" onClick={() => setRechargeModal(false)}>{t('cancel')}</Button>
             </ModalFooter>

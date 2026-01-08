@@ -232,7 +232,7 @@ async function refundStripe(order: HydratedOrder): Promise<boolean> {
     }
     try {
         await stripe.refunds.create({
-            payment_intent: order.stripePaymentIntent
+            payment_intent: order.stripePaymentIntent!
         })
     } catch {
         return false
