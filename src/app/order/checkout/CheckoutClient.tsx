@@ -146,7 +146,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 currentPrice = Decimal.max(0, shoppingCart.getTotalPrice().minus(Decimal(foundCoupon?.value ?? '0')))
             }
             if (paymentMethod === PaymentMethod.stripe) {
-                currentPrice = currentPrice.mul(1.04)
+                currentPrice = currentPrice.mul(1.05)
             }
             return currentPrice
         }
@@ -331,7 +331,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                     </If>
                     <If condition={paymentMethod === PaymentMethod.stripe && mode === 'cart'}>
                         <p className="text-sm mt-3">{t('checkout.stripeFees')}</p>
-                        <p className="text-lg">4%</p>
+                        <p className="text-lg">5%</p>
                     </If>
                 </div>
 
