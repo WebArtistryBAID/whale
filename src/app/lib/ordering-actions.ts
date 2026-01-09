@@ -355,7 +355,7 @@ export async function createOrder(items: OrderedItemTemplate[],
 
     // Add Stripe processing fees
     if (paymentMethod === PaymentMethod.stripe) {
-        totalPrice = totalPrice.mul(1.05)
+        totalPrice = totalPrice.mul(1.035)
     }
 
     // Cash payment is only available with on-site
