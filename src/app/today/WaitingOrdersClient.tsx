@@ -58,9 +58,12 @@ function OrderInfo({ order, done, now }: {
         <div className="mb-3">
             <p>{t('today.user')}: <span
                 className="font-bold">{order.userId != null ? order.user!.name : t('anonymous')}</span></p>
-            <p>{t('today.waitedFor')}: <span className="font-bold">{formatElapsedTime(order.createdAt, now)}</span></p>
+            <p>{t('today.waitedFor')}: <span
+                className={`font-bold ${(getElapsedSeconds(order.createdAt, now) ?? 0) > 600 ? 'text-red-500' : ''}`}>{formatElapsedTime(order.createdAt, now)}</span>
+            </p>
             {order.deliveryRoom != null &&
-                <p>{t('today.deliveryRoom')}: <span className="text-green-400">{order.deliveryRoom!}</span></p>}
+                <p>{t('today.deliveryRoom')}: <span className="text-green-400 font-bold">{order.deliveryRoom!}</span>
+                </p>}
         </div>
 
         <div className="mb-3">
