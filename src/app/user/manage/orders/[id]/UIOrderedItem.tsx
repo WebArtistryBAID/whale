@@ -9,11 +9,8 @@ export default function UIOrderedItem({ item }: { item: HydratedOrderedItem }) {
                 <div key={index + '-' + item.id}
                      aria-label={item.itemType.name + ' ' + t('a11y.shoppingCartItem')}>
                     <p className="font-bold font-display text-lg" aria-hidden>{item.itemType.name}</p>
-                    <p aria-hidden>x1</p>
-                    <p>
-                        <span className="sr-only">{t('a11y.appliedOptions')}</span>
-                        {item.appliedOptions.map(i => i.name).join(' / ')}
-                    </p>
+                    <p aria-hidden>x1 / <span className="sr-only">{t('a11y.appliedOptions')}</span>
+                        {item.appliedOptions.map(i => i.name).join(' / ')}</p>
                 </div>
             ))
         }

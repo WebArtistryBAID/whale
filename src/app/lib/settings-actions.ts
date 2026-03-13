@@ -27,6 +27,7 @@ async function initialize() {
     await setConfigValueInternal('balance-recharge-minimum', '20')
     await setConfigValueInternal('allow-pay-later', 'true')
     await setConfigValueInternal('allow-delivery', 'true')
+    await setConfigValueInternal('availability-override-date', '0000-00-00')
 }
 
 export async function getConfigValues(): Promise<{ [key: string]: string }> {
