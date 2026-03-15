@@ -21,10 +21,49 @@ import TagCreateInput = Prisma.TagCreateInput
 import CouponCodeCreateInput = Prisma.CouponCodeCreateInput
 import AdCreateInput = Prisma.AdCreateInput
 import { prisma } from '@/app/lib/prisma'
+import { revalidatePath } from 'next/cache'
+
+async function getNextCategoryDisplayOrder() {
+    const result = await prisma.category.aggregate({
+        _max: {
+            displayOrder: true
+        }
+    })
+    return (result._max.displayOrder ?? -1) + 1
+}
+
+async function getNextItemTypeDisplayOrder(categoryId: number) {
+    const result = await prisma.itemType.aggregate({
+        where: {
+            categoryId
+        },
+        _max: {
+            displayOrder: true
+        }
+    })
+    return (result._max.displayOrder ?? -1) + 1
+}
+
+async function getNextOptionItemDisplayOrder(typeId: number) {
+    const result = await prisma.optionItem.aggregate({
+        where: {
+            typeId
+        },
+        _max: {
+            displayOrder: true
+        }
+    })
+    return (result._max.displayOrder ?? -1) + 1
+}
 
 export async function getCategories(): Promise<Category[]> {
     await requireUserPermission('admin.manage')
-    return prisma.category.findMany()
+    return prisma.category.findMany({
+        orderBy: [
+            { displayOrder: 'asc' },
+            { id: 'asc' }
+        ]
+    })
 }
 
 export async function getCategory(id: number): Promise<HydratedCategory | null> {
@@ -33,11 +72,20 @@ export async function getCategory(id: number): Promise<HydratedCategory | null> 
         where: { id },
         include: {
             items: {
+                orderBy: [
+                    { displayOrder: 'asc' },
+                    { id: 'asc' }
+                ],
                 include: {
                     tags: true,
                     options: {
                         include: {
-                            items: true
+                            items: {
+                                orderBy: [
+                                    { displayOrder: 'asc' },
+                                    { id: 'asc' }
+                                ]
+                            }
                         }
                     }
                 }
@@ -50,11 +98,20 @@ export async function getItemTypes(category: number): Promise<HydratedItemType[]
     await requireUserPermission('admin.manage')
     return prisma.itemType.findMany({
         where: { categoryId: category },
+        orderBy: [
+            { displayOrder: 'asc' },
+            { id: 'asc' }
+        ],
         include: {
             tags: true,
             options: {
                 include: {
-                    items: true
+                    items: {
+                        orderBy: [
+                            { displayOrder: 'asc' },
+                            { id: 'asc' }
+                        ]
+                    }
                 }
             }
         }
@@ -69,7 +126,12 @@ export async function getItemType(id: number): Promise<HydratedItemType | null> 
             tags: true,
             options: {
                 include: {
-                    items: true
+                    items: {
+                        orderBy: [
+                            { displayOrder: 'asc' },
+                            { id: 'asc' }
+                        ]
+                    }
                 }
             }
         }
@@ -78,17 +140,43 @@ export async function getItemType(id: number): Promise<HydratedItemType | null> 
 
 export async function getOptionTypes(): Promise<OptionType[]> {
     await requireUserPermission('admin.manage')
-    return prisma.optionType.findMany()
+    return prisma.optionType.findMany({
+        orderBy: [
+            { id: 'asc' }
+        ]
+    })
 }
 
 export async function getOptionTypesHydrated(): Promise<HydratedOptionType[]> {
     await requireUserPermission('admin.manage')
-    return prisma.optionType.findMany({ include: { items: true } })
+    return prisma.optionType.findMany({
+        orderBy: [
+            { id: 'asc' }
+        ],
+        include: {
+            items: {
+                orderBy: [
+                    { displayOrder: 'asc' },
+                    { id: 'asc' }
+                ]
+            }
+        }
+    })
 }
 
 export async function getOptionType(id: number): Promise<HydratedOptionType | null> {
     await requireUserPermission('admin.manage')
-    return prisma.optionType.findUnique({ where: { id }, include: { items: true } })
+    return prisma.optionType.findUnique({
+        where: { id },
+        include: {
+            items: {
+                orderBy: [
+                    { displayOrder: 'asc' },
+                    { id: 'asc' }
+                ]
+            }
+        }
+    })
 }
 
 export async function getOptionTypeAssociatedItems(id: number): Promise<ItemType[]> {
@@ -100,13 +188,24 @@ export async function getOptionTypeAssociatedItems(id: number): Promise<ItemType
                     id
                 }
             }
-        }
+        },
+        orderBy: [
+            { category: { displayOrder: 'asc' } },
+            { displayOrder: 'asc' },
+            { id: 'asc' }
+        ]
     })
 }
 
 export async function getOptionItems(type: number): Promise<OptionItem[]> {
     await requireUserPermission('admin.manage')
-    return prisma.optionItem.findMany({ where: { typeId: type } })
+    return prisma.optionItem.findMany({
+        where: { typeId: type },
+        orderBy: [
+            { displayOrder: 'asc' },
+            { id: 'asc' }
+        ]
+    })
 }
 
 export async function getOptionItem(id: number): Promise<OptionItem | null> {
@@ -167,9 +266,21 @@ export async function upsertCategory(id: number | undefined, data: CategoryCreat
         }
     })
     if (id == null) {
-        return prisma.category.create({ data })
+        return prisma.category.create({
+            data: {
+                ...data,
+                displayOrder: await getNextCategoryDisplayOrder()
+            }
+        })
     }
-    return prisma.category.upsert({ where: { id }, update: data, create: data })
+    return prisma.category.upsert({
+        where: { id },
+        update: data,
+        create: {
+            ...data,
+            displayOrder: await getNextCategoryDisplayOrder()
+        }
+    })
 }
 
 export async function upsertOptionType(id: number | undefined, data: OptionTypeCreateInput): Promise<OptionType> {
@@ -189,6 +300,10 @@ export async function upsertOptionType(id: number | undefined, data: OptionTypeC
 
 export async function upsertOptionItem(id: number | undefined, data: OptionItemCreateInput): Promise<OptionItem> {
     const user = await requireUserPermission('admin.manage')
+    const typeId = data.type.connect?.id
+    if (typeId == null) {
+        throw new Error('Option items must be connected to a type.')
+    }
     await prisma.userAuditLog.create({
         data: {
             type: UserAuditLogType.upsertOptionItem,
@@ -196,13 +311,10 @@ export async function upsertOptionItem(id: number | undefined, data: OptionItemC
             values: [ data.name ]
         }
     })
-    if (id == null) {
-        return prisma.optionItem.create({ data })
-    }
     if (data.default) {
         await prisma.optionItem.updateMany({
             where: {
-                typeId: data.type.connect!.id,
+                typeId,
                 default: true
             },
             data: {
@@ -210,7 +322,37 @@ export async function upsertOptionItem(id: number | undefined, data: OptionItemC
             }
         })
     }
-    return prisma.optionItem.upsert({ where: { id }, update: data, create: data })
+    const existing = id == null ? null : await prisma.optionItem.findUnique({
+        where: { id },
+        select: {
+            typeId: true,
+            displayOrder: true
+        }
+    })
+    const displayOrder =
+        existing == null || existing.typeId !== typeId
+            ? await getNextOptionItemDisplayOrder(typeId)
+            : existing.displayOrder
+
+    if (id == null) {
+        return prisma.optionItem.create({
+            data: {
+                ...data,
+                displayOrder
+            }
+        })
+    }
+    return prisma.optionItem.upsert({
+        where: { id },
+        update: {
+            ...data,
+            displayOrder
+        },
+        create: {
+            ...data,
+            displayOrder
+        }
+    })
 }
 
 export async function upsertTag(id: number | undefined, data: TagCreateInput): Promise<Tag> {
@@ -272,6 +414,19 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
             values: [ data.name ]
         }
     })
+    const existing = id == null ? null : await prisma.itemType.findUnique({
+        where: {
+            id
+        },
+        select: {
+            categoryId: true,
+            displayOrder: true
+        }
+    })
+    const displayOrder =
+        existing == null || existing.categoryId !== data.categoryId
+            ? await getNextItemTypeDisplayOrder(data.categoryId)
+            : existing.displayOrder
     let result
     if (id == null) {
         result = await prisma.itemType.create({
@@ -289,13 +444,19 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
                 },
                 basePrice: Decimal(data.basePrice).toString(),
                 salePercent: Decimal(data.salePercent).toString(),
+                displayOrder,
                 soldOut: data.soldOut
             },
             include: {
                 tags: true,
                 options: {
                     include: {
-                        items: true
+                        items: {
+                            orderBy: [
+                                { displayOrder: 'asc' },
+                                { id: 'asc' }
+                            ]
+                        }
                     }
                 }
             }
@@ -319,13 +480,19 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
                 },
                 basePrice: Decimal(data.basePrice).toString(),
                 salePercent: Decimal(data.salePercent).toString(),
+                displayOrder,
                 soldOut: data.soldOut
             },
             include: {
                 tags: true,
                 options: {
                     include: {
-                        items: true
+                        items: {
+                            orderBy: [
+                                { displayOrder: 'asc' },
+                                { id: 'asc' }
+                            ]
+                        }
                     }
                 }
             }
@@ -428,4 +595,131 @@ export async function deleteAd(id: number): Promise<Ad> {
         }
     })
     return prisma.ad.delete({ where: { id } })
+}
+
+export async function reorderCategories(ids: number[]): Promise<void> {
+    const user = await requireUserPermission('admin.manage')
+    const categories = await prisma.category.findMany({
+        where: {
+            id: {
+                in: ids
+            }
+        },
+        select: {
+            id: true
+        }
+    })
+    if (categories.length !== ids.length) {
+        throw new Error('One or more categories were not found.')
+    }
+    await prisma.$transaction([
+        ...ids.map((id, index) => prisma.category.update({
+            where: { id },
+            data: {
+                displayOrder: index
+            }
+        })),
+        prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.reorderCategories,
+                userId: user.id,
+                values: []
+            }
+        })
+    ])
+    revalidatePath('/order')
+    revalidatePath('/user/manage/storefront')
+}
+
+export async function reorderItemTypes(categoryId: number, ids: number[]): Promise<void> {
+    const user = await requireUserPermission('admin.manage')
+    const category = await prisma.category.findUnique({
+        where: {
+            id: categoryId
+        },
+        select: {
+            name: true
+        }
+    })
+    if (category == null) {
+        throw new Error('Category not found.')
+    }
+    const items = await prisma.itemType.findMany({
+        where: {
+            categoryId,
+            id: {
+                in: ids
+            }
+        },
+        select: {
+            id: true
+        }
+    })
+    if (items.length !== ids.length) {
+        throw new Error('One or more items were not found in this category.')
+    }
+    await prisma.$transaction([
+        ...ids.map((id, index) => prisma.itemType.update({
+            where: { id },
+            data: {
+                displayOrder: index
+            }
+        })),
+        prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.reorderItemTypes,
+                userId: user.id,
+                values: [ category.name ]
+            }
+        })
+    ])
+    revalidatePath('/order')
+    revalidatePath('/user/manage/storefront')
+    revalidatePath(`/user/manage/storefront/categories/${categoryId}`)
+}
+
+export async function reorderOptionItems(typeId: number, ids: number[]): Promise<void> {
+    const user = await requireUserPermission('admin.manage')
+    const optionType = await prisma.optionType.findUnique({
+        where: {
+            id: typeId
+        },
+        select: {
+            name: true
+        }
+    })
+    if (optionType == null) {
+        throw new Error('Option type not found.')
+    }
+    const items = await prisma.optionItem.findMany({
+        where: {
+            typeId,
+            id: {
+                in: ids
+            }
+        },
+        select: {
+            id: true
+        }
+    })
+    if (items.length !== ids.length) {
+        throw new Error('One or more option items were not found in this option type.')
+    }
+    await prisma.$transaction([
+        ...ids.map((id, index) => prisma.optionItem.update({
+            where: { id },
+            data: {
+                displayOrder: index
+            }
+        })),
+        prisma.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.reorderOptionItems,
+                userId: user.id,
+                values: [ optionType.name ]
+            }
+        })
+    ])
+    revalidatePath('/order')
+    revalidatePath(`/user/manage/storefront/option-types/${typeId}`)
 }

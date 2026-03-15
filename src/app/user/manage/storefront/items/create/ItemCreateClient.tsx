@@ -104,6 +104,7 @@ export default function ItemCreateClient({
         const result = await upsertItemType(existing?.id, {
             id: -1,
             createdAt: new Date(),
+            displayOrder: existing?.displayOrder ?? -1,
             categoryId: category,
             name,
             image,

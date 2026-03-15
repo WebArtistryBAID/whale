@@ -18,6 +18,8 @@ import { HiCash, HiCog, HiCollection, HiGift, HiTag } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import If from '@/app/lib/If'
+import ReorderableTable from '@/app/user/manage/storefront/ReorderableTable'
+import { reorderCategories } from '@/app/lib/ui-manage-actions'
 
 export default function ManageStorefrontClient({ categories, optionTypes, couponCodes, tags, ads }: {
     categories: Category[],
@@ -43,27 +45,17 @@ export default function ManageStorefrontClient({ categories, optionTypes, coupon
                         <Button color="warning" pill
                                 className="inline-block mb-8">{t('manage.storefront.create')}</Button>
                     </Link>
-                    <Table className="mb-5">
-                        <TableHead>
-                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                            <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
-                            <TableHeadCell><span
-                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                        </TableHead>
-                        <TableBody className="divide-y mb-3">
-                            {categories.map(category => <TableRow className="tr" key={category.id}>
-                                <TableCell className="th">{category.id}</TableCell>
-                                <TableCell>{category.name}</TableCell>
-                                <TableCell>
-                                    <Link href={`/user/manage/storefront/categories/${category.id}`}>
-                                        <Button size="xs" pill color="warning" className="inline-block">
-                                            {t('manage.storefront.view')}
-                                        </Button>
-                                    </Link>
-                                </TableCell>
-                            </TableRow>)}
-                        </TableBody>
-                    </Table>
+                    <ReorderableTable
+                        actionsLabel={t('manage.storefront.actions')}
+                        handleLabel={t('manage.storefront.dragHandle')}
+                        idLabel={t('manage.storefront.id')}
+                        items={categories}
+                        nameLabel={t('manage.storefront.name')}
+                        onReorder={async nextCategories => reorderCategories(nextCategories.map(category => category.id))}
+                        saveErrorMessage={t('manage.storefront.saveOrderError')}
+                        viewLabel={t('manage.storefront.view')}
+                        viewPath={category => `/user/manage/storefront/categories/${category.id}`}
+                    />
                 </If>
                 <If condition={categories.length < 1}>
                     <div className="w-full h-[60dvh] flex flex-col justify-center items-center text-center">

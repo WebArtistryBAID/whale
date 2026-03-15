@@ -86,9 +86,10 @@ model CouponCode {
 }
 
 model Category {
-  id    Int        @id @default(autoincrement())
-  name  String
-  items ItemType[]
+  id           Int        @id @default(autoincrement())
+  name         String
+  displayOrder Int        @default(0)
+  items        ItemType[]
 }
 
 model Tag {
@@ -110,6 +111,7 @@ model OptionItem {
   type         OptionType    @relation(fields: [typeId], references: [id])
   typeId       Int
   name         String
+  displayOrder Int           @default(0)
   default      Boolean       @default(false)
   priceChange  String        @default("0")
   soldOut      Boolean       @default(false)
@@ -129,6 +131,7 @@ model ItemType {
   options          OptionType[]
   basePrice        String
   salePercent      String
+  displayOrder     Int           @default(0)
   soldOut          Boolean       @default(false)
   orderedItems     OrderedItem[]
 }
@@ -219,6 +222,9 @@ enum UserAuditLogType {
   upsertCouponCode
   upsertAd
   upsertItemType
+  reorderCategories
+  reorderItemTypes
+  reorderOptionItems
   deleteCategory
   deleteOptionType
   deleteOptionItem

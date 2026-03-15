@@ -7,23 +7,18 @@ import {
     Modal,
     ModalBody,
     ModalFooter,
-    ModalHeader,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeadCell,
-    TableRow
+    ModalHeader
 } from 'flowbite-react'
 import { HiCollection } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { deleteCategory } from '@/app/lib/ui-manage-actions'
+import { deleteCategory, reorderItemTypes } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
 import { HydratedCategory } from '@/app/lib/ui-data-actions'
 import { Trans } from 'react-i18next/TransWithoutContext'
+import ReorderableTable from '@/app/user/manage/storefront/ReorderableTable'
 
 export default function CategoryViewClient({ object }: { object: HydratedCategory }) {
     const { t } = useTranslationClient('user')
@@ -76,27 +71,17 @@ export default function CategoryViewClient({ object }: { object: HydratedCategor
             <If condition={object.items.length > 0}>
                 <div aria-label={t('manage.storefront.categoryD.items')} className="mb-5">
                     <p className="secondary text-sm font-display mb-3">{t('manage.storefront.categoryD.items')}</p>
-                    <Table>
-                        <TableHead>
-                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                            <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
-                            <TableHeadCell><span
-                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                        </TableHead>
-                        <TableBody className="divide-y mb-3">
-                            {object.items.map(item => <TableRow className="tr" key={item.id}>
-                                <TableCell className="th">{item.id}</TableCell>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>
-                                    <Link href={`/user/manage/storefront/items/${item.id}`}>
-                                        <Button size="xs" pill color="warning" className="inline-block">
-                                            {t('manage.storefront.view')}
-                                        </Button>
-                                    </Link>
-                                </TableCell>
-                            </TableRow>)}
-                        </TableBody>
-                    </Table>
+                    <ReorderableTable
+                        actionsLabel={t('manage.storefront.actions')}
+                        handleLabel={t('manage.storefront.dragHandle')}
+                        idLabel={t('manage.storefront.id')}
+                        items={object.items}
+                        nameLabel={t('manage.storefront.name')}
+                        onReorder={async items => reorderItemTypes(object.id, items.map(item => item.id))}
+                        saveErrorMessage={t('manage.storefront.saveOrderError')}
+                        viewLabel={t('manage.storefront.view')}
+                        viewPath={item => `/user/manage/storefront/items/${item.id}`}
+                    />
                 </div>
             </If>
 

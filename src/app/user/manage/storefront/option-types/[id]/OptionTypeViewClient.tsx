@@ -20,10 +20,11 @@ import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { deleteOptionType } from '@/app/lib/ui-manage-actions'
+import { deleteOptionType, reorderOptionItems } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
 import { HydratedOptionType } from '@/app/lib/ui-data-actions'
 import { ItemType } from '@/generated/prisma/browser'
+import ReorderableTable from '@/app/user/manage/storefront/ReorderableTable'
 
 export default function OptionTypeViewClient({ object, items }: { object: HydratedOptionType, items: ItemType[] }) {
     const { t } = useTranslationClient('user')
@@ -100,27 +101,17 @@ export default function OptionTypeViewClient({ object, items }: { object: Hydrat
             <If condition={object.items.length > 0}>
                 <div aria-label={t('manage.storefront.optionTypeD.optionItems')} className="mb-5">
                     <p className="secondary text-sm font-display mb-3">{t('manage.storefront.optionTypeD.optionItems')}</p>
-                    <Table>
-                        <TableHead>
-                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                            <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
-                            <TableHeadCell><span
-                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                        </TableHead>
-                        <TableBody className="divide-y mb-3">
-                            {object.items.map(item => <TableRow className="tr" key={item.id}>
-                                <TableCell className="th">{item.id}</TableCell>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>
-                                    <Link href={`/user/manage/storefront/option-items/${item.id}`}>
-                                        <Button size="xs" pill color="warning" className="inline-block">
-                                            {t('manage.storefront.view')}
-                                        </Button>
-                                    </Link>
-                                </TableCell>
-                            </TableRow>)}
-                        </TableBody>
-                    </Table>
+                    <ReorderableTable
+                        actionsLabel={t('manage.storefront.actions')}
+                        handleLabel={t('manage.storefront.dragHandle')}
+                        idLabel={t('manage.storefront.id')}
+                        items={object.items}
+                        nameLabel={t('manage.storefront.name')}
+                        onReorder={async items => reorderOptionItems(object.id, items.map(item => item.id))}
+                        saveErrorMessage={t('manage.storefront.saveOrderError')}
+                        viewLabel={t('manage.storefront.view')}
+                        viewPath={item => `/user/manage/storefront/option-items/${item.id}`}
+                    />
                 </div>
             </If>
 

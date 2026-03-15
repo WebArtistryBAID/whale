@@ -134,6 +134,9 @@
       "upsertAd": "{{user}} 更新了广告 {{v0}}。",
       "deleteAd": "{{user}} 删除了广告 {{v0}}。",
       "upsertItemType": "{{user}} 更新了产品 {{v0}}。",
+      "reorderCategories": "{{user}} 重新排序了类目。",
+      "reorderItemTypes": "{{user}} 重新排序了类目 {{v0}} 中的产品。",
+      "reorderOptionItems": "{{user}} 重新排序了选项类型 {{v0}} 中的选项。",
       "deleteItemType": "{{user}} 删除了产品 {{v0}}。"
     }
   },
@@ -286,6 +289,8 @@
       "id": "ID",
       "name": "名称",
       "value": "价值",
+      "dragHandle": "拖动以重新排序",
+      "saveOrderError": "无法保存新的顺序，请重试。",
       "view": "查看",
       "actions": "操作",
       "empty": "暂时没有任何内容。",

@@ -97,6 +97,8 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
                             UserAuditLogType.upsertAd,
                             UserAuditLogType.deleteAd,
                             UserAuditLogType.upsertItemType,
+                            UserAuditLogType.reorderItemTypes,
+                            UserAuditLogType.reorderOptionItems,
                             UserAuditLogType.deleteItemType
                         ] as UserAuditLogType[]).includes(log.type)) {
                             messageData.v0 = log.values[0]

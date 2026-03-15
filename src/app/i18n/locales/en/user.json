@@ -133,6 +133,9 @@
       "upsertAd": "{{user}} updated ad {{v0}}.",
       "deleteAd": "{{user}} deleted ad {{v0}}.",
       "upsertItemType": "{{user}} updated item type {{v0}}.",
+      "reorderCategories": "{{user}} reordered categories.",
+      "reorderItemTypes": "{{user}} reordered the items in category {{v0}}.",
+      "reorderOptionItems": "{{user}} reordered the option items in option type {{v0}}.",
       "deleteItemType": "{{user}} deleted item type {{v0}}."
     }
   },
@@ -285,6 +288,8 @@
       "id": "ID",
       "name": "Name",
       "value": "Value",
+      "dragHandle": "Drag to reorder",
+      "saveOrderError": "Could not save the new order. Please try again.",
       "view": "View",
       "actions": "Actions",
       "empty": "No items.",
