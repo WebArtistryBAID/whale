@@ -60,8 +60,38 @@ function days(year: number): number[] {
     return [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ]
 }
 
-function mod(n: number, m: number): number {
-    return ((n % m) + m) % m
+function startOfDay(date: Date): Date {
+    const next = new Date(date)
+    next.setHours(0, 0, 0, 0)
+    return next
+}
+
+function getPreviousPeriodStart(range: 'week' | 'month' | 'day', start: Date): Date {
+    const lastStart = new Date(start)
+    if (range === 'day') {
+        lastStart.setDate(lastStart.getDate() - 1)
+    } else if (range === 'week') {
+        lastStart.setDate(lastStart.getDate() - 7)
+    } else if (range === 'month') {
+        lastStart.setMonth(lastStart.getMonth() - 1)
+    }
+    return lastStart
+}
+
+function getPreviousComparisonEnd(range: 'week' | 'month' | 'day', start: Date, end: Date, lastStart: Date): Date {
+    if (range === 'day') {
+        return new Date(start)
+    }
+
+    const today = startOfDay(new Date())
+    const periodEnd = startOfDay(end)
+    const comparisonDay = new Date(Math.min(Math.max(today.getTime(), start.getTime()), periodEnd.getTime()))
+    const elapsedDays = Math.floor((comparisonDay.getTime() - start.getTime()) / 86400000) + 1
+
+    const lastEnd = new Date(lastStart)
+    lastEnd.setDate(lastEnd.getDate() + elapsedDays)
+
+    return lastEnd.getTime() > start.getTime() ? new Date(start) : lastEnd
 }
 
 // One big, ugly function to generate all the stats
@@ -81,14 +111,7 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
     end.setHours(23, 59, 59, 999)
 
     // Start of the previous (unit)
-    const lastStart = new Date(start)
-    if (range === 'day') {
-        lastStart.setDate(lastStart.getDate() - 1)
-    } else if (range === 'week') {
-        lastStart.setDate(lastStart.getDate() - 7)
-    } else if (range === 'month') {
-        lastStart.setMonth(mod(lastStart.getMonth() - 1, 12))
-    }
+    const lastStart = getPreviousPeriodStart(range, start)
 
     // 1. Fill new item stats
     const newItems = []
@@ -303,7 +326,7 @@ async function getRawStats(range: 'week' | 'month' | 'day', start: Date): Promis
     const maxDayLookback = 30
     let attempts = 0
     let thisLastStart = new Date(lastStart)
-    let thisLastEnd = new Date(start)
+    let thisLastEnd = getPreviousComparisonEnd(range, start, end, lastStart)
     const maxAttempts = range === 'day' ? maxDayLookback : 1
 
     while (attempts < maxAttempts) {
