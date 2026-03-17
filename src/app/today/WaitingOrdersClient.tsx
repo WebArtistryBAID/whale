@@ -47,7 +47,7 @@ function OrderInfo({ order, done, now }: {
 }) {
     const { t } = useTranslationClient('user')
 
-    return <div className="col-span-1 row-span-1 p-3 bg-amber-50 dark:bg-amber- rounded-3xl">
+    return <div className="col-span-1 row-span-1 p-3 bg-amber-50 dark:bg-amber-800 rounded-3xl">
         <h2 className="flex items-center mb-3 font-bold">
             <Badge className="mr-2 rounded-full h-8 w-8 flex justify-center items-center" color="warning">
                 <HiHashtag className="text-xl"/>
