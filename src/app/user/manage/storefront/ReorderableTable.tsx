@@ -4,6 +4,7 @@ import { Button, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow
 import Link from 'next/link'
 import { type DragEvent, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import { HiBars3 } from 'react-icons/hi2'
 
 type ReorderPosition = 'before' | 'after'
 
@@ -59,11 +60,8 @@ function DragHandle({ disabled, label, onDragEnd, onDragStart }: {
         disabled={disabled}
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
-        className="inline-flex cursor-grab items-center justify-center rounded-full p-2 text-amber-700 transition-opacity hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-amber-300 dark:hover:bg-amber-900"
-    >
-        <span className="grid grid-cols-2 gap-1" aria-hidden>
-            {Array.from({ length: 6 }, (_, index) => <span key={index} className="h-1 w-1 rounded-full bg-current"/>)}
-        </span>
+        className="inline-flex cursor-grab items-center justify-center w-8 h-8 rounded-full p-2 text-amber-700 transition-opacity hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-amber-300 dark:hover:bg-amber-900">
+        <HiBars3 className="w-5"/>
     </button>
 }
 
