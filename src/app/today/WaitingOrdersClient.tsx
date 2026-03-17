@@ -160,7 +160,7 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
 
         <div className="w-full h-full grid sm:grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4 grid-cols-1 p-5"
              aria-label={t('today.ordersPane')}>
-            <div className="col-span-1 row-span-1 flex flex-col gap-3 p-5 bg-amber-50 rounded-3xl">
+            <div className="col-span-1 row-span-1 flex flex-col gap-3 p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl">
                 <div className="flex items-center gap-2">
                     {isOpen && !atCapacity && <HiCheckCircle className="text-green-500 text-xl"/>}
                     {isOpen && atCapacity &&
