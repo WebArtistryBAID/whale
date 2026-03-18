@@ -36,6 +36,7 @@ import Link from 'next/link'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import { getStripeRedirectURI } from '@/app/lib/stripe-actions'
+import { getStripeChargedTotal, getStripeFeeAmount } from '@/app/lib/pricing'
 
 function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     paymentMethod: PaymentMethod,
@@ -119,7 +120,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     useEffect(() => {
         (async () => {
             if (mode === 'cart') {
-                setBalanceEnabled(await canPayWithBalance(getRealTotal().toString()))
+                setBalanceEnabled(await canPayWithBalance(getBaseTotal().toString()))
                 setPayLaterEnabled(await canPayWithPayLater())
                 setDeliveryEnabled(await getConfigValueAsBoolean('allow-delivery'))
             } else if (mode === 'order' && existingOrder != null) {
@@ -137,16 +138,13 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
 
     const hasCartCouponIssue = useMemo(() => mode === 'cart' && coupon.length > 0 && foundCoupon == null, [ coupon.length, foundCoupon, mode ])
 
-    function getRealTotal(): Decimal {
+    function getBaseTotal(): Decimal {
         if (mode === 'cart') {
             let currentPrice: Decimal
             if (foundCoupon == null) {
                 currentPrice = shoppingCart.getTotalPrice()
             } else {
                 currentPrice = Decimal.max(0, shoppingCart.getTotalPrice().minus(Decimal(foundCoupon?.value ?? '0')))
-            }
-            if (paymentMethod === PaymentMethod.stripe) {
-                currentPrice = currentPrice.mul(1.035)
             }
             return currentPrice
         }
@@ -156,9 +154,17 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
         return Decimal(rechargeTransaction?.values[0] ?? 0)
     }
 
+    function getDisplayedTotal(): Decimal {
+        const baseTotal = getBaseTotal()
+        if (paymentMethod === PaymentMethod.stripe && mode !== 'recharge') {
+            return getStripeChargedTotal(baseTotal)
+        }
+        return baseTotal
+    }
+
     function getActualCouponValue(): Decimal {
         if (mode === 'cart') {
-            return shoppingCart.getTotalPrice().minus(getRealTotal())
+            return shoppingCart.getTotalPrice().minus(getBaseTotal())
         }
         return Decimal(0)
     }
@@ -311,7 +317,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 <div className="mb-5 text-sm p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl"
                      aria-label={t('checkout.orderDetails')}>
                     <p className="text-sm">{t('checkout.total')}</p>
-                    <p className="text-lg">¥{getRealTotal().toString()}</p>
+                    <p className="text-lg">¥{getDisplayedTotal().toString()}</p>
                     <If condition={mode !== 'recharge'}>
                         <p className="mt-3 text-sm">{t('checkout.wait')}</p>
                         <p className="text-lg">
@@ -329,9 +335,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                         <span className="sr-only"
                               aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
                     </If>
-                    <If condition={paymentMethod === PaymentMethod.stripe && mode === 'cart'}>
+                    <If condition={paymentMethod === PaymentMethod.stripe && mode !== 'recharge'}>
                         <p className="text-sm mt-3">{t('checkout.stripeFees')}</p>
-                        <p className="text-lg">3.5%</p>
+                        <p className="text-lg">¥{getStripeFeeAmount(getBaseTotal()).toFixed(2)} (3.5%)</p>
                     </If>
                 </div>
 
@@ -451,10 +457,10 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                         {t('tryAgain')}
                     </If>
                     <If condition={!orderFailed}>
-                        <If condition={getRealTotal().eq(0) || paymentMethod === PaymentMethod.cash}>
+                        <If condition={getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash}>
                             {t('continue')}
                         </If>
-                        <If condition={!(getRealTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
+                        <If condition={!(getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
                             {t('checkout.pay')}
                         </If>
                     </If>

@@ -7,6 +7,7 @@ import { prisma } from '@/app/lib/prisma'
 import { PaymentMethod, PaymentStatus, UserAuditLogType } from '@/generated/prisma/enums'
 import { getMyTransaction } from '@/app/lib/balance-actions'
 import Stripe from 'stripe'
+import { getStripeChargedAmountMinorUnit } from '@/app/lib/pricing'
 
 export async function getStripeRedirectURI(id: number, type: 'order' | 'balance' = 'order'): Promise<string> {
     if (type === 'balance') {
@@ -51,7 +52,7 @@ export async function getStripeRedirectURI(id: number, type: 'order' | 'balance'
                 currency: 'cny',
                 product: process.env.STRIPE_PRODUCT!,
                 tax_behavior: 'inclusive',
-                unit_amount: Math.floor(Decimal(order.totalPrice).mul(100).toNumber())
+                unit_amount: getStripeChargedAmountMinorUnit(order.totalPrice)
             },
             quantity: 1
         } ],
