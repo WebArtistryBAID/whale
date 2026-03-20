@@ -44,8 +44,13 @@
   },
   "maximumCupsModal": {
     "title": "Capacity Reached",
-    "simple": "The store has reached its maximum capacity for orders.",
-    "message": "The store has reached its maximum capacity for orders. You can still view the menu, but you cannot place an order."
+    "simple": "The store has reached its live ordering limit for this business day.",
+    "message": "The store has reached its live ordering limit for this business day. You can still view the menu, but you cannot place an order."
+  },
+  "preOrderLimitModal": {
+    "title": "Pre-Order Limit Reached",
+    "simple": "Pre-orders are full right now.",
+    "message": "Pre-orders are full right now. You can place another order after the store officially opens at {{time}}."
   },
   "payLaterModal": {
     "title": "Order Not Paid",

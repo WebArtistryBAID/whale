@@ -58,21 +58,35 @@ The following events must be listened to:
 
 ## Settings
 
-| Key                             | Type       | Description                                                                                       |
-|---------------------------------|------------|---------------------------------------------------------------------------------------------------|
-| `enable-scheduled-availability` | boolean    | Whether or not to use a schedule for making the store available.                                  |
-| `weekdays-only`                 | boolean    | When `enable-scheduled-availability` is on, whether to only make the store available on weekdays. |
-| `open-time`                     | HH:mm      | When `enable-scheduled-availability` is on, the time when the store opens.                        |
-| `close-time`                    | HH:mm      | When `enable-scheduled-availability` is on, the time when the store closes.                       |
-| `store-open`                    | boolean    | When `enable-scheduled-availability` is off, whether the store is currently open.                 |
-| `availability-override-date`    | YYYY-MM-DD | The date on which store availability has been overridden.                                         |
-| `availability-override-value`   | boolean    | The value of the store availability override.                                                     |
-| `maximum-cups-per-order`        | number     | The maximum number of cups that can be ordered in a single order.                                 |
-| `maximum-cups-per-day`          | number     | The maximum number of cups that can be ordered in a single day.                                   |
-| `maximum-balance`               | Decimal    | The maximum balance that a user can have.                                                         |
-| `balance-recharge-minimum`      | Decimal    | The minimum amount that can be recharged.                                                         |
-| `allow-delivery`                | boolean    | Whether to allow delivery service.                                                                |
-| `allow-pay-later`               | boolean    | Whether to allow Pay Later payment method.                                                        |
+| Key                              | Type       | Description                                                                                         |
+|----------------------------------|------------|-----------------------------------------------------------------------------------------------------|
+| `enable-scheduled-availability`  | boolean    | Whether or not to use a schedule for making the store available.                                    |
+| `weekdays-only`                  | boolean    | When `enable-scheduled-availability` is on, whether to only make the store available on weekdays.   |
+| `open-time`                      | HH:mm      | When `enable-scheduled-availability` is on, the time when the store opens.                          |
+| `close-time`                     | HH:mm      | When `enable-scheduled-availability` is on, the time when the store closes.                         |
+| `pre-order-start-time`           | HH:mm      | When scheduled availability is on, the time when pre-ordering begins for the relevant business day. |
+| `store-open`                     | boolean    | When `enable-scheduled-availability` is off, whether the store is currently open.                   |
+| `availability-override-date`     | YYYY-MM-DD | The date on which store availability has been overridden.                                           |
+| `availability-override-value`    | boolean    | The value of the store availability override.                                                       |
+| `maximum-cups-per-order`         | number     | The maximum number of cups that can be ordered in a single order.                                   |
+| `maximum-cups-per-day`           | number     | The live limit for a business day after the store officially opens.                                 |
+| `maximum-pre-order-cups-per-day` | number     | The maximum number of cups that can be accepted as pre-orders for a business day.                   |
+| `maximum-balance`                | Decimal    | The maximum balance that a user can have.                                                           |
+| `balance-recharge-minimum`       | Decimal    | The minimum amount that can be recharged.                                                           |
+| `allow-delivery`                 | boolean    | Whether to allow delivery service.                                                                  |
+| `allow-pay-later`                | boolean    | Whether to allow Pay Later payment method.                                                          |
+
+Pre-order behavior:
+
+* Orders placed between `pre-order-start-time` and `open-time` are treated as pre-orders.
+* Pre-orders count toward `maximum-pre-order-cups-per-day`.
+* When the store officially opens, any unused pre-order capacity is added to the live limit for that same business day.
+  This is the "official" live limit shown on the waiting-orders page.
+* The live limit does not carry over to the next business day.
+* If `pre-order-start-time` is later than `open-time`, the pre-order window starts on the previous business day and
+  continues until the target business day opens. With `weekdays-only`, this can span weekends.
+* Manual closure overrides pre-ordering. If the store is manually closed for the current day, users cannot place
+  pre-orders during that override.
 
 ## Contribution
 

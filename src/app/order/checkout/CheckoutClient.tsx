@@ -27,6 +27,7 @@ import {
     couponQuickValidate,
     createOrder,
     getEstimatedWaitTime,
+    getOrderingAvailability,
     payOrderWithBalance,
     setOrderPaymentMethod
 } from '@/app/lib/ordering-actions'
@@ -76,6 +77,8 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     const [ orderFailed, setOrderFailed ] = useState(false)
     const [ loading, setLoading ] = useState(false)
     const [ awaitRedirect, setAwaitRedirect ] = useState(false)
+    const [ preOrderLimitModal, setPreOrderLimitModal ] = useState(false)
+    const [ preOrderLimitOpenTime, setPreOrderLimitOpenTime ] = useState('')
     const [ redirectTarget, setRedirectTarget ] = useState('#')
     const [ balanceEnabled, setBalanceEnabled ] = useState(false)
     const [ payLaterEnabled, setPayLaterEnabled ] = useState(false)
@@ -186,6 +189,11 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
             const order = await createOrder(shoppingCart.items, coupon.length > 0 ? coupon : null, shoppingCart.onSiteOrderMode,
                 useDelivery ? deliveryRoom : null, paymentMethod)
             if (order == null) {
+                const availability = await getOrderingAvailability()
+                if (availability.unavailableReason === 'preorder-limit-reached') {
+                    setPreOrderLimitOpenTime(availability.openTime)
+                    setPreOrderLimitModal(true)
+                }
                 setOrderFailed(true)
                 setLoading(false)
                 return
@@ -287,6 +295,18 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                     setShowLoginNag(false)
                     void order()
                 }}>{t('checkout.loginNagModal.continue')}</Button>
+            </ModalFooter>
+        </Modal>
+
+        <Modal show={preOrderLimitModal} onClose={() => setPreOrderLimitModal(false)}>
+            <ModalHeader>{t('preOrderLimitModal.title')}</ModalHeader>
+            <ModalBody>
+                <p>{t('preOrderLimitModal.message', { time: preOrderLimitOpenTime })}</p>
+            </ModalBody>
+            <ModalFooter>
+                <Button pill color="warning" onClick={() => setPreOrderLimitModal(false)}>
+                    {t('confirm')}
+                </Button>
             </ModalFooter>
         </Modal>
 

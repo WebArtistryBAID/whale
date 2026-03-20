@@ -48,6 +48,14 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
         })
     }
 
+    function isNumericValue(value: string) {
+        return value.trim() !== '' && !Number.isNaN(Number(value))
+    }
+
+    function isTimeValue(value: string) {
+        return /^([01]?\d|2[0-3]):[0-5]\d$/.test(value.trim())
+    }
+
     function BooleanValue(key: string) {
         return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
             <ToggleSwitch checked={tmpValues[key] === 'true'} onChange={v => setBooleanValue(key, v)}
@@ -57,15 +65,6 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
     }
 
     function NumberValue(key: string, min: Decimal | undefined = undefined, max: Decimal | undefined = undefined) {
-        function isNumber(v: string) {
-            try {
-                parseFloat(v)
-            } catch {
-                return false
-            }
-            return true
-        }
-
         return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
             <p className="mb-1">{t(`manage.settings.types.${key}`)}</p>
             <TextInput value={tmpValues[key]} type="number" placeholder={t(`manage.settings.types.${key}`) + '...'}
@@ -73,13 +72,13 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
                            setValue(key, e.currentTarget.value)
                            setHasErrors(p => p.filter(v => v !== key))
                            if (e.currentTarget.value === '' ||
-                               !isNumber(e.currentTarget.value) || (min != null && Decimal(e.currentTarget.value).lt(min))
+                               !isNumericValue(e.currentTarget.value) || (min != null && Decimal(e.currentTarget.value).lt(min))
                                || (max != null && Decimal(e.currentTarget.value).gt(max))) {
                                setHasErrors(p => [ ...p, key ])
                            }
                        }}/>
             <If condition={tmpValues[key] !== ''}>
-                <If condition={isNumber(tmpValues[key] === '' ? '0' : tmpValues[key])}>
+                <If condition={isNumericValue(tmpValues[key] === '' ? '0' : tmpValues[key])}>
                     <If condition={min != null && Decimal(tmpValues[key] === '' ? '0' : tmpValues[key]).lt(min)}>
                         <p className="text-red-500 mt-1 text-sm">{t('manage.settings.minValue', { min })}</p>
                     </If>
@@ -87,7 +86,7 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
                         <p className="text-red-500 mt-1 text-sm">{t('manage.settings.maxValue', { max })}</p>
                     </If>
                 </If>
-                <If condition={!isNumber(tmpValues[key] === '' ? '0' : tmpValues[key])}>
+                <If condition={!isNumericValue(tmpValues[key] === '' ? '0' : tmpValues[key])}>
                     <p className="text-red-500 mt-1 text-sm">{t('manage.settings.invalidNumber')}</p>
                 </If>
             </If>
@@ -95,11 +94,20 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
         </div>
     }
 
-    function StringValue(key: string) {
+    function TimeValue(key: string) {
         return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
             <p className="mb-1">{t(`manage.settings.types.${key}`)}</p>
             <TextInput value={tmpValues[key]} type="text" placeholder={t(`manage.settings.types.${key}`) + '...'}
-                       onChange={e => setValue(key, e.currentTarget.value)}/>
+                       onChange={e => {
+                           setValue(key, e.currentTarget.value)
+                           setHasErrors(p => p.filter(v => v !== key))
+                           if (!isTimeValue(e.currentTarget.value)) {
+                               setHasErrors(p => [ ...p, key ])
+                           }
+                       }}/>
+            <If condition={!isTimeValue(tmpValues[key] ?? '')}>
+                <p className="text-red-500 mt-1 text-sm">{t('manage.settings.invalidTime')}</p>
+            </If>
             <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.${key}`)}</p>
         </div>
     }
@@ -137,15 +145,17 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
             {BooleanValue('enable-scheduled-availability')}
             <If condition={tmpValues['enable-scheduled-availability'] === 'true'}>
                 {BooleanValue('weekdays-only')}
-                {StringValue('open-time')}
-                {StringValue('close-time')}
+                {TimeValue('open-time')}
+                {TimeValue('close-time')}
+                {TimeValue('pre-order-start-time')}
             </If>
             <If condition={tmpValues['enable-scheduled-availability'] !== 'true'}>
                 {BooleanValue('store-open')}
             </If>
             <div></div>
             {NumberValue('maximum-cups-per-order', Decimal(1))}
-            {NumberValue('maximum-cups-per-day', Decimal(1))}
+            {NumberValue('maximum-cups-per-day', Decimal(0))}
+            {NumberValue('maximum-pre-order-cups-per-day', Decimal(0))}
             <div></div>
             {NumberValue('maximum-balance', Decimal(0))}
             {NumberValue('balance-recharge-minimum', Decimal(0))}

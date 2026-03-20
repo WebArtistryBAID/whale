@@ -44,8 +44,13 @@
   },
   "maximumCupsModal": {
     "title": "店铺已满额",
-    "simple": "店铺已达到订单最大额度。",
-    "message": "店铺已达到订单最大额度。您可以查看菜单，但无法下单。"
+    "simple": "店铺已达到本营业日的现场点单限额。",
+    "message": "店铺已达到本营业日的现场点单限额。您可以查看菜单，但暂时无法下单。"
+  },
+  "preOrderLimitModal": {
+    "title": "预点单已满",
+    "simple": "当前预点单额度已满。",
+    "message": "当前预点单额度已满。您可以在店铺于 {{time}} 正式开店后继续下单。"
   },
   "payLaterModal": {
     "title": "订单尚未付款",

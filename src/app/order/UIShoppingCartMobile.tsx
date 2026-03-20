@@ -2,14 +2,14 @@
 
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { useTranslationClient } from '@/app/i18n/client'
-import { Button, Popover } from 'flowbite-react'
+import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Popover } from 'flowbite-react'
 import If from '@/app/lib/If'
 import { HiClock } from 'react-icons/hi'
 import { useRouter } from 'next/navigation'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { useEffect, useRef, useState } from 'react'
 import { Trans } from 'react-i18next/TransWithoutContext'
-import { isMaximumCupsReached, isStoreOpen } from '@/app/lib/ordering-actions'
+import { getOrderingAvailability, OrderingAvailabilityResponse } from '@/app/lib/ordering-actions'
 import { getConfigValueAsNumber } from '@/app/lib/settings-actions'
 
 export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: string }) {
@@ -19,16 +19,21 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
     const [ showAll, setShowAll ] = useState(false)
     const detailsRef = useRef<HTMLDivElement>(null)
 
-    const [ storeOpen, setStoreOpen ] = useState(false)
-    const [ atCapacity, setAtCapacity ] = useState(false)
+    const [ availability, setAvailability ] = useState<OrderingAvailabilityResponse | null>(null)
     const [ maxCups, setMaxCups ] = useState(0)
+    const [ preOrderLimitModal, setPreOrderLimitModal ] = useState(false)
 
     useEffect(() => {
-        (async () => {
-            setStoreOpen(await isStoreOpen())
-            setAtCapacity(await isMaximumCupsReached())
+        const sync = async () => {
+            setAvailability(await getOrderingAvailability())
             setMaxCups(await getConfigValueAsNumber('maximum-cups-per-order'))
-        })()
+        }
+
+        void sync()
+        const id = setInterval(() => {
+            void sync()
+        }, 10000)
+        return () => clearInterval(id)
     }, [])
 
     useEffect(() => {
@@ -37,15 +42,42 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
         }
     }, [ showAll ])
 
+    const isPreOrderFull = availability?.unavailableReason === 'preorder-limit-reached'
+    const isClosed = availability?.unavailableReason === 'store-closed'
+    const isLiveFull = availability?.unavailableReason === 'live-limit-reached'
+    const showWarning = availability != null && (isClosed || isLiveFull || isPreOrderFull || shoppingCart.getAmount() > maxCups)
+    const buttonDisabled = availability == null ||
+        isClosed ||
+        isLiveFull ||
+        shoppingCart.getAmount() > maxCups ||
+        shoppingCart.items.length < 1
+
     const checkout = <Button pill
-                             disabled={!storeOpen || atCapacity || shoppingCart.getAmount() > maxCups || shoppingCart.items.length < 1}
+                             disabled={buttonDisabled}
                              color="yellow" onClick={() => {
-        if (shoppingCart.items.length > 0) {
-            router.replace('/order/checkout')
+        if (shoppingCart.items.length < 1) {
+            return
         }
+        if (isPreOrderFull) {
+            setPreOrderLimitModal(true)
+            return
+        }
+        router.replace('/order/checkout')
     }}>{t('checkout.title')}</Button>
 
     return <>
+        <Modal show={preOrderLimitModal} onClose={() => setPreOrderLimitModal(false)}>
+            <ModalHeader>{t('preOrderLimitModal.title')}</ModalHeader>
+            <ModalBody>
+                <p>{t('preOrderLimitModal.message', { time: availability?.openTime ?? '' })}</p>
+            </ModalBody>
+            <ModalFooter>
+                <Button pill color="warning" onClick={() => setPreOrderLimitModal(false)}>
+                    {t('confirm')}
+                </Button>
+            </ModalFooter>
+        </Modal>
+
         <If condition={showAll}>
             <div className="fixed top-0 w-screen h-screen z-10 bg-gray-400/50" onClick={() => setShowAll(false)}
                  aria-hidden></div>
@@ -72,13 +104,16 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
                     <Button pill color="gray" className="mr-3" onClick={() => setShowAll(false)}>
                         {t('close')}
                     </Button>
-                    <If condition={!storeOpen || atCapacity || shoppingCart.getAmount() > maxCups}>
+                    <If condition={showWarning}>
                         <span className="sr-only">
-                            <If condition={!storeOpen}>
+                            <If condition={isClosed}>
                                 <span className="text-sm">{t('storeClosedModal.simple')}</span>
                             </If>
-                            <If condition={atCapacity}>
+                            <If condition={isLiveFull}>
                                 <span className="text-sm">{t('maximumCupsModal.simple')}</span>
+                            </If>
+                            <If condition={isPreOrderFull}>
+                                <span className="text-sm">{t('preOrderLimitModal.simple')}</span>
                             </If>
                             <If condition={shoppingCart.getAmount() > maxCups}>
                                 <span className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
@@ -86,11 +121,14 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
                             </If>
                         </span>
                         <Popover trigger="hover" aria-hidden content={<div className="p-3 flex flex-col gap-1">
-                            <If condition={!storeOpen}>
+                            <If condition={isClosed}>
                                 <p className="text-sm">{t('storeClosedModal.simple')}</p>
                             </If>
-                            <If condition={atCapacity}>
+                            <If condition={isLiveFull}>
                                 <p className="text-sm">{t('maximumCupsModal.simple')}</p>
+                            </If>
+                            <If condition={isPreOrderFull}>
+                                <p className="text-sm">{t('preOrderLimitModal.simple')}</p>
                             </If>
                             <If condition={shoppingCart.getAmount() > maxCups}>
                                 <p className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
@@ -100,7 +138,7 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
                             {checkout}
                         </Popover>
                     </If>
-                    <If condition={storeOpen && !atCapacity && shoppingCart.getAmount() <= maxCups}>
+                    <If condition={!showWarning}>
                         {checkout}
                     </If>
                 </div>

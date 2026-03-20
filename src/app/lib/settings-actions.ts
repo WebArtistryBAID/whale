@@ -6,28 +6,36 @@ import { prisma } from '@/app/lib/prisma'
 void initialize()
 
 async function initialize() {
-    if (await prisma.settingsItem.findUnique({
-        where: {
-            key: 'initialized'
-        }
-    })) {
-        return
+    const defaults: { [key: string]: string } = {
+        initialized: new Date().getTime().toString(),
+        'enable-scheduled-availability': 'true',
+        'weekdays-only': 'true',
+        'open-time': '10:00',
+        'close-time': '15:00',
+        'pre-order-start-time': '10:00',
+        'store-open': 'true',
+        'maximum-cups-per-order': '2',
+        'maximum-cups-per-day': '14',
+        'maximum-pre-order-cups-per-day': '0',
+        'maximum-balance': '500',
+        'balance-recharge-minimum': '20',
+        'allow-pay-later': 'true',
+        'allow-delivery': 'true',
+        'availability-override-date': '0000-00-00',
+        'availability-override-value': 'false'
     }
 
-    // Set default values for settings
-    await setConfigValueInternal('initialized', new Date().getTime().toString())
-    await setConfigValueInternal('enable-scheduled-availability', 'true')
-    await setConfigValueInternal('weekdays-only', 'true')
-    await setConfigValueInternal('open-time', '10:00')
-    await setConfigValueInternal('close-time', '15:00')
-    await setConfigValueInternal('store-open', 'true')
-    await setConfigValueInternal('maximum-cups-per-order', '2')
-    await setConfigValueInternal('maximum-cups-per-day', '14')
-    await setConfigValueInternal('maximum-balance', '500')
-    await setConfigValueInternal('balance-recharge-minimum', '20')
-    await setConfigValueInternal('allow-pay-later', 'true')
-    await setConfigValueInternal('allow-delivery', 'true')
-    await setConfigValueInternal('availability-override-date', '0000-00-00')
+    for (const [ key, value ] of Object.entries(defaults)) {
+        const existing = await prisma.settingsItem.findUnique({
+            where: {
+                key
+            }
+        })
+        if (existing != null) {
+            continue
+        }
+        await setConfigValueInternal(key, value)
+    }
 }
 
 export async function getConfigValues(): Promise<{ [key: string]: string }> {

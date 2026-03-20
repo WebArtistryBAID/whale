@@ -156,6 +156,7 @@
     "settings": {
       "title": "Settings",
       "invalidNumber": "Enter a valid number.",
+      "invalidTime": "Enter a valid time in HH:mm format.",
       "minValue": "The value must be at least {{min}}.",
       "maxValue": "The value must be at most {{max}}.",
       "unsaved": "You have unsaved changes.",
@@ -169,9 +170,11 @@
         "weekdays-only": "Weekdays Only",
         "open-time": "Open Time",
         "close-time": "Close Time",
+        "pre-order-start-time": "Pre-Order Start Time",
         "store-open": "Store Open",
         "maximum-cups-per-order": "Maximum Cups Per Order",
-        "maximum-cups-per-day": "Maximum Cups Per Day",
+        "maximum-cups-per-day": "Live Limit",
+        "maximum-pre-order-cups-per-day": "Pre-Order Limit",
         "maximum-balance": "Maximum Balance",
         "balance-recharge-minimum": "Balance Recharge Minimum",
         "allow-pay-later": "Allow Pay Later",
@@ -183,9 +186,11 @@
         "weekdays-only": "Only open the store from Monday to Friday.",
         "open-time": "The time (HH:mm) the store opens.",
         "close-time": "The time (HH:mm) the store closes.",
+        "pre-order-start-time": "The time (HH:mm) when pre-ordering begins. If this is later than Open Time, pre-orders begin on the previous business day and keep counting toward the next business day until the store opens.",
         "store-open": "When this setting is turned on, the store is open.",
         "maximum-cups-per-order": "The maximum amount of cups a user can order in one order.",
-        "maximum-cups-per-day": "The maximum amount of cups that can be processed in a day. The user will be unable to place orders when this amount is reached. There may be a slight overflow when Maximum Cups Per Order is not 1.",
+        "maximum-cups-per-day": "The live limit for a business day. When the store officially opens, this limit is increased by any unused pre-order capacity from the same business day.",
+        "maximum-pre-order-cups-per-day": "The maximum amount of cups that can be accepted as pre-orders for a business day. Once this limit is reached, users must wait until the store officially opens before ordering more.",
         "maximum-balance": "The maximum balance users can hold, in CN¥.",
         "balance-recharge-minimum": "The minimum amount users can recharge, in CN¥.",
         "allow-pay-later": "When this setting is turned on, users can order without paying immediately. Existing orders are not affected.",
@@ -445,16 +450,17 @@
     "ordersPane": "Waiting Orders",
     "detailsPane": "Order Details",
     "storeStatusOpen": "Ready for ordering",
+    "storeStatusPreOrder": "Pre-orders are open",
+    "storeStatusPreOrderFull": "Pre-orders are full",
     "storeStatusAtCapacity": "At capacity",
     "storeStatusClosed": "Store is closed",
     "openActionFull": "Open Storefront",
     "closeActionFull": "Close Storefront",
-    "capacityAction": "Change Capacity",
-    "capacityModal": {
-      "title": "Change Capacity",
-      "message": "Please enter the new maximum amount of cups that can be processed in a day.",
-      "placeholder": "Cups...",
-      "minimum": "Must be at least 1."
-    }
+    "settingsAction": "Open Settings",
+    "limitDate": "Business Day: {{date}}",
+    "officialLimit": "Official Live Limit: {{count}} cups",
+    "remainingLive": "Remaining Live Cups: {{count}}",
+    "preOrderUsage": "Pre-Orders Used: {{used}} / {{limit}}",
+    "remainingPreOrder": "Pre-Orders Remaining Right Now: {{count}} (until {{time}})"
   }
 }

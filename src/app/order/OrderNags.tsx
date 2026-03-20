@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
-import { getUnpaidPayLaterOrder, isMaximumCupsReached, isStoreOpen } from '@/app/lib/ordering-actions'
+import { getOrderingAvailability, getUnpaidPayLaterOrder } from '@/app/lib/ordering-actions'
 import { getConfigValue, getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import If from '@/app/lib/If'
 
@@ -17,6 +17,7 @@ export default function OrderNags() {
 
     const [ storeClosedModal, setStoreClosedModal ] = useState(false)
     const [ atCapacityModal, setAtCapacityModal ] = useState(false)
+    const [ preOrderLimitModal, setPreOrderLimitModal ] = useState(false)
     const [ payLaterModal, setPayLaterModal ] = useState(false)
     const [ payLaterOrder, setPayLaterOrder ] = useState(-1)
     const [ isSchedule, setIsSchedule ] = useState(false)
@@ -25,9 +26,10 @@ export default function OrderNags() {
 
     useEffect(() => {
         (async () => {
-            const open = await isStoreOpen()
-            setStoreClosedModal(!open)
-            setAtCapacityModal(await isMaximumCupsReached())
+            const availability = await getOrderingAvailability()
+            setStoreClosedModal(availability.unavailableReason === 'store-closed')
+            setAtCapacityModal(availability.unavailableReason === 'live-limit-reached')
+            setPreOrderLimitModal(availability.unavailableReason === 'preorder-limit-reached')
             setIsSchedule(await getConfigValueAsBoolean('enable-scheduled-availability'))
             setWeekdaysOnly(await getConfigValueAsBoolean('weekdays-only'))
             setOpenTime(await getConfigValue('open-time'))
@@ -108,6 +110,18 @@ export default function OrderNags() {
                     </ModalBody>
                     <ModalFooter>
                         <Button pill color="warning" onClick={() => setStoreClosedModal(false)}>
+                            {t('confirm')}
+                        </Button>
+                    </ModalFooter>
+                </Modal>
+            ) : preOrderLimitModal ? (
+                <Modal show={preOrderLimitModal} onClose={() => setPreOrderLimitModal(false)}>
+                    <ModalHeader>{t('preOrderLimitModal.title')}</ModalHeader>
+                    <ModalBody>
+                        <p>{t('preOrderLimitModal.message', { time: openTime })}</p>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button pill color="warning" onClick={() => setPreOrderLimitModal(false)}>
                             {t('confirm')}
                         </Button>
                     </ModalFooter>
