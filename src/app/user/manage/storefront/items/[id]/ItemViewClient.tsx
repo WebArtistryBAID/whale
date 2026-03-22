@@ -93,8 +93,25 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
                     <p className="secondary text-sm font-display">{t('manage.storefront.itemD.salePercent')}</p>
                     <p className="text-xl mb-3">{object.salePercent}</p>
 
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.soldOut')}</p>
-                    <p className="text-xl">{object.soldOut ? t('yes') : t('no')}</p>
+                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.countsTowardLimit')}</p>
+                    <p className="text-xl mb-3">{object.countsTowardLimit ? t('yes') : t('no')}</p>
+
+                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.inventoryTrackingEnabled')}</p>
+                    <p className="text-xl mb-3">{object.inventoryTrackingEnabled ? t('yes') : t('no')}</p>
+
+                    <If condition={object.inventoryTrackingEnabled}>
+                        <>
+                            <p className="secondary text-sm font-display">{t('manage.storefront.itemD.remainingItems')}</p>
+                            <p className="text-xl">{object.remainingItems}</p>
+                        </>
+                    </If>
+
+                    <If condition={!object.inventoryTrackingEnabled}>
+                        <>
+                            <p className="secondary text-sm font-display">{t('manage.storefront.itemD.soldOut')}</p>
+                            <p className="text-xl">{object.soldOut ? t('yes') : t('no')}</p>
+                        </>
+                    </If>
                 </div>
             </div>
 

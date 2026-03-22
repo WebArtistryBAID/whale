@@ -14,14 +14,14 @@ import {
 import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedCategory, HydratedItemType, HydratedOptionType } from '@/app/lib/ui-data-actions'
 import Decimal from 'decimal.js'
+import { prisma } from '@/app/lib/prisma'
+import { revalidatePath } from 'next/cache'
 import CategoryCreateInput = Prisma.CategoryCreateInput
 import OptionTypeCreateInput = Prisma.OptionTypeCreateInput
 import OptionItemCreateInput = Prisma.OptionItemCreateInput
 import TagCreateInput = Prisma.TagCreateInput
 import CouponCodeCreateInput = Prisma.CouponCodeCreateInput
 import AdCreateInput = Prisma.AdCreateInput
-import { prisma } from '@/app/lib/prisma'
-import { revalidatePath } from 'next/cache'
 
 async function getNextCategoryDisplayOrder() {
     const result = await prisma.category.aggregate({
@@ -445,6 +445,9 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
                 basePrice: Decimal(data.basePrice).toString(),
                 salePercent: Decimal(data.salePercent).toString(),
                 displayOrder,
+                countsTowardLimit: data.countsTowardLimit,
+                inventoryTrackingEnabled: data.inventoryTrackingEnabled,
+                remainingItems: data.remainingItems,
                 soldOut: data.soldOut
             },
             include: {
@@ -481,6 +484,9 @@ export async function upsertItemType(id: number | undefined, data: HydratedItemT
                 basePrice: Decimal(data.basePrice).toString(),
                 salePercent: Decimal(data.salePercent).toString(),
                 displayOrder,
+                countsTowardLimit: data.countsTowardLimit,
+                inventoryTrackingEnabled: data.inventoryTrackingEnabled,
+                remainingItems: data.remainingItems,
                 soldOut: data.soldOut
             },
             include: {

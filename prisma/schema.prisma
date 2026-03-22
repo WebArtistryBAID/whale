@@ -119,33 +119,37 @@ model OptionItem {
 }
 
 model ItemType {
-  id               Int           @id @default(autoincrement())
-  createdAt        DateTime      @default(now())
-  category         Category      @relation(fields: [categoryId], references: [id])
-  categoryId       Int
-  name             String
-  image            String?
-  tags             Tag[]
-  description      String
-  shortDescription String
-  options          OptionType[]
-  basePrice        String
-  salePercent      String
-  displayOrder     Int           @default(0)
-  soldOut          Boolean       @default(false)
-  orderedItems     OrderedItem[]
+  id                       Int           @id @default(autoincrement())
+  createdAt                DateTime      @default(now())
+  category                 Category      @relation(fields: [categoryId], references: [id])
+  categoryId               Int
+  name                     String
+  image                    String?
+  tags                     Tag[]
+  description              String
+  shortDescription         String
+  options                  OptionType[]
+  basePrice                String
+  salePercent              String
+  displayOrder             Int           @default(0)
+  countsTowardLimit        Boolean       @default(true)
+  inventoryTrackingEnabled Boolean       @default(false)
+  remainingItems           Int           @default(0)
+  soldOut                  Boolean       @default(false)
+  orderedItems             OrderedItem[]
 }
 
 model OrderedItem {
-  id             Int          @id @default(autoincrement())
-  createdAt      DateTime     @default(now())
-  order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId        Int
-  itemType       ItemType     @relation(fields: [itemTypeId], references: [id], onDelete: Cascade)
-  itemTypeId     Int
-  appliedOptions OptionItem[]
-  amount         Int
-  price          String // This is not used in the total price calculation - for stats only
+  id                Int          @id @default(autoincrement())
+  createdAt         DateTime     @default(now())
+  order             Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId           Int
+  itemType          ItemType     @relation(fields: [itemTypeId], references: [id], onDelete: Cascade)
+  itemTypeId        Int
+  appliedOptions    OptionItem[]
+  amount            Int
+  countsTowardLimit Boolean      @default(true)
+  price             String // This is not used in the total price calculation - for stats only
 }
 
 enum OrderStatus {

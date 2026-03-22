@@ -10,6 +10,7 @@ import { Badge, Button } from 'flowbite-react'
 import { calculatePrice, OrderedItemTemplate, useShoppingCart } from '@/app/lib/shopping-cart'
 import If from '@/app/lib/If'
 import Decimal from 'decimal.js'
+import { getAvailableInventory, getRequestedAmountForItem, isItemSoldOut } from '@/app/lib/item-availability'
 
 function getTextColor(backgroundColor: string): 'white' | 'black' {
     const r = parseInt(backgroundColor.slice(1, 3), 16)
@@ -30,6 +31,10 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
     const [ typical, setTypical ] = useState(0) // Trick to force re-render (VERY BAD practice, but I don't know why it doesn't work)
     const ref = useRef<HTMLDivElement>(null)
     const shoppingCart = useShoppingCart()
+    const soldOut = isItemSoldOut(item)
+    const availableInventory = getAvailableInventory(item)
+    const alreadyInCart = getRequestedAmountForItem(shoppingCart.items, item.id)
+    const availableToAdd = availableInventory == null ? null : Math.max(availableInventory - alreadyInCart, 0)
 
     useEffect(() => {
         // Select all default options
@@ -48,6 +53,12 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
             ref.current?.focus()
         }, 100)
     }, [])
+
+    useEffect(() => {
+        if (availableToAdd != null && amount > availableToAdd) {
+            setAmount(Math.max(availableToAdd, 1))
+        }
+    }, [ amount, availableToAdd ])
 
     function getThisItem(): OrderedItemTemplate {
         return {
@@ -118,12 +129,23 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                 </Button>
                 <p aria-hidden>{amount}</p>
                 <Button pill size="xs" color="warning" aria-label={t('itemDetails.add')}
+                        disabled={availableToAdd != null && amount >= availableToAdd}
                         onClick={() => {
+                            if (availableToAdd != null && amount >= availableToAdd) {
+                                return
+                            }
                             setAmount(amount + 1)
                             setTypical(typical + 1)
-                        }}><HiPlus/></Button>
+                        }}><HiPlus/>
+                    <If condition={availableToAdd != null && amount >= availableToAdd}>
+                        <span className="sr-only">{t('itemDetails.cannotAddMore')}</span>
+                    </If>
+                </Button>
             </div>
-            <Button pill color="warning" onClick={() => {
+            <Button pill color="warning" disabled={soldOut || availableToAdd === 0} onClick={() => {
+                if (soldOut || availableToAdd === 0) {
+                    return
+                }
                 shoppingCart.addItem(getThisItem())
                 close()
             }}>{t('addConfirm')}</Button>

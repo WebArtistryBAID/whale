@@ -69,6 +69,12 @@
     "cannotAddMore": "(不能继续添加)",
     "cannotMinusMore": "(不能继续减少)"
   },
+  "inventory": {
+    "cartChanged": "库存已变更，请先检查购物车后再结账。",
+    "soldOut": "“{{item}}”已售罄。",
+    "onlyLeft_one": "“{{item}}”仅剩 {{count}} 件。",
+    "onlyLeft_other": "“{{item}}”仅剩 {{count}} 件。"
+  },
   "total": "总计 ¥{{price}}",
   "empty": "购物车为空",
   "checkout": {

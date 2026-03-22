@@ -186,6 +186,9 @@ export const ItemTypeScalarFieldEnum = {
     basePrice: 'basePrice',
     salePercent: 'salePercent',
     displayOrder: 'displayOrder',
+    countsTowardLimit: 'countsTowardLimit',
+    inventoryTrackingEnabled: 'inventoryTrackingEnabled',
+    remainingItems: 'remainingItems',
     soldOut: 'soldOut'
 } as const
 
@@ -198,6 +201,7 @@ export const OrderedItemScalarFieldEnum = {
     orderId: 'orderId',
     itemTypeId: 'itemTypeId',
     amount: 'amount',
+    countsTowardLimit: 'countsTowardLimit',
     price: 'price'
 } as const
 

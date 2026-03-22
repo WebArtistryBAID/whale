@@ -69,6 +69,12 @@
     "cannotAddMore": "(Cannot add more)",
     "cannotMinusMore": "(Cannot remove more)"
   },
+  "inventory": {
+    "cartChanged": "Inventory changed. Review your cart before checkout.",
+    "soldOut": "{{item}} is sold out.",
+    "onlyLeft_one": "Only {{count}} {{item}} left.",
+    "onlyLeft_other": "Only {{count}} {{item}} left."
+  },
   "total": "Total ¥{{price}}",
   "empty": "No items",
   "checkout": {

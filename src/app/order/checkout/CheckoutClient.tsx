@@ -24,12 +24,15 @@ import type { HydratedOrder } from '@/app/lib/ordering-actions'
 import {
     canPayWithBalance,
     canPayWithPayLater,
+    CartValidationResponse,
     couponQuickValidate,
     createOrder,
     getEstimatedWaitTime,
     getOrderingAvailability,
+    OrderingAvailabilityResponse,
     payOrderWithBalance,
-    setOrderPaymentMethod
+    setOrderPaymentMethod,
+    validateCartItems
 } from '@/app/lib/ordering-actions'
 import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
@@ -85,6 +88,8 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     const [ deliveryEnabled, setDeliveryEnabled ] = useState(false)
     const [ waitTime, setWaitTime ] = useState(-1)
     const [ showLoginNag, setShowLoginNag ] = useState(false)
+    const [ availability, setAvailability ] = useState<OrderingAvailabilityResponse | null>(null)
+    const [ cartValidation, setCartValidation ] = useState<CartValidationResponse | null>(null)
 
     useEffect(() => {
         router.prefetch('/order/checkout/wechat/pay')
@@ -121,6 +126,28 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     }, [ mode ])
 
     useEffect(() => {
+        const syncAvailability = async () => {
+            if (mode !== 'cart') {
+                setAvailability(null)
+                setCartValidation(null)
+                return
+            }
+            setAvailability(await getOrderingAvailability())
+            setCartValidation(await validateCartItems(shoppingCart.items))
+        }
+
+        void syncAvailability()
+        if (mode !== 'cart') {
+            return
+        }
+
+        const id = setInterval(() => {
+            void syncAvailability()
+        }, 10000)
+        return () => clearInterval(id)
+    }, [ mode, shoppingCart.items ])
+
+    useEffect(() => {
         (async () => {
             if (mode === 'cart') {
                 setBalanceEnabled(await canPayWithBalance(getBaseTotal().toString()))
@@ -140,6 +167,25 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     }, [ shoppingCart.items, foundCoupon, mode, existingOrder?.totalPrice, rechargeTransaction?.id, paymentMethod ])
 
     const hasCartCouponIssue = useMemo(() => mode === 'cart' && coupon.length > 0 && foundCoupon == null, [ coupon.length, foundCoupon, mode ])
+    const remainingLimit = availability == null
+        ? 0
+        : availability.phase === 'preorder'
+            ? availability.currentDay.remainingPreOrderCups
+            : availability.phase === 'live'
+                ? availability.currentDay.remainingLiveCups
+                : 0
+    const hasInventoryIssues = mode === 'cart' && (cartValidation?.issues.length ?? 0) > 0
+    const inventoryMessages = mode === 'cart'
+        ? cartValidation?.issues.map(issue =>
+        issue.available <= 0
+            ? t('inventory.soldOut', { item: issue.itemName })
+            : t('inventory.onlyLeft', { count: issue.available, item: issue.itemName })
+    ) ?? []
+        : []
+    const hasStoreClosedIssue = mode === 'cart' && availability?.unavailableReason === 'store-closed'
+    const hasPreOrderLimitIssue = mode === 'cart' && availability?.phase === 'preorder' && (cartValidation?.countedAmount ?? 0) > remainingLimit
+    const hasLiveLimitIssue = mode === 'cart' && availability?.phase === 'live' && (cartValidation?.countedAmount ?? 0) > remainingLimit
+    const hasCheckoutBlockingIssue = hasStoreClosedIssue || hasPreOrderLimitIssue || hasLiveLimitIssue || hasInventoryIssues
 
     function getBaseTotal(): Decimal {
         if (mode === 'cart') {
@@ -465,6 +511,24 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                onChange={e => setDeliveryRoom(e.currentTarget.value)}/>
                 </If>
 
+                <If condition={hasCheckoutBlockingIssue}>
+                    <div className="mt-5 flex flex-col gap-1 text-sm text-red-500" aria-live="polite">
+                        <If condition={hasStoreClosedIssue}>
+                            <p>{t('storeClosedModal.simple')}</p>
+                        </If>
+                        <If condition={hasLiveLimitIssue}>
+                            <p>{t('maximumCupsModal.simple')}</p>
+                        </If>
+                        <If condition={hasPreOrderLimitIssue}>
+                            <p>{t('preOrderLimitModal.simple')}</p>
+                        </If>
+                        <If condition={hasInventoryIssues}>
+                            <p>{t('inventory.cartChanged')}</p>
+                        </If>
+                        {inventoryMessages.map((message, index) => <p key={`${message}-${index}`}>{message}</p>)}
+                    </div>
+                </If>
+
                 <Button fullSized className="mt-8" color="warning" onClick={() => {
                     if (mode === 'cart' && me == null && !shoppingCart.onSiteOrderMode) {
                         setShowLoginNag(true)
@@ -472,7 +536,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                     }
                     void order()
                 }}
-                        disabled={(mode === 'cart' && ((coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3))) || loading}>
+                        disabled={(mode === 'cart' && (((coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3)) || hasCheckoutBlockingIssue)) || loading}>
                     <If condition={orderFailed}>
                         {t('tryAgain')}
                     </If>

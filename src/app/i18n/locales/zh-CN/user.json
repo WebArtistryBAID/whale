@@ -335,6 +335,9 @@
         "shortDescription": "短描述",
         "basePrice": "基础价格 (¥)",
         "salePercent": "折扣 (价格乘数)",
+        "countsTowardLimit": "计入每日限额",
+        "inventoryTrackingEnabled": "启用库存跟踪",
+        "remainingItems": "剩余数量",
         "soldOut": "是否售罄",
         "tags": "关联标签",
         "options": "关联选项类型",
@@ -345,7 +348,8 @@
         "descriptionError": "请输入有效的描述。",
         "shortDescriptionError": "请输入有效的短描述。",
         "basePriceError": "请输入有效的基础价格。",
-        "salePercentError": "请输入有效的价格乘数。"
+        "salePercentError": "请输入有效的价格乘数。",
+        "remainingItemsError": "请输入有效的剩余库存数量。"
       },
       "tagD": {
         "create": "新标签",

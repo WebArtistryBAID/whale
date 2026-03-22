@@ -29,6 +29,9 @@ export interface HydratedItemType {
     options: HydratedOptionType[]
     basePrice: string
     salePercent: string
+    countsTowardLimit: boolean
+    inventoryTrackingEnabled: boolean
+    remainingItems: number
     soldOut: boolean
 }
 

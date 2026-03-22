@@ -49,6 +49,9 @@ export default function ItemCreateClient({
     const [ shortDescription, setShortDescription ] = useState(existing?.shortDescription ?? '')
     const [ basePrice, setBasePrice ] = useState(existing?.basePrice ?? '')
     const [ salePercent, setSalePercent ] = useState(existing?.salePercent ?? '')
+    const [ countsTowardLimit, setCountsTowardLimit ] = useState(existing?.countsTowardLimit ?? true)
+    const [ inventoryTrackingEnabled, setInventoryTrackingEnabled ] = useState(existing?.inventoryTrackingEnabled ?? false)
+    const [ remainingItems, setRemainingItems ] = useState(existing?.remainingItems?.toString() ?? '0')
     const [ soldOut, setSoldOut ] = useState(existing?.soldOut ?? false)
     const [ tags, setTags ] = useState(existing?.tags.map(t => t.id) ?? [])
     const [ options, setOptions ] = useState(existing?.options.map(o => o.id) ?? [])
@@ -60,6 +63,7 @@ export default function ItemCreateClient({
     const [ shortDescriptionError, setShortDescriptionError ] = useState(false)
     const [ basePriceError, setBasePriceError ] = useState(false)
     const [ salePercentError, setSalePercentError ] = useState(false)
+    const [ remainingItemsError, setRemainingItemsError ] = useState(false)
 
     async function submit() {
         if (loading) {
@@ -71,7 +75,8 @@ export default function ItemCreateClient({
         setShortDescriptionError(false)
         setBasePriceError(false)
         setSalePercentError(false)
-        if (name.length < 1 || name.length > 16) {
+        setRemainingItemsError(false)
+        if (name.length < 1) {
             setNameError(true)
             return
         }
@@ -99,6 +104,13 @@ export default function ItemCreateClient({
             setSalePercentError(true)
             return
         }
+        if (inventoryTrackingEnabled) {
+            const parsedRemainingItems = parseInt(remainingItems, 10)
+            if (!Number.isInteger(parsedRemainingItems) || parsedRemainingItems < 0) {
+                setRemainingItemsError(true)
+                return
+            }
+        }
 
         setLoading(true)
         const result = await upsertItemType(existing?.id, {
@@ -112,6 +124,9 @@ export default function ItemCreateClient({
             shortDescription,
             basePrice: basePrice,
             salePercent: salePercent,
+            countsTowardLimit,
+            inventoryTrackingEnabled,
+            remainingItems: inventoryTrackingEnabled ? parseInt(remainingItems, 10) : 0,
             soldOut,
             tags: tags.map(t => availableTags.find(tag => tag.id === t)!),
             options: options.map(o => availableOptions.find(option => option.id === o)!)
@@ -205,9 +220,32 @@ export default function ItemCreateClient({
                            helperText={salePercentError ? t('manage.storefront.itemD.salePercentError') : null}/>
             </div>
             <div className="w-full">
+                <ToggleSwitch checked={countsTowardLimit} label={t('manage.storefront.itemD.countsTowardLimit')}
+                              onChange={setCountsTowardLimit} color="yellow"/>
+            </div>
+            <div className="w-full">
+                <ToggleSwitch checked={inventoryTrackingEnabled}
+                              label={t('manage.storefront.itemD.inventoryTrackingEnabled')}
+                              onChange={setInventoryTrackingEnabled} color="yellow"/>
+            </div>
+            <If condition={inventoryTrackingEnabled}>
+                <div className="w-full">
+                    <div className="mb-2">
+                        <Label htmlFor="remainingItems" value={t('manage.storefront.itemD.remainingItems')}/>
+                    </div>
+                    <TextInput id="remainingItems" type="number" min={0} required
+                               placeholder={t('manage.storefront.itemD.remainingItems') + '...'}
+                               color={remainingItemsError ? 'failure' : undefined}
+                               value={remainingItems} onChange={e => setRemainingItems(e.currentTarget.value)}
+                               helperText={remainingItemsError ? t('manage.storefront.itemD.remainingItemsError') : null}/>
+                </div>
+            </If>
+            <If condition={!inventoryTrackingEnabled}>
+                <div className="w-full">
                 <ToggleSwitch checked={soldOut} label={t('manage.storefront.itemD.soldOut')}
                               onChange={setSoldOut} color="yellow"/>
-            </div>
+                </div>
+            </If>
             <div className="w-full">
                 <div className="mb-2">
                     <Label value={t('manage.storefront.itemD.tags')}/>

@@ -8,6 +8,7 @@ import {
     OrderType,
     PaymentMethod,
     PaymentStatus,
+    Prisma,
     User,
     UserAuditLogType
 } from '@/generated/prisma/client'
@@ -16,6 +17,7 @@ import { getMyUser } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 import { getConfigValueAsBoolean, getConfigValueAsNumber, getConfigValues } from '@/app/lib/settings-actions'
 import { prisma } from '@/app/lib/prisma'
+import { countsTowardLimit, getAvailableInventory, isItemSoldOut } from '@/app/lib/item-availability'
 
 export interface HydratedOrderedItem {
     id: number
@@ -98,6 +100,18 @@ export interface OrderingAvailabilityResponse {
     openTime: string
     closeTime: string
     preOrderStartTime: string
+}
+
+export interface CartValidationIssue {
+    itemTypeId: number
+    itemName: string
+    requested: number
+    available: number
+}
+
+export interface CartValidationResponse {
+    countedAmount: number
+    issues: CartValidationIssue[]
 }
 
 function startOfDay(date: Date): Date {
@@ -314,6 +328,103 @@ async function getOrderingConfiguration(): Promise<OrderingConfiguration> {
     }
 }
 
+type OrderableItemRecord = Pick<ItemType, 'id' | 'name' | 'soldOut' | 'countsTowardLimit' | 'inventoryTrackingEnabled' | 'remainingItems'>
+type OrderableOptionRecord = Pick<OptionItem, 'id' | 'typeId' | 'soldOut'>
+type TransactionClient = Prisma.TransactionClient
+
+function getRequestedItemAmounts(items: OrderedItemTemplate[]): Map<number, number> {
+    const requestedAmounts = new Map<number, number>()
+    for (const item of items) {
+        requestedAmounts.set(item.item.id, (requestedAmounts.get(item.item.id) ?? 0) + item.amount)
+    }
+    return requestedAmounts
+}
+
+function getCurrentCountedAmount(items: OrderedItemTemplate[], itemMap: Map<number, OrderableItemRecord>): number {
+    return items.reduce((acc, current) => {
+        const item = itemMap.get(current.item.id)
+        if (item == null || !countsTowardLimit(item)) {
+            return acc
+        }
+        return acc + current.amount
+    }, 0)
+}
+
+function getRemainingLimitForAvailability(availability: OrderingAvailabilityResponse): number {
+    if (availability.phase === 'preorder') {
+        return availability.currentDay.remainingPreOrderCups
+    }
+    if (availability.phase === 'live') {
+        return availability.currentDay.remainingLiveCups
+    }
+    return 0
+}
+
+function buildCartValidation(items: OrderedItemTemplate[], itemMap: Map<number, OrderableItemRecord>): CartValidationResponse {
+    const requestedAmounts = getRequestedItemAmounts(items)
+    const issues: CartValidationIssue[] = []
+
+    for (const [ itemTypeId, requested ] of requestedAmounts.entries()) {
+        const item = itemMap.get(itemTypeId)
+        if (item == null) {
+            issues.push({
+                itemTypeId,
+                itemName: 'Unknown Item',
+                requested,
+                available: 0
+            })
+            continue
+        }
+
+        const availableInventory = getAvailableInventory(item)
+        if (availableInventory != null) {
+            if (requested > availableInventory) {
+                issues.push({
+                    itemTypeId,
+                    itemName: item.name,
+                    requested,
+                    available: availableInventory
+                })
+            }
+            continue
+        }
+
+        if (isItemSoldOut(item)) {
+            issues.push({
+                itemTypeId,
+                itemName: item.name,
+                requested,
+                available: 0
+            })
+        }
+    }
+
+    return {
+        countedAmount: getCurrentCountedAmount(items, itemMap),
+        issues
+    }
+}
+
+async function getOrderableItems(itemIds: number[], tx?: TransactionClient): Promise<Map<number, OrderableItemRecord>> {
+    const client = tx ?? prisma
+    const itemRecords = await client.itemType.findMany({
+        where: {
+            id: {
+                in: itemIds
+            }
+        },
+        select: {
+            id: true,
+            name: true,
+            soldOut: true,
+            countsTowardLimit: true,
+            inventoryTrackingEnabled: true,
+            remainingItems: true
+        }
+    })
+    return new Map(itemRecords.map(item => [ item.id, item ]))
+}
+
 async function getDailyCupLimitSummary(date: Date, config: OrderingConfiguration): Promise<DailyCupLimitSummary> {
     const day = startOfDay(date)
     const windows = getBusinessDayWindows(day, config)
@@ -332,7 +443,8 @@ async function getDailyCupLimitSummary(date: Date, config: OrderingConfiguration
             createdAt: true,
             items: {
                 select: {
-                    amount: true
+                    amount: true,
+                    countsTowardLimit: true
                 }
             }
         }
@@ -347,7 +459,7 @@ async function getDailyCupLimitSummary(date: Date, config: OrderingConfiguration
             continue
         }
 
-        const cups = order.items.reduce((acc, item) => acc + item.amount, 0)
+        const cups = order.items.reduce((acc, item) => acc + (item.countsTowardLimit ? item.amount : 0), 0)
         if (assignment.bucket === 'preorder') {
             preOrderedCups += cups
             continue
@@ -450,6 +562,26 @@ export async function getOrderingAvailability(): Promise<OrderingAvailabilityRes
     }
 }
 
+export async function hasAvailableItemsOutsideLimit(): Promise<boolean> {
+    return await prisma.itemType.count({
+        where: {
+            countsTowardLimit: false,
+            OR: [
+                {
+                    inventoryTrackingEnabled: true,
+                    remainingItems: {
+                        gt: 0
+                    }
+                },
+                {
+                    inventoryTrackingEnabled: false,
+                    soldOut: false
+                }
+            ]
+        }
+    }) > 0
+}
+
 export async function setOrderPaymentMethod(id: number, paymentMethod: PaymentMethod): Promise<boolean> {
     const order = await prisma.order.findUnique({
         where: {
@@ -484,6 +616,19 @@ export async function couponQuickValidate(code: string): Promise<CouponCode | nu
             }
         }
     })
+}
+
+export async function validateCartItems(items: OrderedItemTemplate[]): Promise<CartValidationResponse> {
+    const itemIds = Array.from(new Set(items.map(item => item.item.id)))
+    if (itemIds.length < 1) {
+        return {
+            countedAmount: 0,
+            issues: []
+        }
+    }
+
+    const itemMap = await getOrderableItems(itemIds)
+    return buildCartValidation(items, itemMap)
 }
 
 function calculatePrice(item: OrderedItemTemplate): Decimal {
@@ -654,18 +799,13 @@ export async function createOrder(items: OrderedItemTemplate[],
                                   paymentMethod: PaymentMethod): Promise<HydratedOrder | null> {
     const me = await getMyUser()
 
-    // We didn't perform atomization - for a small use case like this, we should be fine.
+    if (items.length < 1) {
+        return null
+    }
 
     // SANITY CHECKS - These should be enforced by the frontend as well
     // On site order mode require administrative permissions
     if (onSiteOrderMode && (me == null || !me.permissions.includes('admin.manage'))) {
-        return null
-    }
-
-    const availability = await getOrderingAvailability()
-
-    // Ensure the storefront is currently accepting this type of order
-    if (!availability.canOrderNow) {
         return null
     }
 
@@ -683,13 +823,45 @@ export async function createOrder(items: OrderedItemTemplate[],
         return null
     }
 
+    const availability = await getOrderingAvailability()
+    if (availability.unavailableReason === 'store-closed') {
+        return null
+    }
+
+    const itemIds = Array.from(new Set(items.map(item => item.item.id)))
+    const optionIds = Array.from(new Set(items.flatMap(item => item.options.map(option => option.id))))
+    const [ itemMap, currentOptions ] = await Promise.all([
+        getOrderableItems(itemIds),
+        optionIds.length < 1 ? Promise.resolve([] as OrderableOptionRecord[]) : prisma.optionItem.findMany({
+            where: {
+                id: {
+                    in: optionIds
+                }
+            },
+            select: {
+                id: true,
+                typeId: true,
+                soldOut: true
+            }
+        })
+    ])
+    const currentOptionMap = new Map(currentOptions.map(option => [ option.id, option ]))
+    const cartValidation = buildCartValidation(items, itemMap)
+    if (cartValidation.issues.length > 0) {
+        return null
+    }
+    if (cartValidation.countedAmount > getRemainingLimitForAvailability(availability)) {
+        return null
+    }
+
     // Ensure items and options aren't sold out
     for (const item of items) {
-        if (item.item.soldOut) {
+        if (!itemMap.has(item.item.id)) {
             return null
         }
         for (const option of item.options) {
-            if (option.soldOut) {
+            const currentOption = currentOptionMap.get(option.id)
+            if (currentOption == null || currentOption.soldOut) {
                 return null
             }
         }
@@ -705,17 +877,6 @@ export async function createOrder(items: OrderedItemTemplate[],
             return null
         }
         totalPrice = totalPrice.minus(Decimal.min(totalPrice, Decimal(couponCode.value)))
-        await prisma.couponCode.update({
-            where: {
-                id: couponCode.id
-            },
-            data: {
-                remainingUses: {
-                    decrement: 1
-                }
-            }
-        })
-        usedCoupon = true
     }
 
     // Cash payment is only available with on-site
@@ -731,14 +892,6 @@ export async function createOrder(items: OrderedItemTemplate[],
         if (Decimal(me.balance).lt(totalPrice)) {
             return null
         }
-        await prisma.user.update({
-            where: {
-                id: me.id
-            },
-            data: {
-                balance: Decimal(me.balance).minus(totalPrice).toString()
-            }
-        })
     }
 
     // Delivery room must be over 3 characters
@@ -766,47 +919,129 @@ export async function createOrder(items: OrderedItemTemplate[],
         return null
     }
 
-    const order = await prisma.order.create({
-        include: {
-            items: {
-                include: {
-                    itemType: true,
-                    appliedOptions: true
+    let order: HydratedOrder | null = null
+    try {
+        order = await prisma.$transaction(async tx => {
+            const currentItemMap = await getOrderableItems(itemIds, tx)
+            const currentValidation = buildCartValidation(items, currentItemMap)
+            if (currentValidation.issues.length > 0) {
+                throw new Error('inventory-conflict')
+            }
+
+            const requestedAmounts = getRequestedItemAmounts(items)
+            for (const [ itemTypeId, requested ] of requestedAmounts.entries()) {
+                const currentItem = currentItemMap.get(itemTypeId)
+                if (currentItem == null) {
+                    throw new Error('missing-item')
                 }
-            },
-            user: true
-        },
-        data: {
-            items: {
-                create: items.map(item => ({
-                    itemType: {
-                        connect: {
-                            id: item.item.id
+                if (!currentItem.inventoryTrackingEnabled) {
+                    continue
+                }
+                const updated = await tx.itemType.updateMany({
+                    where: {
+                        id: itemTypeId,
+                        inventoryTrackingEnabled: true,
+                        remainingItems: {
+                            gte: requested
                         }
                     },
-                    appliedOptions: {
-                        connect: item.options.map(option => ({
-                            id: option.id
+                    data: {
+                        remainingItems: {
+                            decrement: requested
+                        }
+                    }
+                })
+                if (updated.count !== 1) {
+                    throw new Error('inventory-conflict')
+                }
+            }
+
+            if (coupon != null) {
+                const couponCode = await tx.couponCode.findFirst({
+                    where: {
+                        id: coupon,
+                        remainingUses: {
+                            gt: 0
+                        }
+                    }
+                })
+                if (couponCode == null) {
+                    throw new Error('coupon-invalid')
+                }
+                await tx.couponCode.update({
+                    where: {
+                        id: couponCode.id
+                    },
+                    data: {
+                        remainingUses: {
+                            decrement: 1
+                        }
+                    }
+                })
+                usedCoupon = true
+            }
+
+            if (paymentMethod === PaymentMethod.balance && me != null) {
+                await tx.user.update({
+                    where: {
+                        id: me.id
+                    },
+                    data: {
+                        balance: Decimal(me.balance).minus(totalPrice).toString()
+                    }
+                })
+            }
+
+            return tx.order.create({
+                include: {
+                    items: {
+                        include: {
+                            itemType: true,
+                            appliedOptions: true
+                        }
+                    },
+                    user: true
+                },
+                data: {
+                    items: {
+                        create: items.map(item => ({
+                            itemType: {
+                                connect: {
+                                    id: item.item.id
+                                }
+                            },
+                            appliedOptions: {
+                                connect: item.options.map(option => ({
+                                    id: option.id
+                                }))
+                            },
+                            amount: item.amount,
+                            countsTowardLimit: countsTowardLimit(currentItemMap.get(item.item.id)!),
+                            price: calculatePrice(item).toString()
                         }))
                     },
-                    amount: item.amount,
-                    price: calculatePrice(item).toString()
-                }))
-            },
-            totalPrice: totalPrice.toString(),
-            totalPriceRaw: totalPriceNoCoupon.toString(),
-            status: OrderStatus.waiting,
-            type: deliveryRoom == null ? OrderType.pickUp : OrderType.delivery,
-            deliveryRoom,
-            user: (onSiteOrderMode || me == null) ? undefined : {
-                connect: {
-                    id: me?.id
+                    totalPrice: totalPrice.toString(),
+                    totalPriceRaw: totalPriceNoCoupon.toString(),
+                    status: OrderStatus.waiting,
+                    type: deliveryRoom == null ? OrderType.pickUp : OrderType.delivery,
+                    deliveryRoom,
+                    user: (onSiteOrderMode || me == null) ? undefined : {
+                        connect: {
+                            id: me.id
+                        }
+                    },
+                    paymentStatus: (totalPrice.eq(0) || paymentMethod === PaymentMethod.cash || paymentMethod === PaymentMethod.balance) ? PaymentStatus.paid : PaymentStatus.notPaid,
+                    paymentMethod
                 }
-            },
-            paymentStatus: (totalPrice.eq(0) || paymentMethod === PaymentMethod.cash || paymentMethod === PaymentMethod.balance) ? PaymentStatus.paid : PaymentStatus.notPaid,
-            paymentMethod
-        }
-    })
+            })
+        })
+    } catch {
+        return null
+    }
+
+    if (order == null) {
+        return null
+    }
 
     await prisma.userAuditLog.create({
         data: {
@@ -1016,11 +1251,35 @@ export async function cancelUnpaidOrder(id: number): Promise<OrderedItemTemplate
     if (order == null) {
         return []
     }
-    await prisma.order.delete({
-        where: {
-            id
+
+    const requestedAmounts = new Map<number, number>()
+    for (const item of order.items) {
+        if (!item.itemType.inventoryTrackingEnabled) {
+            continue
         }
+        requestedAmounts.set(item.itemTypeId, (requestedAmounts.get(item.itemTypeId) ?? 0) + item.amount)
+    }
+
+    await prisma.$transaction(async tx => {
+        for (const [ itemTypeId, amount ] of requestedAmounts.entries()) {
+            await tx.itemType.update({
+                where: {
+                    id: itemTypeId
+                },
+                data: {
+                    remainingItems: {
+                        increment: amount
+                    }
+                }
+            })
+        }
+        await tx.order.delete({
+            where: {
+                id
+            }
+        })
     })
+
     return order.items.map(item => ({
         item: item.itemType,
         amount: item.amount,

@@ -9,7 +9,12 @@ import { useRouter } from 'next/navigation'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { useEffect, useRef, useState } from 'react'
 import { Trans } from 'react-i18next/TransWithoutContext'
-import { getOrderingAvailability, OrderingAvailabilityResponse } from '@/app/lib/ordering-actions'
+import {
+    CartValidationResponse,
+    getOrderingAvailability,
+    OrderingAvailabilityResponse,
+    validateCartItems
+} from '@/app/lib/ordering-actions'
 import { getConfigValueAsNumber } from '@/app/lib/settings-actions'
 
 export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: string }) {
@@ -20,12 +25,14 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
     const detailsRef = useRef<HTMLDivElement>(null)
 
     const [ availability, setAvailability ] = useState<OrderingAvailabilityResponse | null>(null)
+    const [ cartValidation, setCartValidation ] = useState<CartValidationResponse | null>(null)
     const [ maxCups, setMaxCups ] = useState(0)
     const [ preOrderLimitModal, setPreOrderLimitModal ] = useState(false)
 
     useEffect(() => {
         const sync = async () => {
             setAvailability(await getOrderingAvailability())
+            setCartValidation(await validateCartItems(shoppingCart.items))
             setMaxCups(await getConfigValueAsNumber('maximum-cups-per-order'))
         }
 
@@ -34,7 +41,7 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
             void sync()
         }, 10000)
         return () => clearInterval(id)
-    }, [])
+    }, [ shoppingCart.items ])
 
     useEffect(() => {
         if (showAll) {
@@ -42,13 +49,28 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
         }
     }, [ showAll ])
 
-    const isPreOrderFull = availability?.unavailableReason === 'preorder-limit-reached'
     const isClosed = availability?.unavailableReason === 'store-closed'
-    const isLiveFull = availability?.unavailableReason === 'live-limit-reached'
-    const showWarning = availability != null && (isClosed || isLiveFull || isPreOrderFull || shoppingCart.getAmount() > maxCups)
+    const remainingLimit = availability == null
+        ? 0
+        : availability.phase === 'preorder'
+            ? availability.currentDay.remainingPreOrderCups
+            : availability.phase === 'live'
+                ? availability.currentDay.remainingLiveCups
+                : 0
+    const isPreOrderFull = availability?.phase === 'preorder' && (cartValidation?.countedAmount ?? 0) > remainingLimit
+    const isLiveFull = availability?.phase === 'live' && (cartValidation?.countedAmount ?? 0) > remainingLimit
+    const hasInventoryIssues = (cartValidation?.issues.length ?? 0) > 0
+    const inventoryMessages = cartValidation?.issues.map(issue =>
+        issue.available <= 0
+            ? t('inventory.soldOut', { item: issue.itemName })
+            : t('inventory.onlyLeft', { count: issue.available, item: issue.itemName })
+    ) ?? []
+    const showWarning = availability != null && (isClosed || isLiveFull || isPreOrderFull || hasInventoryIssues || shoppingCart.getAmount() > maxCups)
     const buttonDisabled = availability == null ||
         isClosed ||
         isLiveFull ||
+        isPreOrderFull ||
+        hasInventoryIssues ||
         shoppingCart.getAmount() > maxCups ||
         shoppingCart.items.length < 1
 
@@ -115,6 +137,11 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
                             <If condition={isPreOrderFull}>
                                 <span className="text-sm">{t('preOrderLimitModal.simple')}</span>
                             </If>
+                            <If condition={hasInventoryIssues}>
+                                <span className="text-sm">{t('inventory.cartChanged')}</span>
+                            </If>
+                            {inventoryMessages.map((message, index) => <span key={`${message}-${index}`}
+                                                                             className="text-sm">{message}</span>)}
                             <If condition={shoppingCart.getAmount() > maxCups}>
                                 <span className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
                                                                  count={maxCups}/></span>
@@ -130,6 +157,11 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
                             <If condition={isPreOrderFull}>
                                 <p className="text-sm">{t('preOrderLimitModal.simple')}</p>
                             </If>
+                            <If condition={hasInventoryIssues}>
+                                <p className="text-sm">{t('inventory.cartChanged')}</p>
+                            </If>
+                            {inventoryMessages.map((message, index) => <p key={`${message}-${index}`}
+                                                                          className="text-sm">{message}</p>)}
                             <If condition={shoppingCart.getAmount() > maxCups}>
                                 <p className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
                                                               count={maxCups}/></p>

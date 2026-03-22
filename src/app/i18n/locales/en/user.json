@@ -335,6 +335,9 @@
         "shortDescription": "Short Description",
         "basePrice": "Base Price (¥)",
         "salePercent": "Sale (Price Multiplier)",
+        "countsTowardLimit": "Counts Toward Daily Limit",
+        "inventoryTrackingEnabled": "Enable Inventory Tracking",
+        "remainingItems": "Remaining Items",
         "soldOut": "Sold Out",
         "tags": "Associated Tags",
         "options": "Associated Option Types",
@@ -345,7 +348,8 @@
         "descriptionError": "Enter a valid description.",
         "shortDescriptionError": "Enter a valid short description.",
         "basePriceError": "Enter a valid base price.",
-        "salePercentError": "Enter a valid price multiplier."
+        "salePercentError": "Enter a valid price multiplier.",
+        "remainingItemsError": "Enter a valid remaining inventory count."
       },
       "tagD": {
         "create": "New Tag",

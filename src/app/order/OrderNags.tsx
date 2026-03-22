@@ -5,7 +5,11 @@ import { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
-import { getOrderingAvailability, getUnpaidPayLaterOrder } from '@/app/lib/ordering-actions'
+import {
+    getOrderingAvailability,
+    getUnpaidPayLaterOrder,
+    hasAvailableItemsOutsideLimit
+} from '@/app/lib/ordering-actions'
 import { getConfigValue, getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import If from '@/app/lib/If'
 
@@ -27,9 +31,10 @@ export default function OrderNags() {
     useEffect(() => {
         (async () => {
             const availability = await getOrderingAvailability()
+            const hasExemptItems = await hasAvailableItemsOutsideLimit()
             setStoreClosedModal(availability.unavailableReason === 'store-closed')
-            setAtCapacityModal(availability.unavailableReason === 'live-limit-reached')
-            setPreOrderLimitModal(availability.unavailableReason === 'preorder-limit-reached')
+            setAtCapacityModal(availability.unavailableReason === 'live-limit-reached' && !hasExemptItems)
+            setPreOrderLimitModal(availability.unavailableReason === 'preorder-limit-reached' && !hasExemptItems)
             setIsSchedule(await getConfigValueAsBoolean('enable-scheduled-availability'))
             setWeekdaysOnly(await getConfigValueAsBoolean('weekdays-only'))
             setOpenTime(await getConfigValue('open-time'))
