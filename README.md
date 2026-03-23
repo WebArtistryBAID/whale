@@ -36,6 +36,7 @@ To run in development:
 | `STRIPE_PRODUCT`                 | Stripe product ID.                                                                                              |
 | `STRIPE_WEBHOOK_ENDPOINT_SECRET` | Stripe webhook endpoint secret.                                                                                 |
 | `CRON_KEY`                       | Cron task verification key.                                                                                     |
+| `WAITING_ORDERS_API_KEY`         | API key required to access the waiting orders JSON endpoint.                                                    |
 
 ## Cron Tasks
 
@@ -46,6 +47,23 @@ For each task, you need to pass the query parameter `key={CRON_KEY}`.
 | `/order/prune`     | Every 30 minutes  | Delete unpaid orders.                     |
 | `/balance/prune`   | Every 30 minutes  | Delete unpaid balance transactions.       |
 | `/order/pay-later` | Everyday at 20:00 | Remind users to pay for Pay Later orders. |
+
+## Waiting Orders API
+
+The waiting orders view is also available as JSON at `/api/waiting-orders`.
+
+Send the API key in the `x-api-key` header, or as a Bearer token in the `Authorization` header.
+
+Example:
+
+```bash
+curl \
+  -H "x-api-key: ${WAITING_ORDERS_API_KEY}" \
+  http://localhost:3000/api/waiting-orders
+```
+
+The response is a JSON array of hydrated waiting orders in reverse chronological order. Each order includes its
+`items`, `itemType`, `appliedOptions`, and `user`, matching the data used by the waiting orders page.
 
 ## Stripe Webhook
 

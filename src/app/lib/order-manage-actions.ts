@@ -18,6 +18,7 @@ import { me } from '@/app/login/login'
 import signData from '@/app/lib/wx-pay-sign'
 import { prisma } from '@/app/lib/prisma'
 import { stripe } from '@/app/lib/stripe'
+import { listHydratedWaitingOrders } from '@/app/lib/waiting-orders'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
 
@@ -277,32 +278,7 @@ async function refundBalance(order: HydratedOrder): Promise<void> {
 
 export async function getWaitingOrders(): Promise<{ [id: number]: HydratedOrder }> {
     await requireUserPermission('admin.manage')
-    const orders = await prisma.order.findMany({
-        where: {
-            status: OrderStatus.waiting,
-            OR: [
-                {
-                    paymentStatus: PaymentStatus.paid
-                },
-                {
-                    paymentStatus: PaymentStatus.notPaid,
-                    paymentMethod: PaymentMethod.payLater
-                }
-            ]
-        },
-        orderBy: {
-            createdAt: 'desc'
-        },
-        include: {
-            items: {
-                include: {
-                    itemType: true,
-                    appliedOptions: true
-                }
-            },
-            user: true
-        }
-    })
+    const orders = await listHydratedWaitingOrders()
     const result: { [id: number]: HydratedOrder } = {}
     for (const order of orders) {
         result[order.id] = order
