@@ -465,6 +465,6 @@
     "officialLimit": "Official Live Limit: {{count}} cups",
     "remainingLive": "Remaining Live Cups: {{count}}",
     "preOrderUsage": "Pre-Orders Used: {{used}} / {{limit}}",
-    "remainingPreOrder": "Pre-Orders Remaining Right Now: {{count}} (until {{time}})"
+    "remainingPreOrder": "Pre-Orders Remaining: {{count}} (until {{time}})"
   }
 }

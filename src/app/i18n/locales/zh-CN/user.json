@@ -461,10 +461,10 @@
     "openActionFull": "手动开业",
     "closeActionFull": "暂停营业",
     "settingsAction": "打开设置",
-    "limitDate": "营业日：{{date}}",
-    "officialLimit": "当日现场总限额：{{count}} 杯",
-    "remainingLive": "剩余现场杯数：{{count}}",
-    "preOrderUsage": "已使用预点单：{{used}} / {{limit}}",
-    "remainingPreOrder": "当前剩余预点单杯数：{{count}}（至 {{time}}）"
+    "limitDate": "营业日: {{date}}",
+    "officialLimit": "当日现场总限额: {{count}} 杯",
+    "remainingLive": "剩余现场杯数: {{count}}",
+    "preOrderUsage": "已使用预点单: {{used}} / {{limit}}",
+    "remainingPreOrder": "剩余预点单杯数: {{count}}（至 {{time}}）"
   }
 }
