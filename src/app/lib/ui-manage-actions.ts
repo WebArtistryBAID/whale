@@ -13,6 +13,7 @@ import {
 } from '@/generated/prisma/client'
 import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedCategory, HydratedItemType, HydratedOptionType } from '@/app/lib/ui-data-actions'
+import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 import Decimal from 'decimal.js'
 import { prisma } from '@/app/lib/prisma'
 import { revalidatePath } from 'next/cache'
@@ -220,7 +221,7 @@ export async function getCouponCodes(): Promise<CouponCode[]> {
 
 export async function getCouponCode(id: string): Promise<CouponCode | null> {
     await requireUserPermission('admin.manage')
-    return prisma.couponCode.findUnique({ where: { id } })
+    return prisma.couponCode.findUnique({ where: { id: normalizeCouponCode(id) } })
 }
 
 export async function getTags(): Promise<Tag[]> {
@@ -372,14 +373,22 @@ export async function upsertTag(id: number | undefined, data: TagCreateInput): P
 
 export async function upsertCouponCode(data: CouponCodeCreateInput): Promise<CouponCode> {
     const user = await requireUserPermission('admin.manage')
+    const normalizedData = {
+        ...data,
+        id: normalizeCouponCode(data.id)
+    }
     await prisma.userAuditLog.create({
         data: {
             type: UserAuditLogType.upsertCouponCode,
             userId: user.id,
-            values: [ data.id ]
+            values: [ normalizedData.id ]
         }
     })
-    return prisma.couponCode.upsert({ where: { id: data.id }, update: data, create: data })
+    return prisma.couponCode.upsert({
+        where: { id: normalizedData.id },
+        update: normalizedData,
+        create: normalizedData
+    })
 }
 
 export async function upsertAd(id: number | undefined, data: AdCreateInput): Promise<Ad> {
@@ -581,14 +590,15 @@ export async function deleteTag(id: number): Promise<Tag> {
 
 export async function deleteCouponCode(id: string): Promise<CouponCode> {
     const user = await requireUserPermission('admin.manage')
+    const normalizedId = normalizeCouponCode(id)
     await prisma.userAuditLog.create({
         data: {
             type: UserAuditLogType.deleteCouponCode,
             userId: user.id,
-            values: [ id ]
+            values: [ normalizedId ]
         }
     })
-    return prisma.couponCode.delete({ where: { id } })
+    return prisma.couponCode.delete({ where: { id: normalizedId } })
 }
 
 export async function deleteAd(id: number): Promise<Ad> {

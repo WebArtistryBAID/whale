@@ -41,6 +41,7 @@ import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import { getStripeRedirectURI } from '@/app/lib/stripe-actions'
 import { getStripeChargedTotal, getStripeFeeAmount } from '@/app/lib/pricing'
+import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 
 function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     paymentMethod: PaymentMethod,
@@ -491,7 +492,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 <If condition={mode === 'cart'}>
                     <p className="mb-1">{t('checkout.coupon')}</p>
                     <TextInput className="w-full" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
-                               onChange={e => setCoupon(e.currentTarget.value)}/>
+                               onChange={e => setCoupon(normalizeCouponCode(e.currentTarget.value))}/>
                     <p className="mt-1 text-sm text-red-500" aria-live="polite">
                         <If condition={hasCartCouponIssue}>
                             {t('checkout.couponInvalid')}

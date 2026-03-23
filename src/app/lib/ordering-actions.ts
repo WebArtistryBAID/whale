@@ -14,6 +14,7 @@ import {
 } from '@/generated/prisma/client'
 import { OrderedItemTemplate } from '@/app/lib/shopping-cart'
 import { getMyUser } from '@/app/login/login-actions'
+import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 import Decimal from 'decimal.js'
 import { getConfigValueAsBoolean, getConfigValueAsNumber, getConfigValues } from '@/app/lib/settings-actions'
 import { prisma } from '@/app/lib/prisma'
@@ -613,9 +614,13 @@ export async function requireUnpaidOrder(order: number): Promise<HydratedOrder> 
 }
 
 export async function couponQuickValidate(code: string): Promise<CouponCode | null> {
+    const normalizedCode = normalizeCouponCode(code)
+    if (normalizedCode.length < 1) {
+        return null
+    }
     return prisma.couponCode.findUnique({
         where: {
-            id: code,
+            id: normalizedCode,
             remainingUses: {
                 gt: 0
             }
@@ -803,6 +808,7 @@ export async function createOrder(items: OrderedItemTemplate[],
                                   deliveryRoom: string | null,
                                   paymentMethod: PaymentMethod): Promise<HydratedOrder | null> {
     const me = await getMyUser()
+    const normalizedCoupon = coupon == null ? null : normalizeCouponCode(coupon)
 
     if (items.length < 1) {
         return null
@@ -876,8 +882,8 @@ export async function createOrder(items: OrderedItemTemplate[],
     let usedCoupon = false
     const totalPriceNoCoupon = items.reduce((acc, item) => acc.add(calculatePrice(item)), new Decimal(0))
     let totalPrice = totalPriceNoCoupon
-    if (coupon != null) {
-        const couponCode = await couponQuickValidate(coupon)
+    if (normalizedCoupon != null && normalizedCoupon.length > 0) {
+        const couponCode = await couponQuickValidate(normalizedCoupon)
         if (couponCode == null) {
             return null
         }
@@ -961,10 +967,10 @@ export async function createOrder(items: OrderedItemTemplate[],
                 }
             }
 
-            if (coupon != null) {
+            if (normalizedCoupon != null && normalizedCoupon.length > 0) {
                 const couponCode = await tx.couponCode.findFirst({
                     where: {
-                        id: coupon,
+                        id: normalizedCoupon,
                         remainingUses: {
                             gt: 0
                         }
@@ -1077,7 +1083,7 @@ export async function createOrder(items: OrderedItemTemplate[],
                         id: order.id
                     }
                 },
-                values: [ coupon! ]
+                values: [ normalizedCoupon! ]
             }
         })
     }

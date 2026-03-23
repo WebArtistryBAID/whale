@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { upsertCouponCode } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
 import { CouponCode } from '@/generated/prisma/browser'
+import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 
 export default function CouponCodeCreateClient({ editMode, existing }: {
     editMode: boolean,
@@ -17,7 +18,7 @@ export default function CouponCodeCreateClient({ editMode, existing }: {
     const [ loading, setLoading ] = useState(false)
     const router = useRouter()
 
-    const [ id, setID ] = useState(existing?.id ?? '')
+    const [ id, setID ] = useState(existing?.id == null ? '' : normalizeCouponCode(existing.id))
     const [ value, setValue ] = useState(existing?.value ?? '')
     const [ remainingUses, setRemainingUses ] = useState(existing?.remainingUses.toString() ?? '')
     const [ idError, setIDError ] = useState(false)
@@ -44,13 +45,14 @@ export default function CouponCodeCreateClient({ editMode, existing }: {
             return
         }
         setLoading(true)
+        const normalizedId = normalizeCouponCode(id)
         await upsertCouponCode({
-            id,
+            id: normalizedId,
             value: value,
             remainingUses: parseInt(remainingUses),
             allowedUses: -1
         })
-        router.push(`/user/manage/storefront/coupons/${id}`)
+        router.push(`/user/manage/storefront/coupons/${normalizedId}`)
         setLoading(false)
     }
 
@@ -75,7 +77,7 @@ export default function CouponCodeCreateClient({ editMode, existing }: {
                 </div>
                 <TextInput id="id" type="text" required placeholder={t('manage.storefront.couponD.id') + '...'}
                            color={idError ? 'failure' : undefined} disabled={editMode}
-                           value={id} onChange={e => setID(e.currentTarget.value)}
+                           value={id} onChange={e => setID(normalizeCouponCode(e.currentTarget.value))}
                            helperText={idError ? t('manage.storefront.couponD.idError') : null}/>
             </div>
             <div className="w-full">
