@@ -11,23 +11,44 @@ import { HiCheckCircle, HiExclamationTriangle } from 'react-icons/hi2'
 import { HiClock, HiHashtag } from 'react-icons/hi'
 import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
 
-function getElapsedSeconds(createdAt: Date | string, now: number | null): number | null {
+function getOfficialOpenTime(openAt: string | null | undefined): number | null {
+    if (openAt == null) {
+        return null
+    }
+
+    const openAtTime = new Date(openAt).getTime()
+    return Number.isNaN(openAtTime) ? null : openAtTime
+}
+
+function getElapsedSeconds(createdAt: Date | string, openAt: string | null | undefined, now: number | null): number | null {
     if (now == null) {
         return null
     }
 
     const createdAtDate = createdAt instanceof Date ? createdAt : new Date(createdAt)
     const createdAtTime = createdAtDate.getTime()
+    const officialOpenTime = getOfficialOpenTime(openAt)
 
-    if (Number.isNaN(createdAtTime)) {
+    if (Number.isNaN(createdAtTime) || (officialOpenTime != null && now < officialOpenTime)) {
         return null
     }
 
-    return Math.max(0, Math.floor((now - createdAtTime) / 1000))
+    const startTime = officialOpenTime == null ? createdAtTime : Math.max(createdAtTime, officialOpenTime)
+    return Math.max(0, Math.floor((now - startTime) / 1000))
 }
 
-function formatElapsedTime(createdAt: Date | string, now: number | null): string {
-    const elapsedSeconds = getElapsedSeconds(createdAt, now)
+function formatElapsedTime(
+    createdAt: Date | string,
+    openAt: string | null | undefined,
+    now: number | null,
+    preOrderLabel: string
+): string {
+    const officialOpenTime = getOfficialOpenTime(openAt)
+    if (officialOpenTime != null && now != null && now < officialOpenTime) {
+        return preOrderLabel
+    }
+
+    const elapsedSeconds = getElapsedSeconds(createdAt, openAt, now)
 
     if (elapsedSeconds == null) {
         return '--:--'
@@ -39,12 +60,14 @@ function formatElapsedTime(createdAt: Date | string, now: number | null): string
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
-function OrderInfo({ order, done, now }: {
+function OrderInfo({ order, done, now, openAt }: {
     order: HydratedOrder,
     done: () => Promise<void>,
-    now: number | null
+    now: number | null,
+    openAt: string | null
 }) {
     const { t } = useTranslationClient('user')
+    const elapsedSeconds = getElapsedSeconds(order.createdAt, openAt, now)
 
     return <div className="col-span-1 row-span-1 p-3 bg-amber-50 dark:bg-amber-800 rounded-3xl">
         <h2 className="flex items-center mb-3 font-bold">
@@ -58,7 +81,7 @@ function OrderInfo({ order, done, now }: {
             <p>{t('today.user')}: <span
                 className="font-bold">{order.userId != null ? order.user!.name : t('anonymous')}</span></p>
             <p>{t('today.waitedFor')}: <span
-                className={`font-bold ${(getElapsedSeconds(order.createdAt, now) ?? 0) > 600 ? 'text-red-500' : ''}`}>{formatElapsedTime(order.createdAt, now)}</span>
+                className={`font-bold ${(elapsedSeconds ?? 0) > 600 ? 'text-red-500' : ''}`}>{formatElapsedTime(order.createdAt, openAt, now, t('today.preOrderLabel'))}</span>
             </p>
             {order.deliveryRoom != null &&
                 <p>{t('today.deliveryRoom')}: <span className="text-green-400 font-bold">{order.deliveryRoom!}</span>
@@ -198,7 +221,7 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
             {Object.values(orders).map(order => <OrderInfo order={order} done={async () => {
                 await markOrderDone(order.id)
                 void tick()
-            }} key={order.id} now={now}/>)}
+            }} key={order.id} now={now} openAt={availability?.openAt ?? null}/>)}
         </div>
     </>
 }

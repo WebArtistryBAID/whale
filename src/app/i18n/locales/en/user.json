@@ -424,6 +424,7 @@
     "user": "Ordered By",
     "createdAt": "Created At",
     "waitedFor": "Waited For",
+    "preOrderLabel": "Pre-Order.",
     "price": "Total Price",
     "current": "Current Status",
     "payment": "Payment Status",

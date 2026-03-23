@@ -424,6 +424,7 @@
     "user": "点单用户",
     "createdAt": "创建时间",
     "waitedFor": "已等待",
+    "preOrderLabel": "预点单",
     "price": "总价",
     "current": "目前状态",
     "payment": "支付状态",

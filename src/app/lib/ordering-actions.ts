@@ -97,6 +97,7 @@ export interface OrderingAvailabilityResponse {
     isStoreOpen: boolean
     unavailableReason: OrderingUnavailableReason
     currentDay: DailyCupLimitSummary
+    openAt: string
     openTime: string
     closeTime: string
     preOrderStartTime: string
@@ -523,6 +524,7 @@ export async function getOrderingAvailability(): Promise<OrderingAvailabilityRes
     }
 
     const currentDay = await getDailyCupLimitSummary(targetDay, config)
+    const openAt = dateAtMinutes(targetDay, config.openTimeMinutes).toISOString()
 
     if (phase === 'preorder') {
         return {
@@ -531,6 +533,7 @@ export async function getOrderingAvailability(): Promise<OrderingAvailabilityRes
             isStoreOpen: isStoreOpenNow,
             unavailableReason: currentDay.remainingPreOrderCups > 0 ? 'none' : 'preorder-limit-reached',
             currentDay,
+            openAt,
             openTime: config.openTime,
             closeTime: config.closeTime,
             preOrderStartTime: config.preOrderStartTime
@@ -544,6 +547,7 @@ export async function getOrderingAvailability(): Promise<OrderingAvailabilityRes
             isStoreOpen: isStoreOpenNow,
             unavailableReason: currentDay.remainingLiveCups > 0 ? 'none' : 'live-limit-reached',
             currentDay,
+            openAt,
             openTime: config.openTime,
             closeTime: config.closeTime,
             preOrderStartTime: config.preOrderStartTime
@@ -556,6 +560,7 @@ export async function getOrderingAvailability(): Promise<OrderingAvailabilityRes
         isStoreOpen: false,
         unavailableReason: 'store-closed',
         currentDay,
+        openAt,
         openTime: config.openTime,
         closeTime: config.closeTime,
         preOrderStartTime: config.preOrderStartTime
