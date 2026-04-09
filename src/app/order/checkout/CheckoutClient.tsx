@@ -338,7 +338,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 <Link href="/login?redirect=%2Forder%2Fcheckout">
                     <Button pill color="warning">{t('login')}</Button>
                 </Link>
-                <Button pill color="gray" onClick={() => {
+                <Button pill color="yellow" onClick={() => {
                     setShowLoginNag(false)
                     void order()
                 }}>{t('checkout.loginNagModal.continue')}</Button>
