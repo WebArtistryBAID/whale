@@ -19,7 +19,7 @@ import {
     Spinner,
     TextInput
 } from 'flowbite-react'
-import { CouponCode, PaymentMethod, PaymentStatus, User, UserAuditLog } from '@/generated/prisma/browser'
+import { CouponCode, OrderType, PaymentMethod, PaymentStatus, User, UserAuditLog } from '@/generated/prisma/browser'
 import type { HydratedOrder } from '@/app/lib/ordering-actions'
 import {
     canPayWithBalance,
@@ -31,7 +31,7 @@ import {
     getOrderingAvailability,
     OrderingAvailabilityResponse,
     payOrderWithBalance,
-    setOrderPaymentMethod,
+    setOrderCheckoutOptions,
     validateCartItems
 } from '@/app/lib/ordering-actions'
 import Decimal from 'decimal.js'
@@ -42,6 +42,12 @@ import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import { getStripeRedirectURI } from '@/app/lib/stripe-actions'
 import { getStripeChargedTotal, getStripeFeeAmount } from '@/app/lib/pricing'
 import { normalizeCouponCode } from '@/app/lib/coupon-codes'
+import {
+    DEFAULT_PICK_UP_TIME,
+    isValidPickUpTime,
+    PICK_UP_TIME_OPTIONS,
+    PickUpTimeOption
+} from '@/app/lib/pick-up-times'
 
 function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     paymentMethod: PaymentMethod,
@@ -53,6 +59,22 @@ function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     return <Button color={selected ? 'warning' : 'gray'} pill size="xs"
                    onClick={select} disabled={disabled}>
         {t(`checkout.${paymentMethod}`)}
+        <If condition={selected}>
+            <span className="sr-only">{t('a11y.selected')}</span>
+        </If>
+    </Button>
+}
+
+function PickUpTimeButton({ value, selected, select, disabled }: {
+    value: PickUpTimeOption,
+    selected: boolean,
+    select: () => void,
+    disabled: boolean
+}) {
+    const { t } = useTranslationClient('order')
+    return <Button color={selected ? 'warning' : 'gray'} pill size="xs"
+                   onClick={select} disabled={disabled}>
+        {t(`checkout.pickUpTimeOptions.${value}`)}
         <If condition={selected}>
             <span className="sr-only">{t('a11y.selected')}</span>
         </If>
@@ -73,6 +95,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     const router = useRouter()
     const mode: CheckoutMode = rechargeTransaction != null ? 'recharge' : (existingOrder != null ? 'order' : 'cart')
     const [ paymentMethod, setPaymentMethod ] = useState<PaymentMethod>(existingOrder?.paymentStatus === PaymentStatus.notPaid && existingOrder.paymentMethod !== PaymentMethod.payLater ? existingOrder.paymentMethod : PaymentMethod.wxPay)
+    const [ pickUpTime, setPickUpTime ] = useState<PickUpTimeOption>(existingOrder?.type === OrderType.pickUp && isValidPickUpTime(existingOrder.pickUpTime)
+        ? existingOrder.pickUpTime
+        : DEFAULT_PICK_UP_TIME)
     const [ coupon, setCoupon ] = useState('')
     const [ foundCoupon, setFoundCoupon ] = useState<CouponCode | null>(null)
     const [ me, setMe ] = useState<User | null>(null)
@@ -234,7 +259,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 return
             }
             const order = await createOrder(shoppingCart.items, coupon.length > 0 ? coupon : null, shoppingCart.onSiteOrderMode,
-                useDelivery ? deliveryRoom : null, paymentMethod)
+                useDelivery ? deliveryRoom : null, paymentMethod, useDelivery ? null : pickUpTime)
             if (order == null) {
                 const availability = await getOrderingAvailability()
                 if (availability.unavailableReason === 'preorder-limit-reached') {
@@ -266,6 +291,8 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
         }
 
         if (mode === 'order' && existingOrder != null) {
+            await setOrderCheckoutOptions(existingOrder.id, paymentMethod, existingOrder.type === OrderType.pickUp ? pickUpTime : null)
+
             if (paymentMethod === PaymentMethod.balance) {
                 const success = await payOrderWithBalance(existingOrder.id)
                 setLoading(false)
@@ -278,8 +305,6 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 setAwaitRedirect(true)
                 return
             }
-
-            await setOrderPaymentMethod(existingOrder.id, paymentMethod)
             if (paymentMethod === PaymentMethod.stripe) {
                 const redirect = await getStripeRedirectURI(existingOrder.id)
                 setRedirectTarget(redirect)
@@ -488,6 +513,19 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
 
                     <p className="secondary text-sm">{t('checkout.stripeInfo')}</p>
                 </div>
+
+                <If condition={mode !== 'recharge' && (mode === 'cart' ? !useDelivery : existingOrder?.type === OrderType.pickUp)}>
+                    <p className="mb-1">{t('checkout.pickUpTime')}</p>
+                    <div className="mb-5" aria-label={t('checkout.pickUpTime')}>
+                        <div className="flex flex-wrap gap-3 items-center mb-1">
+                            {PICK_UP_TIME_OPTIONS.map(option => <PickUpTimeButton key={option} value={option}
+                                                                                  selected={pickUpTime === option}
+                                                                                  disabled={loading}
+                                                                                  select={() => setPickUpTime(option)}/>)}
+                        </div>
+                        <p className="secondary text-sm">{t('checkout.pickUpTimeMessage')}</p>
+                    </div>
+                </If>
 
                 <If condition={mode === 'cart'}>
                     <p className="mb-1">{t('checkout.coupon')}</p>

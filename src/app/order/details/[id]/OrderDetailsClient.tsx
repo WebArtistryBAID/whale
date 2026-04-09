@@ -18,6 +18,7 @@ import { HiHashtag, HiInformationCircle } from 'react-icons/hi'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import Link from 'next/link'
+import { isValidPickUpTime } from '@/app/lib/pick-up-times'
 
 export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
     initialOrder: HydratedOrder,
@@ -149,6 +150,10 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                 aria-label={t('a11y.orderedItems')}>
                 <p>{t('checkout.total')}</p>
                 <p className="text-lg mb-5">¥{order.totalPrice}</p>
+                <If condition={order.type === OrderType.pickUp && isValidPickUpTime(order.pickUpTime)}>
+                    <p>{t('details.pickUpTime')}</p>
+                    <p className="text-lg mb-5">{t(`checkout.pickUpTimeOptions.${order.pickUpTime}`)}</p>
+                </If>
                 <div className="flex flex-col gap-5">
                     {order.items.map((item, index) =>
                         <UIOrderedItemTemplate key={index} item={{

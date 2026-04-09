@@ -10,6 +10,7 @@ import { setConfigValue } from '@/app/lib/settings-actions'
 import { HiCheckCircle, HiExclamationTriangle } from 'react-icons/hi2'
 import { HiClock, HiHashtag } from 'react-icons/hi'
 import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
+import { isValidPickUpTime } from '@/app/lib/pick-up-times'
 
 function getOfficialOpenTime(openAt: string | null | undefined): number | null {
     if (openAt == null) {
@@ -83,6 +84,10 @@ function OrderInfo({ order, done, now, openAt }: {
             <p>{t('today.waitedFor')}: <span
                 className={`font-bold ${(elapsedSeconds ?? 0) > 600 ? 'text-red-500' : ''}`}>{formatElapsedTime(order.createdAt, openAt, now, t('today.preOrderLabel'))}</span>
             </p>
+            {isValidPickUpTime(order.pickUpTime) &&
+                <p>{t('today.pickUpTime')}: <span
+                    className="text-amber-600 dark:text-amber-300 font-bold">{t(`today.pickUpTimeOptions.${order.pickUpTime}`)}</span>
+                </p>}
             {order.deliveryRoom != null &&
                 <p>{t('today.deliveryRoom')}: <span className="text-green-400 font-bold">{order.deliveryRoom!}</span>
                 </p>}

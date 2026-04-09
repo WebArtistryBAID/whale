@@ -432,6 +432,12 @@
     "paid": "已支付",
     "refunded": "已退款",
     "paymentMethod": "支付方式",
+    "pickUpTime": "取餐时间",
+    "pickUpTimeOptions": {
+      "morning": "6:30 - 8:00",
+      "midday": "12:00 - 14:00",
+      "evening": "17:00 - 19:00"
+    },
     "wxPay": "微信支付",
     "stripe": "Stripe",
     "balance": "余额",

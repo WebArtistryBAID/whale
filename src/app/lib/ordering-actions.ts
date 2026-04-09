@@ -19,6 +19,7 @@ import Decimal from 'decimal.js'
 import { getConfigValueAsBoolean, getConfigValueAsNumber, getConfigValues } from '@/app/lib/settings-actions'
 import { prisma } from '@/app/lib/prisma'
 import { countsTowardLimit, getAvailableInventory, isItemSoldOut } from '@/app/lib/item-availability'
+import { DEFAULT_PICK_UP_TIME, isValidPickUpTime, PickUpTimeOption } from '@/app/lib/pick-up-times'
 
 export interface HydratedOrderedItem {
     id: number
@@ -39,6 +40,7 @@ export interface HydratedOrder {
     createdAt: Date
     updatedAt: Date
     type: OrderType
+    pickUpTime: string | null
     deliveryRoom: string | null
     user: User | null
     userId: number | null
@@ -588,7 +590,7 @@ export async function hasAvailableItemsOutsideLimit(): Promise<boolean> {
     }) > 0
 }
 
-export async function setOrderPaymentMethod(id: number, paymentMethod: PaymentMethod): Promise<boolean> {
+export async function setOrderCheckoutOptions(id: number, paymentMethod: PaymentMethod, pickUpTime: PickUpTimeOption | null): Promise<boolean> {
     const order = await prisma.order.findUnique({
         where: {
             id,
@@ -600,7 +602,10 @@ export async function setOrderPaymentMethod(id: number, paymentMethod: PaymentMe
     }
     await prisma.order.update({
         where: { id },
-        data: { paymentMethod }
+        data: {
+            paymentMethod,
+            pickUpTime: order.type === OrderType.pickUp ? (pickUpTime ?? DEFAULT_PICK_UP_TIME) : null
+        }
     })
     return true
 }
@@ -806,7 +811,8 @@ export async function createOrder(items: OrderedItemTemplate[],
                                   coupon: string | null,
                                   onSiteOrderMode: boolean,
                                   deliveryRoom: string | null,
-                                  paymentMethod: PaymentMethod): Promise<HydratedOrder | null> {
+                                  paymentMethod: PaymentMethod,
+                                  pickUpTime: PickUpTimeOption | null): Promise<HydratedOrder | null> {
     const me = await getMyUser()
     const normalizedCoupon = coupon == null ? null : normalizeCouponCode(coupon)
 
@@ -836,6 +842,14 @@ export async function createOrder(items: OrderedItemTemplate[],
 
     const availability = await getOrderingAvailability()
     if (availability.unavailableReason === 'store-closed') {
+        return null
+    }
+
+    if (deliveryRoom == null && !isValidPickUpTime(pickUpTime)) {
+        return null
+    }
+
+    if (deliveryRoom != null && pickUpTime != null) {
         return null
     }
 
@@ -1035,6 +1049,7 @@ export async function createOrder(items: OrderedItemTemplate[],
                     totalPriceRaw: totalPriceNoCoupon.toString(),
                     status: OrderStatus.waiting,
                     type: deliveryRoom == null ? OrderType.pickUp : OrderType.delivery,
+                    pickUpTime: deliveryRoom == null ? pickUpTime : null,
                     deliveryRoom,
                     user: (onSiteOrderMode || me == null) ? undefined : {
                         connect: {

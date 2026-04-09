@@ -10,6 +10,7 @@ import Link from 'next/link'
 import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
 import { useState } from 'react'
 import { useTranslationClient } from '@/app/i18n/client'
+import { isValidPickUpTime } from '@/app/lib/pick-up-times'
 
 export default function OrderWithData({ order, forceUpdate, close }: {
     order: HydratedOrder,
@@ -72,6 +73,11 @@ export default function OrderWithData({ order, forceUpdate, close }: {
 
                 <p className="secondary text-sm font-display">{t('today.payment')}</p>
                 <p className="text-xl">{t(`today.${order.paymentStatus}`)}</p>
+
+                <If condition={isValidPickUpTime(order.pickUpTime)}>
+                    <p className="secondary text-sm font-display mt-3">{t('today.pickUpTime')}</p>
+                    <p className="text-xl">{t(`today.pickUpTimeOptions.${order.pickUpTime}`)}</p>
+                </If>
 
                 <If condition={order.type === OrderType.delivery}>
                     <p className="secondary text-sm font-display mt-3">{t('today.deliveryRoom')}</p>

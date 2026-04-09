@@ -432,6 +432,12 @@
     "paid": "Paid",
     "refunded": "Refunded",
     "paymentMethod": "Payment Method",
+    "pickUpTime": "Pick-Up Time",
+    "pickUpTimeOptions": {
+      "morning": "6:30 - 8:00",
+      "midday": "12:00 - 14:00",
+      "evening": "17:00 - 19:00"
+    },
     "wxPay": "Weixin Pay",
     "stripe": "Stripe",
     "balance": "Balance",

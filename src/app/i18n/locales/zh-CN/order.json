@@ -90,6 +90,13 @@
     "waitTime_one": "{{count}} 分钟",
     "waitTime_other": "{{count}} 分钟",
     "paymentMethod": "支付方式",
+    "pickUpTime": "取餐时间",
+    "pickUpTimeMessage": "您想在哪个时间段取餐?",
+    "pickUpTimeOptions": {
+      "morning": "6:30 - 8:00",
+      "midday": "12:00 - 14:00",
+      "evening": "17:00 - 19:00"
+    },
     "stripeFees": "Stripe 付款手续费",
     "wxPay": "微信支付",
     "stripe": "Stripe",
@@ -141,6 +148,7 @@
     "orderNumberPrompt": "请记住您的订单号，您在取餐时会用到。",
     "contactPrompt": "如果您对订单有异议或需要退款，请联系负责人李家瑞。WebArtistry 并未参与白鲸咖啡馆的运营。",
     "pickUpPrompt": "您必须在大厅柜台取餐。<1>如果您没有取餐，您将不会被退款。</1>",
+    "pickUpTime": "取餐时间",
     "paymentTitle": "支付",
     "paymentPromptPayLater": "此「先喝后付」订单尚未支付。",
     "paymentPrompt": "此订单尚未支付。支付后，订单才会开始准备。",
