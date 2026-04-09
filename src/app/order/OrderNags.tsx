@@ -53,9 +53,9 @@ export default function OrderNags() {
             const lastShown = localStorage.getItem('login-nag')
             localStorage.setItem('login-nag', new Date().toISOString())
             if (lastShown == null) {
-                setLoginModal(true)
+                //setLoginModal(true)
             } else if (new Date().getTime() - new Date(lastShown).getTime() > 16 * 60 * 60 * 1000) {
-                setLoginModal(true)
+                //setLoginModal(true)
             }
         }
     }, [ cookies.access_token ])
