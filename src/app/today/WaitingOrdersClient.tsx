@@ -70,7 +70,7 @@ function OrderInfo({ order, done, now, openAt }: {
     const { t } = useTranslationClient('user')
     const elapsedSeconds = getElapsedSeconds(order.createdAt, openAt, now)
 
-    return <div className="col-span-1 row-span-1 p-3 bg-amber-50 dark:bg-amber-800 rounded-3xl">
+    return <div className="col-span-1 row-span-1 p-3 card">
         <h2 className="flex items-center mb-3 font-bold">
             <Badge className="mr-2 rounded-full h-8 w-8 flex justify-center items-center" color="warning">
                 <HiHashtag className="text-xl"/>
@@ -188,7 +188,7 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
     return <>
         <div className="w-full h-full grid sm:grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4 grid-cols-1 p-5"
              aria-label={t('today.ordersPane')}>
-            <div className="col-span-1 row-span-1 flex flex-col gap-3 p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl">
+            <div className="col-span-1 row-span-1 flex flex-col gap-3 p-5 card">
                 <div className="flex items-center gap-2">
                     {(isOpen || isPreOrder) && !isCapacityBlocked &&
                         <HiCheckCircle className="text-green-500 text-xl"/>}

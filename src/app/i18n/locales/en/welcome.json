@@ -11,5 +11,10 @@
   "recentOrder": "Recent Order",
   "recentOrderSub": "View Details",
   "orderNumber": "(Order Number)",
-  "ads": "Sponsored Messages"
+  "ads": "Sponsored Messages",
+  "tagline": "Freshly made coffee and tea. Order online, pick up in store.",
+  "statusLive": "Open now",
+  "statusPreorder": "Taking pre-orders",
+  "statusClosed": "Closed",
+  "hours": "Open {{open}} – {{close}}"
 }

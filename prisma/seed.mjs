@@ -16,7 +16,7 @@ INSERT INTO "User"(id,name,pinyin,phone,permissions,type,gender,balance,points,"
  (1001,'张三','Zhang San','13800000000','{admin.manage}','teacher','male','128.5','342',now()),
  (1002,'李四','Li Si','13900000000','{}','student','female','20','56',now());
 INSERT INTO "Category"(name,"displayOrder") VALUES ('咖啡 Coffee',0),('茶饮 Tea',1),('甜点 Desserts',2);
-INSERT INTO "Tag"(name,color) VALUES ('热销 Bestseller','red'),('新品 New','green');
+INSERT INTO "Tag"(name,color) VALUES ('热销 Bestseller','#e11d48'),('新品 New','#16a34a');
 INSERT INTO "OptionType"(name) VALUES ('温度 Temperature'),('甜度 Sweetness'),('杯型 Size');
 INSERT INTO "OptionItem"("typeId",name,"displayOrder","default","priceChange") VALUES
  (1,'热 Hot',0,true,'0'),(1,'冰 Iced',1,false,'0'),
@@ -33,6 +33,7 @@ UPDATE "ItemType" SET "countsTowardLimit"=false, "inventoryTrackingEnabled"=true
 INSERT INTO "_ItemTypeToOptionType"("A","B") SELECT i,o FROM generate_series(1,5) i, generate_series(1,3) o;
 INSERT INTO "_ItemTypeToTag"("A","B") VALUES (1,1),(4,2);
 INSERT INTO "CouponCode"(id,value,"allowedUses","remainingUses") VALUES ('WELCOME','5',10,10);
+INSERT INTO "Ad"(name, image, url) VALUES ('新品上市 · 抹茶拿铁 New: Matcha Latte', 'banner-matcha.webp', '/order');
 INSERT INTO "SettingsItem"(key, value) VALUES ('enable-scheduled-availability', 'false'), ('store-open', 'true'), ('maximum-cups-per-order', '4')
     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 `
@@ -53,6 +54,8 @@ async function writeImages() {
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><defs><radialGradient id="g" cx="50%" cy="40%" r="70%"><stop offset="0" stop-color="${light}"/><stop offset="1" stop-color="${dark}"/></radialGradient></defs><rect width="600" height="600" fill="url(#g)"/><ellipse cx="300" cy="430" rx="190" ry="34" fill="#00000022"/><path d="M180 220 h240 l-24 200 a30 30 0 0 1 -30 26 h-132 a30 30 0 0 1 -30 -26z" fill="#fff" opacity="0.92"/><path d="M420 260 a50 50 0 0 1 0 100" stroke="#fff" stroke-width="22" fill="none" opacity="0.92"/><ellipse cx="300" cy="222" rx="120" ry="18" fill="${dark}"/></svg>`
         await sharp(Buffer.from(svg)).webp().toFile(path.join(dir, `${name}.webp`))
     }
+    const banner = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600"><defs><linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9cbf73"/><stop offset="1" stop-color="#3f6b35"/></linearGradient></defs><rect width="1200" height="600" fill="url(#b)"/><circle cx="980" cy="120" r="220" fill="#ffffff18"/><circle cx="150" cy="560" r="180" fill="#ffffff12"/><g transform="translate(720 150)"><path d="M0 60 h300 l-30 250 a36 36 0 0 1 -36 32 h-168 a36 36 0 0 1 -36 -32z" fill="#fff" opacity="0.95"/><path d="M300 110 a60 60 0 0 1 0 120" stroke="#fff" stroke-width="26" fill="none" opacity="0.95"/><ellipse cx="150" cy="62" rx="150" ry="22" fill="#7fa35b"/></g></svg>`
+    await sharp(Buffer.from(banner)).webp().toFile(path.join(dir, 'banner-matcha.webp'))
 }
 
 const client = new pg.Client({ connectionString: process.env.DATABASE_URI })

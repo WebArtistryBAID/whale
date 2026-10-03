@@ -63,7 +63,7 @@
   "addConfirm": "加入购物车",
   "itemDetails": {
     "soldOut": "售罄",
-    "sale": "{{sale}} 降价!",
+    "sale": "直降 {{sale}}%!",
     "add": "加一杯",
     "minus": "减一杯",
     "cannotAddMore": "(不能继续添加)",
@@ -158,6 +158,18 @@
     "refundTip": "如需退款，请联系我们。",
     "paymentMethod": "支付方式",
     "paymentMethodMessage": "您想使用什么方式付款?",
-    "insufficientBalance": "余额不足"
-  }
+    "insufficientBalance": "余额不足",
+    "steps": {
+      "placed": "已下单",
+      "preparing": "制作中",
+      "ready": "可取餐",
+      "readyDelivery": "已送出"
+    },
+    "goodToKnow": "温馨提示"
+  },
+  "menu": "菜单",
+  "cartTitle": "购物车",
+  "cartCount_one": "{{count}} 件",
+  "cartCount_other": "{{count}} 件",
+  "notice": "暂时无法结账"
 }

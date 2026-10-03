@@ -2,20 +2,14 @@
 
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { useTranslationClient } from '@/app/i18n/client'
-import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Popover } from 'flowbite-react'
+import { Button } from 'flowbite-react'
 import If from '@/app/lib/If'
-import { HiClock } from 'react-icons/hi'
+import { HiChevronUp, HiShoppingBag } from 'react-icons/hi'
 import { useRouter } from 'next/navigation'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { useEffect, useRef, useState } from 'react'
-import { Trans } from 'react-i18next/TransWithoutContext'
-import {
-    CartValidationResponse,
-    getOrderingAvailability,
-    OrderingAvailabilityResponse,
-    validateCartItems
-} from '@/app/lib/ordering-actions'
-import { getConfigValueAsNumber } from '@/app/lib/settings-actions'
+import { useCartStatus } from '@/app/order/useCartStatus'
+import CartWarnings from '@/app/order/CartWarnings'
 
 export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: string }) {
     const { t } = useTranslationClient('order')
@@ -23,166 +17,91 @@ export default function UIShoppingCartMobile({ uploadPrefix }: { uploadPrefix: s
     const router = useRouter()
     const [ showAll, setShowAll ] = useState(false)
     const detailsRef = useRef<HTMLDivElement>(null)
-
-    const [ availability, setAvailability ] = useState<OrderingAvailabilityResponse | null>(null)
-    const [ cartValidation, setCartValidation ] = useState<CartValidationResponse | null>(null)
-    const [ maxCups, setMaxCups ] = useState(0)
-    const [ preOrderLimitModal, setPreOrderLimitModal ] = useState(false)
-
-    useEffect(() => {
-        const sync = async () => {
-            setAvailability(await getOrderingAvailability())
-            setCartValidation(await validateCartItems(shoppingCart.items))
-            setMaxCups(await getConfigValueAsNumber('maximum-cups-per-order'))
-        }
-
-        void sync()
-        const id = setInterval(() => {
-            void sync()
-        }, 10000)
-        return () => clearInterval(id)
-    }, [ shoppingCart.items ])
+    const { warnings, checkoutDisabled } = useCartStatus()
 
     useEffect(() => {
         if (showAll) {
-            detailsRef.current!.focus()
+            detailsRef.current?.focus()
         }
     }, [ showAll ])
 
-    const isClosed = availability?.unavailableReason === 'store-closed'
-    const remainingLimit = availability == null
-        ? 0
-        : availability.phase === 'preorder'
-            ? availability.currentDay.remainingPreOrderCups
-            : availability.phase === 'live'
-                ? availability.currentDay.remainingLiveCups
-                : 0
-    const isPreOrderFull = availability?.phase === 'preorder' && (cartValidation?.countedAmount ?? 0) > remainingLimit
-    const isLiveFull = availability?.phase === 'live' && (cartValidation?.countedAmount ?? 0) > remainingLimit
-    const hasInventoryIssues = (cartValidation?.issues.length ?? 0) > 0
-    const inventoryMessages = cartValidation?.issues.map(issue =>
-        issue.available <= 0
-            ? t('inventory.soldOut', { item: issue.itemName })
-            : t('inventory.onlyLeft', { count: issue.available, item: issue.itemName })
-    ) ?? []
-    const showWarning = availability != null && (isClosed || isLiveFull || isPreOrderFull || hasInventoryIssues || shoppingCart.getAmount() > maxCups)
-    const buttonDisabled = availability == null ||
-        isClosed ||
-        isLiveFull ||
-        isPreOrderFull ||
-        hasInventoryIssues ||
-        shoppingCart.getAmount() > maxCups ||
-        shoppingCart.items.length < 1
-
-    const checkout = <Button pill
-                             disabled={buttonDisabled}
-                             color="yellow" onClick={() => {
-        if (shoppingCart.items.length < 1) {
-            return
-        }
-        if (isPreOrderFull) {
-            setPreOrderLimitModal(true)
-            return
-        }
-        router.replace('/order/checkout')
-    }}>{t('checkout.title')}</Button>
+    const total = <p className="mr-auto">
+        <span className="sr-only">{t('total', { price: shoppingCart.getTotalPrice().toString() })}</span>
+        <span aria-hidden className="price text-xl">¥{shoppingCart.getTotalPrice().toString()}</span>
+    </p>
 
     return <>
-        <Modal show={preOrderLimitModal} onClose={() => setPreOrderLimitModal(false)}>
-            <ModalHeader>{t('preOrderLimitModal.title')}</ModalHeader>
-            <ModalBody>
-                <p>{t('preOrderLimitModal.message', { time: availability?.openTime ?? '' })}</p>
-            </ModalBody>
-            <ModalFooter>
-                <Button pill color="warning" onClick={() => setPreOrderLimitModal(false)}>
-                    {t('confirm')}
-                </Button>
-            </ModalFooter>
-        </Modal>
-
         <If condition={showAll}>
-            <div className="fixed top-0 w-screen h-screen z-10 bg-gray-400/50" onClick={() => setShowAll(false)}
+            <div className="fixed inset-0 z-50 bg-espresso-900/40 backdrop-blur-sm" onClick={() => setShowAll(false)}
                  aria-hidden></div>
             <div aria-label={t('a11y.shoppingCart')} ref={detailsRef} tabIndex={0}
-                 className="bg-amber-50 dark:bg-yellow-800 rounded-t-3xl h-[50vh] fixed bottom-0 w-screen z-20">
+                 className="bg-white dark:bg-espresso-700 rounded-t-3xl max-h-[75dvh] fixed bottom-0 inset-x-0 z-50
+                 flex flex-col shadow-lift animate-[fadeIn_150ms_ease-out]">
+                <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-stone-300 dark:bg-white/20" aria-hidden/>
+                <div className="flex items-center px-5 pt-3 pb-2">
+                    <h2 className="text-lg font-bold mr-auto">{t('cartTitle')}</h2>
+                    <button className="text-sm secondary px-3 py-1" onClick={() => setShowAll(false)}>{t('close')}</button>
+                </div>
                 <If condition={shoppingCart.items.length > 0}>
-                    <div className="flex flex-col gap-5 mb-8 p-8 h-full overflow-y-auto">
+                    <div className="flex flex-col gap-4 px-5 py-3 overflow-y-auto">
                         {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate uploadPrefix={uploadPrefix}
                                                                                         item={item}
                                                                                         key={JSON.stringify(item) + index.toString()}
                                                                                         index={index}/>)}
                     </div>
                 </If>
-
                 <If condition={shoppingCart.items.length < 1}>
-                    <div className="flex flex-col justify-center items-center h-4/5 w-full">
-                        <HiClock className="text-6xl mb-1 text-amber-400 dark:text-yellow-400"/>
-                        <p>{t('empty')}</p>
+                    <div className="flex flex-col justify-center items-center py-12">
+                        <HiShoppingBag className="text-4xl mb-2 text-caramel"/>
+                        <p className="secondary">{t('empty')}</p>
                     </div>
                 </If>
-
-                <div className="absolute z-20 bottom-0 w-full flex items-center rounded-3xl p-3">
-                    <p className="text-lg mr-auto">{t('total', { price: shoppingCart.getTotalPrice().toString() })}</p>
-                    <Button pill color="gray" className="mr-3" onClick={() => setShowAll(false)}>
-                        {t('close')}
-                    </Button>
-                    <If condition={showWarning}>
-                        <span className="sr-only">
-                            <If condition={isClosed}>
-                                <span className="text-sm">{t('storeClosedModal.simple')}</span>
-                            </If>
-                            <If condition={isLiveFull}>
-                                <span className="text-sm">{t('maximumCupsModal.simple')}</span>
-                            </If>
-                            <If condition={isPreOrderFull}>
-                                <span className="text-sm">{t('preOrderLimitModal.simple')}</span>
-                            </If>
-                            <If condition={hasInventoryIssues}>
-                                <span className="text-sm">{t('inventory.cartChanged')}</span>
-                            </If>
-                            {inventoryMessages.map((message, index) => <span key={`${message}-${index}`}
-                                                                             className="text-sm">{message}</span>)}
-                            <If condition={shoppingCart.getAmount() > maxCups}>
-                                <span className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
-                                                                 count={maxCups}/></span>
-                            </If>
-                        </span>
-                        <Popover trigger="hover" aria-hidden content={<div className="p-3 flex flex-col gap-1">
-                            <If condition={isClosed}>
-                                <p className="text-sm">{t('storeClosedModal.simple')}</p>
-                            </If>
-                            <If condition={isLiveFull}>
-                                <p className="text-sm">{t('maximumCupsModal.simple')}</p>
-                            </If>
-                            <If condition={isPreOrderFull}>
-                                <p className="text-sm">{t('preOrderLimitModal.simple')}</p>
-                            </If>
-                            <If condition={hasInventoryIssues}>
-                                <p className="text-sm">{t('inventory.cartChanged')}</p>
-                            </If>
-                            {inventoryMessages.map((message, index) => <p key={`${message}-${index}`}
-                                                                          className="text-sm">{message}</p>)}
-                            <If condition={shoppingCart.getAmount() > maxCups}>
-                                <p className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
-                                                              count={maxCups}/></p>
-                            </If>
-                        </div>}>
-                            {checkout}
-                        </Popover>
-                    </If>
-                    <If condition={!showWarning}>
-                        {checkout}
-                    </If>
+                <div className="border-t border-cream-200 dark:border-white/10 p-4 flex flex-col gap-3
+                pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                    <CartWarnings title={t('notice')} warnings={shoppingCart.items.length > 0 ? warnings : []}/>
+                    <div className="flex items-center gap-3">
+                        {total}
+                        <Button pill size="lg" disabled={checkoutDisabled} color="warning" onClick={() => {
+                            if (shoppingCart.items.length < 1) {
+                                return
+                            }
+                            router.replace('/order/checkout')
+                        }}>{t('checkout.title')}</Button>
+                    </div>
                 </div>
             </div>
         </If>
         <If condition={!showAll}>
-            <div aria-label={t('a11y.shoppingCart')} tabIndex={0}
-                 className="bg-amber-50 dark:bg-yellow-800 flex items-center p-3 fixed bottom-0 w-screen z-20">
-                <p className="text-lg mr-auto">{t('total', { price: shoppingCart.getTotalPrice().toString() })}</p>
-                <Button pill color="warning" onClick={() => {
-                    setShowAll(true)
-                }}>{t('checkout.details')}</Button>
+            <div className="fixed bottom-0 inset-x-0 z-20 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                <div aria-label={t('a11y.shoppingCart')} tabIndex={0}
+                     className="flex items-center gap-3 rounded-full bg-espresso dark:bg-espresso-700 text-white
+                     shadow-lift pl-3 pr-2 py-2">
+                    <button className="flex items-center gap-3 mr-auto" onClick={() => setShowAll(true)}
+                            aria-label={t('checkout.details')}>
+                        <span className="relative h-11 w-11 rounded-full bg-caramel flex items-center justify-center">
+                            <HiShoppingBag className="text-xl"/>
+                            <If condition={shoppingCart.getAmount() > 0}>
+                                <span className="absolute -top-1 -right-1 h-5 min-w-5 px-1 rounded-full bg-white
+                                text-espresso text-[11px] font-bold flex items-center justify-center tabular-nums">
+                                    {shoppingCart.getAmount()}
+                                </span>
+                            </If>
+                        </span>
+                        <span className="text-left">
+                            <span className="block price text-lg text-white leading-tight">¥{shoppingCart.getTotalPrice().toString()}</span>
+                            <span className="flex items-center gap-1 text-xs text-white/60">
+                                {t('checkout.details')} <HiChevronUp/>
+                            </span>
+                        </span>
+                    </button>
+                    <Button pill color="warning" disabled={checkoutDisabled} onClick={() => {
+                        if (warnings.length > 0) {
+                            setShowAll(true)
+                            return
+                        }
+                        router.replace('/order/checkout')
+                    }}>{t('checkout.title')}</Button>
+                </div>
             </div>
         </If>
     </>

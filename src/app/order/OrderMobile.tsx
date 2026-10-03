@@ -4,6 +4,7 @@ import { HydratedCategory } from '@/app/lib/ui-data-actions'
 import UICategory from '@/app/order/UICategory'
 import { useTranslationClient } from '@/app/i18n/client'
 import UIShoppingCartMobile from '@/app/order/UIShoppingCartMobile'
+import CategoryTabs from '@/app/order/CategoryTabs'
 
 export default function OrderMobile({ categories, uploadPrefix }: {
     categories: HydratedCategory[],
@@ -12,10 +13,10 @@ export default function OrderMobile({ categories, uploadPrefix }: {
     const { t } = useTranslationClient('order')
 
     return <>
-        <div className="p-5 pb-36" aria-label={t('a11y.products')}>
-            {categories.map(category => <div className="mb-3" key={category.id}>
-                <UICategory category={category} uploadPrefix={uploadPrefix}/>
-            </div>)}
+        <CategoryTabs categories={categories} sticky="top-16"/>
+        <div className="px-4 pb-36" aria-label={t('a11y.products')}>
+            {categories.map(category => <UICategory key={category.id} category={category}
+                                                     uploadPrefix={uploadPrefix}/>)}
         </div>
         <UIShoppingCartMobile uploadPrefix={uploadPrefix}/>
     </>

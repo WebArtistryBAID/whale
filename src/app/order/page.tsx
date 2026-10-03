@@ -7,7 +7,7 @@ import CookiesBoundary from '@/app/lib/CookiesBoundary'
 
 export default async function OrderBase() {
     const categories = await getCoreItems()
-    return <div className="bg-coffee-1 dark:bg-yellow-950">
+    return <div className="bg-coffee-1 dark:bg-espresso-900">
         <SimpleNav/>
         <CookiesBoundary>
             <OrderNags/>

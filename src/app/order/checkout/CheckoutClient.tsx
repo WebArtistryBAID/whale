@@ -3,22 +3,15 @@
 import { useTranslationClient } from '@/app/i18n/client'
 import { useShoppingCart, useStoredOrder } from '@/app/lib/shopping-cart'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
-import {
-    Badge,
-    Button,
-    ButtonGroup,
-    Modal,
-    ModalBody,
-    ModalFooter,
-    ModalHeader,
-    Popover,
-    Spinner,
-    TextInput
-} from 'flowbite-react'
+import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react'
+import { IconType } from 'react-icons'
+import { HiCash, HiClock, HiCreditCard, HiCurrencyYen, HiTicket, HiUserGroup } from 'react-icons/hi'
+import { SiWechat } from 'react-icons/si'
+import CartWarnings from '@/app/order/CartWarnings'
 import { CouponCode, OrderType, PaymentMethod, PaymentStatus, User, UserAuditLog } from '@/generated/prisma/browser'
 import type { HydratedOrder } from '@/app/lib/ordering-actions'
 import {
@@ -37,7 +30,6 @@ import {
 import Decimal from 'decimal.js'
 import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
-import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
 import { getStripeRedirectURI } from '@/app/lib/stripe-actions'
 import { getStripeChargedTotal, getStripeFeeAmount } from '@/app/lib/pricing'
@@ -49,6 +41,39 @@ import {
     PickUpTimeOption
 } from '@/app/lib/pick-up-times'
 
+const PAYMENT_METHOD_ICONS: { [method in PaymentMethod]: IconType } = {
+    wxPay: SiWechat,
+    stripe: HiCreditCard,
+    balance: HiCurrencyYen,
+    cash: HiCash,
+    payLater: HiClock,
+    payForMe: HiUserGroup
+}
+
+function OptionTile({ label, icon: Icon, selected, select, disabled }: {
+    label: string,
+    icon?: IconType,
+    selected: boolean,
+    select: () => void,
+    disabled: boolean
+}) {
+    const { t } = useTranslationClient('order')
+    return <button onClick={select} disabled={disabled} aria-pressed={selected}
+                   className={`relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-medium
+                   transition-all disabled:opacity-40 disabled:cursor-not-allowed
+                   ${selected
+                       ? 'border-caramel bg-caramel-50 ring-2 ring-caramel/30 dark:bg-caramel/10'
+                       : 'border-cream-200 bg-white enabled:hover:border-caramel/50 dark:border-white/10 dark:bg-white/5'}`}>
+        {Icon != null ? <Icon className={`text-xl flex-shrink-0 ${selected ? 'text-caramel' : 'secondary'}`}/> : null}
+        <span className="flex-1">{label}</span>
+        <span aria-hidden className={`h-4 w-4 rounded-full border-2 flex-shrink-0
+        ${selected ? 'border-caramel bg-caramel shadow-[inset_0_0_0_2px_white] dark:shadow-[inset_0_0_0_2px_#2c1911]' : 'border-stone-300 dark:border-white/20'}`}/>
+        <If condition={selected}>
+            <span className="sr-only">{t('a11y.selected')}</span>
+        </If>
+    </button>
+}
+
 function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     paymentMethod: PaymentMethod,
     selected: boolean,
@@ -56,13 +81,8 @@ function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     disabled: boolean
 }) {
     const { t } = useTranslationClient('order')
-    return <Button color={selected ? 'warning' : 'gray'} pill size="xs"
-                   onClick={select} disabled={disabled}>
-        {t(`checkout.${paymentMethod}`)}
-        <If condition={selected}>
-            <span className="sr-only">{t('a11y.selected')}</span>
-        </If>
-    </Button>
+    return <OptionTile label={t(`checkout.${paymentMethod}`)} icon={PAYMENT_METHOD_ICONS[paymentMethod]}
+                       selected={selected} select={select} disabled={disabled}/>
 }
 
 function PickUpTimeButton({ value, selected, select, disabled }: {
@@ -72,13 +92,22 @@ function PickUpTimeButton({ value, selected, select, disabled }: {
     disabled: boolean
 }) {
     const { t } = useTranslationClient('order')
-    return <Button color={selected ? 'warning' : 'gray'} pill size="xs"
-                   onClick={select} disabled={disabled}>
-        {t(`checkout.pickUpTimeOptions.${value}`)}
-        <If condition={selected}>
-            <span className="sr-only">{t('a11y.selected')}</span>
-        </If>
-    </Button>
+    return <OptionTile label={t(`checkout.pickUpTimeOptions.${value}`)} selected={selected} select={select}
+                       disabled={disabled}/>
+}
+
+function Section({ title, children }: { title: string, children: ReactNode }) {
+    return <section className="card p-5 lg:p-6" aria-label={title}>
+        <h2 className="text-base font-bold mb-4">{title}</h2>
+        {children}
+    </section>
+}
+
+function SummaryRow({ label, value, strong }: { label: string, value: ReactNode, strong?: boolean }) {
+    return <div className="flex items-baseline justify-between gap-3">
+        <span className={strong ? 'font-semibold' : 'secondary text-sm'}>{label}</span>
+        <span className={strong ? 'price text-2xl' : 'tabular-nums'}>{value}</span>
+    </div>
 }
 
 type CheckoutMode = 'cart' | 'order' | 'recharge'
@@ -382,96 +411,64 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
             </ModalFooter>
         </Modal>
 
-        <div className="flex flex-col lg:flex-row w-screen lg:h-[93vh]">
-            <div id="primary-content" className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto"
-                 aria-label={t('checkout.title')}>
-                <h1 className="mb-5 font-serif">{mode === 'recharge' ? t('checkout.recharge') : t('checkout.title')}</h1>
-
-                <If condition={deliveryEnabled && mode === 'cart'}>
-                    <ButtonGroup className="mb-3">
-                        <Button color={useDelivery ? 'gray' : 'warning'} onClick={() => setUseDelivery(false)}>
-                            {t('checkout.pickUp')}
-                            <If condition={!useDelivery}>
-                                <span className="sr-only">{t('a11y.selected')}</span>
-                            </If>
-                        </Button>
-
-                        <Button color={useDelivery ? 'warning' : 'gray'} onClick={() => setUseDelivery(true)}>
-                            {t('checkout.delivery')}
-                            <If condition={useDelivery}>
-                                <span className="sr-only">{t('a11y.selected')}</span>
-                            </If>
-                        </Button>
-                    </ButtonGroup>
-                </If>
-
-                <p className="mb-1">{t('checkout.orderDetails')}</p>
-                <div className="mb-5 text-sm p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl"
-                     aria-label={t('checkout.orderDetails')}>
-                    <p className="text-sm">{t('checkout.total')}</p>
-                    <p className="text-lg">¥{getDisplayedTotal().toString()}</p>
-                    <If condition={mode !== 'recharge'}>
-                        <p className="mt-3 text-sm">{t('checkout.wait')}</p>
-                        <p className="text-lg">
-                            <If condition={waitTime === -1}>
-                                ...
-                            </If>
-                            <If condition={waitTime !== -1}>
-                                <Trans t={t} i18nKey="checkout.waitTime" count={waitTime + shoppingCart.getAmount() * 2}/>
-                            </If>
-                        </p>
+        <div className="max-w-6xl mx-auto px-4 lg:px-8 py-6 lg:py-10">
+            <h1 className="mb-6">{mode === 'recharge' ? t('checkout.recharge') : t('checkout.title')}</h1>
+            <div className="grid lg:grid-cols-[1fr_24rem] gap-6 lg:gap-8 items-start">
+                <div id="primary-content" className="flex flex-col gap-5" aria-label={t('checkout.title')}>
+                    <If condition={deliveryEnabled && mode === 'cart'}>
+                        <div className="inline-flex self-start rounded-full bg-cream-100 dark:bg-white/5 p-1">
+                            {[ false, true ].map(delivery =>
+                                <button key={delivery ? 'delivery' : 'pickUp'} onClick={() => setUseDelivery(delivery)}
+                                        aria-pressed={useDelivery === delivery}
+                                        className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors
+                                        ${useDelivery === delivery ? 'bg-white dark:bg-espresso-700 shadow-card' : 'secondary'}`}>
+                                    {delivery ? t('checkout.delivery') : t('checkout.pickUp')}
+                                    <If condition={useDelivery === delivery}>
+                                        <span className="sr-only">{t('a11y.selected')}</span>
+                                    </If>
+                                </button>)}
+                        </div>
                     </If>
-                    <If condition={foundCoupon != null && mode === 'cart'}>
-                        <p className="text-sm mt-3" aria-hidden>{t('checkout.coupon')}</p>
-                        <p className="text-lg" aria-hidden>-¥{getActualCouponValue().toString()}</p>
-                        <span className="sr-only"
-                              aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
-                    </If>
-                    <If condition={paymentMethod === PaymentMethod.stripe && mode !== 'recharge'}>
-                        <p className="text-sm mt-3">{t('checkout.stripeFees')}</p>
-                        <p className="text-lg">¥{getStripeFeeAmount(getBaseTotal()).toFixed(2)} (3.5%)</p>
-                    </If>
-                </div>
 
-                <p className="mb-1">{t('checkout.paymentMethod')}</p>
-                <div className="mb-5" aria-label={t('checkout.paymentMethod')}>
-                    <div className="flex flex-wrap gap-3 items-center mb-1">
-                        <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
-                                             selected={paymentMethod === PaymentMethod.wxPay}
-                                             disabled={loading}
-                                             select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
-
-                        <PaymentMethodButton paymentMethod={PaymentMethod.stripe}
-                                             selected={paymentMethod === PaymentMethod.stripe}
-                                             disabled={loading}
-                                             select={() => setPaymentMethod(PaymentMethod.stripe)}/>
-
-                        <If condition={mode === 'cart' && shoppingCart.onSiteOrderMode}>
-                            <PaymentMethodButton paymentMethod={PaymentMethod.cash}
-                                                 selected={paymentMethod === PaymentMethod.cash}
+                    <Section title={t('checkout.paymentMethod')}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                            <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
+                                                 selected={paymentMethod === PaymentMethod.wxPay}
                                                  disabled={loading}
-                                                 select={() => setPaymentMethod(PaymentMethod.cash)}/>
-                        </If>
+                                                 select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
 
-                        <If condition={me != null && !shoppingCart.onSiteOrderMode && mode !== 'recharge'}>
-                            <PaymentMethodButton paymentMethod={PaymentMethod.balance}
-                                                 disabled={!balanceEnabled || loading}
-                                                 selected={paymentMethod === PaymentMethod.balance}
-                                                 select={() => setPaymentMethod(PaymentMethod.balance)}/>
-                            <If condition={showPayLater && mode === 'cart'}>
-                                <PaymentMethodButton paymentMethod={PaymentMethod.payLater}
-                                                     disabled={!payLaterEnabled || loading}
-                                                     selected={paymentMethod === PaymentMethod.payLater}
-                                                     select={() => setPaymentMethod(PaymentMethod.payLater)}/>
+                            <PaymentMethodButton paymentMethod={PaymentMethod.stripe}
+                                                 selected={paymentMethod === PaymentMethod.stripe}
+                                                 disabled={loading}
+                                                 select={() => setPaymentMethod(PaymentMethod.stripe)}/>
+
+                            <If condition={mode === 'cart' && shoppingCart.onSiteOrderMode}>
+                                <PaymentMethodButton paymentMethod={PaymentMethod.cash}
+                                                     selected={paymentMethod === PaymentMethod.cash}
+                                                     disabled={loading}
+                                                     select={() => setPaymentMethod(PaymentMethod.cash)}/>
                             </If>
-                        </If>
 
-                        <Popover trigger="hover" aria-hidden content={<div className="p-3">
-                            <If condition={shouldShowOnSiteNag}>
-                                <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
+                            <If condition={me != null && !shoppingCart.onSiteOrderMode && mode !== 'recharge'}>
+                                <PaymentMethodButton paymentMethod={PaymentMethod.balance}
+                                                     disabled={!balanceEnabled || loading}
+                                                     selected={paymentMethod === PaymentMethod.balance}
+                                                     select={() => setPaymentMethod(PaymentMethod.balance)}/>
+                                <If condition={showPayLater && mode === 'cart'}>
+                                    <PaymentMethodButton paymentMethod={PaymentMethod.payLater}
+                                                         disabled={!payLaterEnabled || loading}
+                                                         selected={paymentMethod === PaymentMethod.payLater}
+                                                         select={() => setPaymentMethod(PaymentMethod.payLater)}/>
+                                </If>
+                            </If>
+                        </div>
+
+                        <div aria-label={t('a11y.paymentMethods')} className="flex flex-col gap-1 text-sm secondary">
+                            <If condition={paymentMethod === PaymentMethod.stripe}>
+                                <p>{t('checkout.stripeInfo')}</p>
                             </If>
                             <If condition={me == null && shouldShowOnSiteNag}>
-                                <p className="text-sm">
+                                <p>
                                     <Trans t={t} i18nKey="checkout.loginNag"
                                            components={{
                                                1: <Link key="login" href="/login?redirect=%2Forder%2Fcheckout"
@@ -480,130 +477,129 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                 </p>
                             </If>
                             <If condition={me != null && !balanceEnabled && mode !== 'recharge'}>
-                                <p className="mt-1 text-sm">{t('checkout.balanceDisabled')}</p>
+                                <p>{t('checkout.balanceDisabled')}</p>
                             </If>
-                            <If condition={me != null && !payLaterEnabled && mode === 'cart'}>
-                                <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
+                            <If condition={me != null && !payLaterEnabled && mode === 'cart' && showPayLater}>
+                                <p>{t('checkout.payLaterDisabled')}</p>
                             </If>
-                        </div>}>
-                            <Badge color="warning" icon={HiMagnifyingGlass}/>
-                        </Popover>
-                    </div>
+                        </div>
+                    </Section>
 
-                    <div aria-label={t('a11y.paymentMethods')} className="sr-only">
-                        <If condition={shouldShowOnSiteNag}>
-                            <p className="mt-1 text-sm">{t('checkout.onSiteNag')}</p>
-                        </If>
-                        <If condition={me == null && shouldShowOnSiteNag}>
-                            <p className="text-sm">
-                                <Trans t={t} i18nKey="checkout.loginNag"
-                                       components={{
-                                           1: <Link key="login" href="/login?redirect=%2Forder%2Fcheckout"
-                                                    className="inline"/>
-                                       }}/>
+                    <If condition={mode !== 'recharge' && (mode === 'cart' ? !useDelivery : existingOrder?.type === OrderType.pickUp)}>
+                        <Section title={t('checkout.pickUpTime')}>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                                {PICK_UP_TIME_OPTIONS.map(option => <PickUpTimeButton key={option} value={option}
+                                                                                      selected={pickUpTime === option}
+                                                                                      disabled={loading}
+                                                                                      select={() => setPickUpTime(option)}/>)}
+                            </div>
+                            <p className="secondary text-sm">{t('checkout.pickUpTimeMessage')}</p>
+                        </Section>
+                    </If>
+
+                    <If condition={useDelivery && mode === 'cart'}>
+                        <Section title={t('checkout.deliveryRoom')}>
+                            <TextInput className="w-full" type="text" value={deliveryRoom}
+                                       placeholder={t('checkout.deliveryRoom') + '...'}
+                                       onChange={e => setDeliveryRoom(e.currentTarget.value)}/>
+                        </Section>
+                    </If>
+
+                    <If condition={mode === 'cart'}>
+                        <Section title={t('checkout.coupon')}>
+                            <TextInput className="w-full" type="text" value={coupon} icon={HiTicket}
+                                       placeholder={t('checkout.coupon') + '...'}
+                                       color={hasCartCouponIssue ? 'failure' : foundCoupon != null ? 'success' : 'gray'}
+                                       onChange={e => setCoupon(normalizeCouponCode(e.currentTarget.value))}/>
+                            <p className="mt-2 text-sm text-rose-600" aria-live="polite">
+                                <If condition={hasCartCouponIssue}>
+                                    {t('checkout.couponInvalid')}
+                                </If>
                             </p>
-                        </If>
-                        <If condition={me != null && !balanceEnabled && mode !== 'recharge'}>
-                            <p className="mt-1 text-sm">{t('checkout.balanceDisabled')}</p>
-                        </If>
-                        <If condition={me != null && !payLaterEnabled && mode === 'cart'}>
-                            <p className="mt-1 text-sm">{t('checkout.payLaterDisabled')}</p>
-                        </If>
-                    </div>
-
-                    <p className="secondary text-sm">{t('checkout.stripeInfo')}</p>
+                            <p className="text-sm secondary" aria-live="polite">
+                                <If condition={foundCoupon != null && isCouponTooBig()}>
+                                    {t('checkout.couponTooBig', { original: foundCoupon?.value })}
+                                </If>
+                            </p>
+                        </Section>
+                    </If>
                 </div>
 
-                <If condition={mode !== 'recharge' && (mode === 'cart' ? !useDelivery : existingOrder?.type === OrderType.pickUp)}>
-                    <p className="mb-1">{t('checkout.pickUpTime')}</p>
-                    <div className="mb-5" aria-label={t('checkout.pickUpTime')}>
-                        <div className="flex flex-wrap gap-3 items-center mb-1">
-                            {PICK_UP_TIME_OPTIONS.map(option => <PickUpTimeButton key={option} value={option}
-                                                                                  selected={pickUpTime === option}
-                                                                                  disabled={loading}
-                                                                                  select={() => setPickUpTime(option)}/>)}
+                <aside className="card p-5 lg:p-6 lg:sticky lg:top-24 flex flex-col gap-5"
+                       aria-label={t('checkout.orderDetails')}>
+                    <h2 className="text-base font-bold">{t('checkout.orderDetails')}</h2>
+                    <If condition={mode !== 'recharge'}>
+                        <div className="flex flex-col gap-4 max-h-80 overflow-y-auto -mx-1 px-1 pt-2"
+                             aria-label={t('a11y.orderedItems')}>
+                            <If condition={mode === 'cart'}>
+                                {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate key={index} item={item}
+                                                                                            index={-1}
+                                                                                            uploadPrefix={uploadPrefix}/>)}
+                            </If>
+                            <If condition={mode === 'order' && existingOrder != null}>
+                                {existingOrder?.items.map((item, index) =>
+                                    <UIOrderedItemTemplate key={index} item={{
+                                        item: item.itemType,
+                                        amount: item.amount,
+                                        options: item.appliedOptions
+                                    }} index={-1} uploadPrefix={uploadPrefix} price={item.price}/>)}
+                            </If>
                         </div>
-                        <p className="secondary text-sm">{t('checkout.pickUpTimeMessage')}</p>
-                    </div>
-                </If>
-
-                <If condition={mode === 'cart'}>
-                    <p className="mb-1">{t('checkout.coupon')}</p>
-                    <TextInput className="w-full" type="text" value={coupon} placeholder={t('checkout.coupon') + '...'}
-                               onChange={e => setCoupon(normalizeCouponCode(e.currentTarget.value))}/>
-                    <p className="mt-1 text-sm text-red-500" aria-live="polite">
-                        <If condition={hasCartCouponIssue}>
-                            {t('checkout.couponInvalid')}
-                        </If>
-                    </p>
-                    <p className="mt-1 text-sm" aria-live="polite">
-                        <If condition={foundCoupon != null && isCouponTooBig()}>
-                            {t('checkout.couponTooBig', { original: foundCoupon?.value })}
-                        </If>
-                    </p>
-                </If>
-
-                <If condition={useDelivery && mode === 'cart'}>
-                    <p className="mt-5 mb-1">{t('checkout.deliveryRoom')}</p>
-                    <TextInput className="w-full" type="text" value={deliveryRoom}
-                               placeholder={t('checkout.deliveryRoom') + '...'}
-                               onChange={e => setDeliveryRoom(e.currentTarget.value)}/>
-                </If>
-
-                <If condition={hasCheckoutBlockingIssue}>
-                    <div className="mt-5 flex flex-col gap-1 text-sm text-red-500" aria-live="polite">
-                        <If condition={hasStoreClosedIssue}>
-                            <p>{t('storeClosedModal.simple')}</p>
-                        </If>
-                        <If condition={hasLiveLimitIssue}>
-                            <p>{t('maximumCupsModal.simple')}</p>
-                        </If>
-                        <If condition={hasPreOrderLimitIssue}>
-                            <p>{t('preOrderLimitModal.simple')}</p>
-                        </If>
-                        <If condition={hasInventoryIssues}>
-                            <p>{t('inventory.cartChanged')}</p>
-                        </If>
-                        {inventoryMessages.map((message, index) => <p key={`${message}-${index}`}>{message}</p>)}
-                    </div>
-                </If>
-
-                <Button fullSized className="mt-8" color="warning" onClick={() => {
-                    if (mode === 'cart' && me == null && !shoppingCart.onSiteOrderMode) {
-                        setShowLoginNag(true)
-                        return
-                    }
-                    void order()
-                }}
-                        disabled={(mode === 'cart' && (((coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3)) || hasCheckoutBlockingIssue)) || loading}>
-                    <If condition={orderFailed}>
-                        {t('tryAgain')}
                     </If>
-                    <If condition={!orderFailed}>
-                        <If condition={getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash}>
-                            {t('continue')}
+
+                    <div className="flex flex-col gap-2 border-t border-dashed border-cream-200 dark:border-white/10 pt-4">
+                        <If condition={mode !== 'recharge'}>
+                            <SummaryRow label={t('checkout.wait')} value={waitTime === -1 ? '...' :
+                                <Trans t={t} i18nKey="checkout.waitTime" count={waitTime + shoppingCart.getAmount() * 2}/>}/>
                         </If>
-                        <If condition={!(getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
-                            {t('checkout.pay')}
+                        <If condition={foundCoupon != null && mode === 'cart'}>
+                            <div aria-hidden>
+                                <SummaryRow label={t('checkout.coupon')}
+                                            value={<span className="text-emerald-600">-¥{getActualCouponValue().toString()}</span>}/>
+                            </div>
+                            <span className="sr-only"
+                                  aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
                         </If>
+                        <If condition={paymentMethod === PaymentMethod.stripe && mode !== 'recharge'}>
+                            <SummaryRow label={t('checkout.stripeFees')}
+                                        value={`¥${getStripeFeeAmount(getBaseTotal()).toFixed(2)} (3.5%)`}/>
+                        </If>
+                        <div className="mt-2">
+                            <SummaryRow strong label={t('checkout.total')} value={`¥${getDisplayedTotal().toString()}`}/>
+                        </div>
+                    </div>
+
+                    <If condition={hasCheckoutBlockingIssue}>
+                        <CartWarnings title={t('notice')} warnings={[
+                            ...(hasStoreClosedIssue ? [ t('storeClosedModal.simple') ] : []),
+                            ...(hasLiveLimitIssue ? [ t('maximumCupsModal.simple') ] : []),
+                            ...(hasPreOrderLimitIssue ? [ t('preOrderLimitModal.simple') ] : []),
+                            ...(hasInventoryIssues ? [ t('inventory.cartChanged') ] : []),
+                            ...inventoryMessages
+                        ]}/>
                     </If>
-                </Button>
-            </div>
-            <div
-                className="lg:w-1/2 w-full p-8 xl:p-16 lg:h-full overflow-y-auto border-l border-yellow-100 dark:border-yellow-800 flex flex-col gap-5"
-                aria-label={t('a11y.orderedItems')}>
-                <If condition={mode === 'cart'}>
-                    {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate key={index} item={item} index={-1}
-                                                                                uploadPrefix={uploadPrefix}/>)}
-                </If>
-                <If condition={mode === 'order' && existingOrder != null}>
-                    {existingOrder?.items.map((item, index) =>
-                        <UIOrderedItemTemplate key={index} item={{
-                            item: item.itemType,
-                            amount: item.amount,
-                            options: item.appliedOptions
-                        }} index={-1} uploadPrefix={uploadPrefix} price={item.price}/>)}
-                </If>
+
+                    <Button fullSized size="lg" pill color="warning" onClick={() => {
+                        if (mode === 'cart' && me == null && !shoppingCart.onSiteOrderMode) {
+                            setShowLoginNag(true)
+                            return
+                        }
+                        void order()
+                    }}
+                            disabled={(mode === 'cart' && (((coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3)) || hasCheckoutBlockingIssue)) || loading}>
+                        <If condition={orderFailed}>
+                            {t('tryAgain')}
+                        </If>
+                        <If condition={!orderFailed}>
+                            <If condition={getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash}>
+                                {t('continue')}
+                            </If>
+                            <If condition={!(getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
+                                {t('checkout.pay')} · ¥{getDisplayedTotal().toString()}
+                            </If>
+                        </If>
+                    </Button>
+                </aside>
             </div>
         </div>
     </>

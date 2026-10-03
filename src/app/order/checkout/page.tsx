@@ -16,7 +16,7 @@ export default async function CheckoutBase({ searchParams }: {
     const existingOrder = orderId == null ? null : await getOrder(parseInt(orderId as string))
     const transaction = rechargeId == null ? null : await getMyTransaction(parseInt(rechargeId as string))
 
-    return <div className="bg-coffee-1 dark:bg-yellow-950">
+    return <div className="bg-coffee-1 dark:bg-espresso-900">
         <SimpleNav/>
         <div id="primary-content">
             <CookiesBoundary>

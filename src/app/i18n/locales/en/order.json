@@ -158,6 +158,18 @@
     "refundTip": "Please contact us if you need a refund.",
     "paymentMethod": "Payment Method",
     "paymentMethodMessage": "How would you like to pay for this order?",
-    "insufficientBalance": "Insufficient Balance"
-  }
+    "insufficientBalance": "Insufficient Balance",
+    "steps": {
+      "placed": "Placed",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "readyDelivery": "On its way"
+    },
+    "goodToKnow": "Good to know"
+  },
+  "menu": "Menu",
+  "cartTitle": "Your order",
+  "cartCount_one": "{{count}} item",
+  "cartCount_other": "{{count}} items",
+  "notice": "Checkout unavailable"
 }

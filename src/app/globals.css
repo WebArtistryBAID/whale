@@ -3,38 +3,63 @@
 @tailwind utilities;
 
 body {
-    @apply bg-white dark:bg-yellow-950 text-black dark:text-white;
+    @apply bg-cream dark:bg-espresso-900 text-espresso dark:text-stone-100;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .bg-default {
-    @apply bg-coffee-1 dark:bg-yellow-950 text-black dark:text-white;
+    @apply bg-cream dark:bg-espresso-900 text-espresso dark:text-stone-100;
+}
+
+@layer components {
+    /* A white surface for grouping content */
+    .card {
+        @apply bg-white dark:bg-espresso-700 rounded-3xl shadow-card border border-cream-200/60 dark:border-white/5;
+    }
+
+    /* Small uppercase label above a section */
+    .eyebrow {
+        @apply text-xs font-semibold tracking-wider uppercase text-caramel-600 dark:text-caramel-100;
+    }
+
+    .price {
+        @apply font-semibold tabular-nums text-espresso dark:text-white;
+    }
+}
+
+.scrollbar-none {
+    scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
 }
 
 .messagebox-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    @apply bg-yellow-100 h-screen w-screen;
+    @apply bg-cream dark:bg-espresso-900 h-screen w-screen;
 }
 
 .messagebox {
-    @apply bg-white text-black p-8 rounded-3xl max-w-md max-h-96 overflow-y-auto;
+    @apply bg-white text-espresso p-8 rounded-3xl max-w-md max-h-96 overflow-y-auto shadow-lift;
 }
 
 .btn {
-    @apply w-full rounded-full bg-yellow-500 hover:bg-yellow-600 hover:shadow-lg transition-all duration-100 p-2 text-white text-center;
+    @apply w-full rounded-full bg-caramel hover:bg-caramel-600 hover:shadow-lg transition-all duration-150 p-2 text-white text-center;
 }
 
 .btn-icon-only {
-    @apply rounded-full bg-yellow-500 hover:bg-yellow-600 hover:shadow-lg transition-all duration-100 p-2 text-white flex justify-center items-center;
+    @apply rounded-full bg-caramel hover:bg-caramel-600 hover:shadow-lg transition-all duration-150 p-2 text-white flex justify-center items-center;
 }
 
 a.inline {
-    @apply text-yellow-500 hover:underline;
+    @apply text-caramel-600 dark:text-caramel-100 hover:underline;
 }
 
 h1 {
-    @apply font-display text-3xl font-bold;
+    @apply font-display text-3xl font-bold tracking-tight;
 }
 
 h2 {
@@ -46,7 +71,7 @@ h3 {
 }
 
 .secondary {
-    @apply text-gray-800 dark:text-gray-400;
+    @apply text-stone-500 dark:text-stone-400;
 }
 
 .container {
@@ -75,4 +100,15 @@ b {
 
 i {
     @apply italic;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }

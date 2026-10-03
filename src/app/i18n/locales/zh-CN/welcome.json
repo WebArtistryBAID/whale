@@ -10,5 +10,10 @@
   "userSub": "余额充值",
   "recentOrder": "近期订单",
   "recentOrderSub": "查看订单详情",
-  "orderNumber": "(订单号)"
+  "orderNumber": "(订单号)",
+  "tagline": "现做咖啡与茶饮。在线点单，到店即取。",
+  "statusLive": "营业中",
+  "statusPreorder": "接受预订",
+  "statusClosed": "休息中",
+  "hours": "营业时间 {{open}} – {{close}}"
 }

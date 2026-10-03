@@ -58,7 +58,7 @@ export default function OrderWithData({ order, forceUpdate, close }: {
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5 col-span-1" aria-label={t('today.info')}>
+            <div className="card p-5 col-span-1" aria-label={t('today.info')}>
                 <If condition={order.userId != null}>
                     <p className="secondary text-sm font-display">{t('today.user')}</p>
                     <p className="text-xl mb-3"><Link
@@ -90,8 +90,8 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                 <div className="flex w-full h-full gap-3 justify-center items-center">
                     <button
                         aria-label={t('today.waiting') + (order.status === OrderStatus.waiting ? t('selected') : '')}
-                        className="w-40 h-40 rounded-3xl bg-yellow-50 dark:bg-yellow-800
-                    hover:bg-yellow-100 dark:hover:bg-yellow-700 transition-colors duration-100
+                        className="w-40 h-40 rounded-3xl bg-white dark:bg-espresso-700 shadow-card border border-cream-200/60 dark:border-white/5
+                    hover:bg-caramel-50 dark:hover:bg-white/10 transition-colors duration-100
                     flex flex-col text-center items-center justify-center p-5" disabled={true}>
                         <HiClock
                             className={`${order.status === OrderStatus.waiting ? 'text-red-500 dark:text-red-400' : 'text-yellow-300 dark:text-yellow-400'} text-3xl mb-1`}/>
@@ -103,8 +103,8 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                     </button>
 
                     <button aria-label={t('today.done') + (order.status === OrderStatus.done ? t('selected') : '')}
-                            className="w-40 h-40 rounded-3xl bg-yellow-50 dark:bg-yellow-800
-                    hover:bg-yellow-100 dark:hover:bg-yellow-700 transition-colors duration-100
+                            className="w-40 h-40 rounded-3xl bg-white dark:bg-espresso-700 shadow-card border border-cream-200/60 dark:border-white/5
+                    hover:bg-caramel-50 dark:hover:bg-white/10 transition-colors duration-100
                     flex flex-col text-center items-center justify-center p-5"
                             disabled={order.status === OrderStatus.done || loading}
                             onClick={async () => {
@@ -125,13 +125,13 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                 </div>
             </div>
 
-            <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5 col-span-1 flex-col gap-3 flex"
+            <div className="card p-5 col-span-1 flex-col gap-3 flex"
                  aria-label={t('today.items')}>
                 {order.items.map(item => <UIOrderedItem item={item} key={item.id}/>)}
                 {order.items.length < 1 && <p className="secondary text-center">{t('today.noItems')}</p>}
             </div>
 
-            <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5 col-span-1" aria-label={t('today.actions')}>
+            <div className="card p-5 col-span-1" aria-label={t('today.actions')}>
                 <p className="secondary text-sm font-display">{t('today.paymentMethod')}</p>
                 <p className="text-xl mb-3">{t(`today.${order.paymentMethod}`)}</p>
 

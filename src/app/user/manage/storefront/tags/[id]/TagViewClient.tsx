@@ -59,7 +59,7 @@ export default function TagViewClient({ object, items }: { object: Tag, items: I
             </Breadcrumb>
             <h1 className="mb-5">{object.name}</h1>
             <div className="2xl:w-1/2 mb-5">
-                <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5 mb-3"
+                <div className="card p-5 mb-3"
                      aria-label={t('manage.storefront.data')}>
                     <p className="secondary text-sm font-display">{t('manage.storefront.tagD.id')}</p>
                     <p className="text-xl mb-3">{object.id}</p>
