@@ -5,6 +5,7 @@ import Decimal from 'decimal.js'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
+import { calculateLinePrice } from '@/app/lib/pricing'
 
 export interface OrderedItemTemplate {
     item: ItemType
@@ -30,15 +31,8 @@ export interface StoredOrderState {
 }
 
 export function calculatePrice(item: OrderedItemTemplate): Decimal {
-    let price = Decimal(item.item.basePrice)
-    for (const option of item.options) {
-        if (option == null) {
-            continue
-        }
-        price = price.add(Decimal(option.priceChange))
-    }
-    price = price.mul(Decimal(item.item.salePercent))
-    return price.mul(item.amount)
+    return calculateLinePrice(item.item.basePrice, item.item.salePercent,
+        item.options.filter(option => option != null).map(option => option.priceChange), item.amount)
 }
 
 export const useShoppingCart = create<ShoppingCartState>()(

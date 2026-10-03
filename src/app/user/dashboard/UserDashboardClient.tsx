@@ -1,5 +1,6 @@
 'use client'
 
+import { logout } from '@/app/login/login-actions'
 import { NotificationType, User } from '@/generated/prisma/browser'
 import {
     Breadcrumb,
@@ -17,7 +18,6 @@ import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { getConfigValue } from '@/app/lib/settings-actions'
 import Decimal from 'decimal.js'
 import { beginTransaction } from '@/app/lib/balance-actions'
@@ -31,7 +31,6 @@ export default function UserDashboardClient({ user }: { user: User }) {
     const [ rechargeMin, setRechargeMin ] = useState(Decimal(-1))
     const [ rechargeModal, setRechargeModal ] = useState(false)
     const [ toRecharge, setToRecharge ] = useState('')
-    const removeCookie = useCookies()[2]
 
     useEffect(() => {
         (async () => {
@@ -182,8 +181,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
                     <h2 className="text-sm font-normal mb-3">{t('dashboard.others.title')}</h2>
                     <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
                         <Button pill color="warning" className="mb-3" onClick={() => {
-                            removeCookie('access_token', { path: '/' })
-                            router.replace('/')
+                            void logout().then(() => router.replace('/'))
                         }}>{t('dashboard.others.logOut')}</Button>
                         <p className="text-sm secondary">{t('dashboard.others.credits')}</p>
                     </div>

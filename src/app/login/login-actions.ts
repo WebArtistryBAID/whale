@@ -2,13 +2,20 @@
 
 import { User, UserAuditLogType } from '@/generated/prisma/client'
 import { me } from '@/app/login/login'
-import { decodeJwt } from 'jose'
+import { cookies } from 'next/headers'
+import { ACCESS_TOKEN_COOKIE, sensitiveCookieOptions } from '@/app/login/jwt'
+import { buildLoginUrl, LOGIN_STATE_COOKIE, LOGIN_STATE_MAX_AGE_SECONDS, sanitizeRedirect } from '@/app/login/redirect'
 import Paginated from '@/app/lib/Paginated'
 import { prisma } from '@/app/lib/prisma'
 
 export async function getLoginTarget(redirect: string): Promise<string> {
-    // We are really abusing state here... But it works.
-    return `${process.env.ONELOGIN_HOST}/oauth2/authorize?client_id=${process.env.ONELOGIN_CLIENT_ID}&redirect_uri=${process.env.HOST}/login/authorize&scope=basic+phone+sms&response_type=code&state=${redirect}`
+    const nonce = crypto.randomUUID();
+    (await cookies()).set(LOGIN_STATE_COOKIE, nonce, sensitiveCookieOptions(LOGIN_STATE_MAX_AGE_SECONDS))
+    return buildLoginUrl(sanitizeRedirect(redirect), nonce)
+}
+
+export async function logout(): Promise<void> {
+    (await cookies()).delete(ACCESS_TOKEN_COOKIE)
 }
 
 export async function requireUser(): Promise<User> {
@@ -121,48 +128,23 @@ export async function getUsers(page: number, keyword: string): Promise<Paginated
     }
 }
 
-export async function getAccessToken(): Promise<string | null> {
-    const user = await prisma.user.findUnique({
-        where: {
-            id: await me() ?? -1
-        },
-        include: {
-            oaTokens: true
+export async function setUserBlocked(id: number, blocked: boolean): Promise<void> {
+    const me = await requireUserPermission('admin.manage')
+    if (!Number.isSafeInteger(id) || typeof blocked !== 'boolean' || id === me.id) {
+        return
+    }
+    const updated = await prisma.user.updateMany({
+        where: { id },
+        data: { blocked }
+    })
+    if (updated.count < 1) {
+        return
+    }
+    await prisma.userAuditLog.create({
+        data: {
+            type: blocked ? UserAuditLogType.blocked : UserAuditLogType.unblocked,
+            userId: me.id,
+            values: [ id.toString() ]
         }
     })
-    if (!user) {
-        return null
-    }
-    const access = user.oaTokens!.accessToken
-    const refresh = user.oaTokens!.refreshToken
-    // Check if token has expired, if so refresh
-    const decoded = decodeJwt(access)
-    if (decoded.exp! * 1000 < Date.now()) {
-        const response = await fetch(`${process.env.ONELOGIN_HOST}/oauth2/token`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Basic ${Buffer.from(`${process.env.ONELOGIN_CLIENT_ID}:${process.env.ONELOGIN_CLIENT_SECRET}`).toString('base64')}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-                grant_type: 'refresh_token',
-                refresh_token: refresh
-            }).toString()
-        })
-        const json = await response.json()
-        if ('error' in json) {
-            return null
-        }
-        await prisma.oATokens.update({
-            where: {
-                userId: user.id
-            },
-            data: {
-                accessToken: json['access_token'],
-                refreshToken: json['refresh_token']
-            }
-        })
-        return json['access_token']
-    }
-    return access
 }

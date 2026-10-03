@@ -214,6 +214,8 @@
       "permissions": "Permissions",
       "admin": "Management Access",
       "permissionsOwn": "You can't change your own permissions.",
+      "blocked": "Block this user",
+      "blockedHint": "Blocked users cannot place orders, pay, or top up their balance.",
       "orders": "User Orders",
       "pointsModal": {
         "title": "Edit Points",

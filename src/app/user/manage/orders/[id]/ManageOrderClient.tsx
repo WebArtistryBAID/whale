@@ -8,7 +8,7 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
     const [ order, setOrder ] = useState(init)
 
     useEffect(() => {
-        setInterval(async () => {
+        const intervalId = setInterval(async () => {
             const o = await getOrder(order.id)
             if (o == null) {
                 location.href = '/'
@@ -16,6 +16,7 @@ export default function ManageOrderClient({ init }: { init: HydratedOrder }) {
             }
             setOrder(o)
         }, 10000)
+        return () => clearInterval(intervalId)
     }, [ order.id ])
 
     return <OrderWithData order={order} close={() => {

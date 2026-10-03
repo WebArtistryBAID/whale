@@ -1,52 +1,10 @@
 'use server'
 
-import { Notification, NotificationType, User } from '@/generated/prisma/client'
-import { getAccessToken, requireUser } from '@/app/login/login-actions'
+import { Notification, NotificationType } from '@/generated/prisma/client'
+import { requireUser } from '@/app/login/login-actions'
 import { me } from '@/app/login/login'
 import Paginated from '@/app/lib/Paginated'
 import { prisma } from '@/app/lib/prisma'
-
-export async function sendNotification(user: User, type: NotificationType, values: string[], order: number | null): Promise<void> {
-    if (user.inboxNotifications.includes(type)) {
-        await prisma.notification.create({
-            data: {
-                userId: user.id,
-                type,
-                orderId: order,
-                values: values
-            }
-        })
-    }
-
-    if (user.smsNotifications.includes(type)) {
-        const template = Object({
-            orderCreated: 'SMS_478560531',
-            pickupReminder: 'SMS_478570535',
-            orderRefunded: 'SMS_478405523',
-            balanceToppedUp: 'SMS_478460599',
-            pointsEarned: 'SMS_478485567',
-            payLaterReminder: 'SMS_478630531'
-        })[type]
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const params: any = {}
-        if (order != null) {
-            params.order = order
-        }
-        if (type === NotificationType.balanceToppedUp || type === NotificationType.pointsEarned) {
-            params.value = values[0]
-        }
-        await fetch(`${process.env.ONELOGIN_HOST}/api/v1/sms`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${await getAccessToken()}`
-            },
-            body: JSON.stringify({
-                template,
-                params
-            })
-        })
-    }
-}
 
 export async function getUntoastedNotifications(): Promise<Notification[]> {
     const hi = await me()

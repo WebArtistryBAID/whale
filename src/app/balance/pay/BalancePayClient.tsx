@@ -58,13 +58,17 @@ export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
                 })()
             }
         }
-        setTimeout(() => {
+        const restartTimeoutId = setTimeout(() => {
             setCanRestart(true) // Make sure the user don't restart right away
         }, 10000)
 
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             void pollPaymentStatus()
         }, 3000)
+        return () => {
+            clearTimeout(restartTimeoutId)
+            clearInterval(intervalId)
+        }
         // We don't want any more dependencies
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])

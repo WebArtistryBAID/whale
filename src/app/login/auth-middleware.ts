@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { jwtVerify } from 'jose'
-import { getLoginTarget } from '@/app/login/login-actions'
+import { ACCESS_TOKEN_COOKIE, sensitiveCookieOptions, verifyJwt } from '@/app/login/jwt'
+import { buildLoginUrl, LOGIN_STATE_COOKIE, LOGIN_STATE_MAX_AGE_SECONDS } from '@/app/login/redirect'
 
 const protectedRoutes = [
     '/login',
@@ -12,26 +11,22 @@ const protectedRoutesPartial = [
     '/user'
 ]
 
+function isProtected(pathname: string): boolean {
+    return protectedRoutes.includes(pathname) ||
+        protectedRoutesPartial.some(path => pathname === path || pathname.startsWith(`${path}/`))
+}
+
 export default async function authMiddleware(req: NextRequest): Promise<NextResponse | null> {
-    let isProtected = protectedRoutes.includes(req.nextUrl.pathname)
-    for (const path of protectedRoutesPartial) {
-        if (req.nextUrl.pathname.startsWith(path)) {
-            isProtected = true
-            break
-        }
-    }
-    if (!isProtected) {
+    if (!isProtected(req.nextUrl.pathname)) {
         return null
     }
-    const cookie = (await cookies()).get('access_token')?.value
-    if (cookie == null) {
-        return NextResponse.redirect(new URL(await getLoginTarget(req.nextUrl.pathname + req.nextUrl.search), req.nextUrl))
-    }
-    try {
-        await jwtVerify(cookie, new TextEncoder().encode(process.env.JWT_SECRET!))
-    } catch {
-        return NextResponse.redirect(new URL(await getLoginTarget(req.nextUrl.pathname + req.nextUrl.search), req.nextUrl))
+    const token = req.cookies.get(ACCESS_TOKEN_COOKIE)?.value
+    if (token != null && await verifyJwt(token) != null) {
+        return null
     }
 
-    return null
+    const nonce = crypto.randomUUID()
+    const response = NextResponse.redirect(buildLoginUrl(req.nextUrl.pathname + req.nextUrl.search, nonce))
+    response.cookies.set(LOGIN_STATE_COOKIE, nonce, sensitiveCookieOptions(LOGIN_STATE_MAX_AGE_SECONDS))
+    return response
 }

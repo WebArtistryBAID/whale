@@ -12,14 +12,50 @@ import {
     User,
     UserAuditLogType
 } from '@/generated/prisma/client'
-import { OrderedItemTemplate } from '@/app/lib/shopping-cart'
+import type { OrderedItemTemplate } from '@/app/lib/shopping-cart'
 import { getMyUser } from '@/app/login/login-actions'
 import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 import Decimal from 'decimal.js'
 import { getConfigValueAsBoolean, getConfigValueAsNumber, getConfigValues } from '@/app/lib/settings-actions'
 import { prisma } from '@/app/lib/prisma'
 import { countsTowardLimit, getAvailableInventory, isItemSoldOut } from '@/app/lib/item-availability'
-import { DEFAULT_PICK_UP_TIME, isValidPickUpTime, PickUpTimeOption } from '@/app/lib/pick-up-times'
+import { DEFAULT_PICK_UP_TIME, PickUpTimeOption } from '@/app/lib/pick-up-times'
+import {
+    assignOrderBucket,
+    CartValidationIssue,
+    CartValidationResponse,
+    DailyCupLimitSummary,
+    dateAtMinutes,
+    endOfDay,
+    findNextBusinessDay,
+    formatDateKey,
+    getBusinessDayWindows,
+    getOverrideValueForDate,
+    getPreOrderTargetDay,
+    isBusinessDay,
+    isLiveWindow,
+    OrderingAvailabilityResponse,
+    OrderingConfiguration,
+    OrderingPhase,
+    parseOrderingConfiguration,
+    startOfDay
+} from '@/app/lib/ordering-schedule'
+import { calculateLinePrice } from '@/app/lib/pricing'
+import { adjustUserBalance, adjustUserPoints, lockUserRow } from '@/app/lib/user-balance'
+import { canAccessOrder, rememberGuestOrder } from '@/app/lib/order-access'
+import { findHydratedOrder, hydratedOrderInclude } from '@/app/lib/order-queries'
+import { expireStripeSession, releaseAndDeleteUnpaidOrder } from '@/app/lib/order-lifecycle'
+import { cartSchema, createOrderSchema, idSchema, paymentMethodSchema, pickUpTimeSchema } from '@/app/lib/validation'
+import { checkRateLimit } from '@/app/lib/rate-limit'
+
+export type {
+    CartValidationIssue,
+    CartValidationResponse,
+    DailyCupLimitSummary,
+    OrderingAvailabilityResponse
+} from '@/app/lib/ordering-schedule'
+
+export type OrderUser = Pick<User, 'id' | 'name' | 'pinyin'>
 
 export interface HydratedOrderedItem {
     id: number
@@ -42,7 +78,7 @@ export interface HydratedOrder {
     type: OrderType
     pickUpTime: string | null
     deliveryRoom: string | null
-    user: User | null
+    user: OrderUser | null
     userId: number | null
     paymentStatus: PaymentStatus
     paymentMethod: PaymentMethod
@@ -58,285 +94,15 @@ export interface EstimatedWaitTimeResponse {
     orders: number
 }
 
-type OrderingPhase = 'live' | 'preorder' | 'closed'
-type OrderingUnavailableReason = 'none' | 'store-closed' | 'live-limit-reached' | 'preorder-limit-reached'
-type OrderLimitBucket = 'live' | 'preorder'
-
-interface OrderingConfiguration {
-    enableScheduledAvailability: boolean
-    weekdaysOnly: boolean
-    openTime: string
-    openTimeMinutes: number
-    closeTime: string
-    closeTimeMinutes: number
-    preOrderStartTime: string
-    preOrderStartTimeMinutes: number
-    storeOpen: boolean
-    availabilityOverrideDate: string
-    availabilityOverrideValue: boolean
-    liveLimit: number
-    preOrderLimit: number
-}
-
-interface OrderBucketAssignment {
-    bucket: OrderLimitBucket
-    targetDate: Date
-}
-
-export interface DailyCupLimitSummary {
-    dateKey: string
-    liveLimit: number
-    preOrderLimit: number
-    officialLimit: number
-    preOrderedCups: number
-    liveOrderedCups: number
-    remainingPreOrderCups: number
-    remainingLiveCups: number
-}
-
-export interface OrderingAvailabilityResponse {
-    phase: OrderingPhase
-    canOrderNow: boolean
-    isStoreOpen: boolean
-    unavailableReason: OrderingUnavailableReason
-    currentDay: DailyCupLimitSummary
-    openAt: string
-    openTime: string
-    closeTime: string
-    preOrderStartTime: string
-}
-
-export interface CartValidationIssue {
-    itemTypeId: number
-    itemName: string
-    requested: number
-    available: number
-}
-
-export interface CartValidationResponse {
-    countedAmount: number
-    issues: CartValidationIssue[]
-}
-
-function startOfDay(date: Date): Date {
-    const result = new Date(date)
-    result.setHours(0, 0, 0, 0)
-    return result
-}
-
-function addDays(date: Date, days: number): Date {
-    const result = new Date(date)
-    result.setDate(result.getDate() + days)
-    return result
-}
-
-function endOfDay(date: Date): Date {
-    return addDays(startOfDay(date), 1)
-}
-
-function formatDateKey(date: Date): string {
-    const year = date.getFullYear()
-    const month = `${date.getMonth() + 1}`.padStart(2, '0')
-    const day = `${date.getDate()}`.padStart(2, '0')
-    return `${year}-${month}-${day}`
-}
-
-function formatLegacyDateKey(date: Date): string {
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
-}
-
-function parseTimeToMinutes(value: string | undefined, fallback: number): number {
-    if (value == null) {
-        return fallback
-    }
-
-    const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim())
-    if (match == null) {
-        return fallback
-    }
-
-    const hours = parseInt(match[1], 10)
-    const minutes = parseInt(match[2], 10)
-    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-        return fallback
-    }
-
-    return hours * 60 + minutes
-}
-
-function dateAtMinutes(date: Date, minutes: number): Date {
-    const result = startOfDay(date)
-    result.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0)
-    return result
-}
-
-function isWeekday(date: Date): boolean {
-    const day = date.getDay()
-    return day !== 0 && day !== 6
-}
-
-function isBusinessDay(date: Date, config: OrderingConfiguration): boolean {
-    return !config.weekdaysOnly || isWeekday(date)
-}
-
-function findNextBusinessDay(date: Date, config: OrderingConfiguration, includeSelf: boolean): Date {
-    let cursor = startOfDay(date)
-    if (!includeSelf) {
-        cursor = addDays(cursor, 1)
-    }
-
-    while (!isBusinessDay(cursor, config)) {
-        cursor = addDays(cursor, 1)
-    }
-
-    return cursor
-}
-
-function findPreviousBusinessDay(date: Date, config: OrderingConfiguration): Date {
-    let cursor = addDays(startOfDay(date), -1)
-    while (!isBusinessDay(cursor, config)) {
-        cursor = addDays(cursor, -1)
-    }
-    return cursor
-}
-
-function getOverrideValueForDate(date: Date, config: OrderingConfiguration): boolean | null {
-    if (config.availabilityOverrideDate !== formatDateKey(date) &&
-        config.availabilityOverrideDate !== formatLegacyDateKey(date)) {
-        return null
-    }
-
-    return config.availabilityOverrideValue
-}
-
-function isWithinRange(target: Date, start: Date, end: Date): boolean {
-    return target.getTime() >= start.getTime() && target.getTime() < end.getTime()
-}
-
-function getBusinessDayWindows(day: Date, config: OrderingConfiguration): {
-    openAt: Date,
-    closeAt: Date,
-    preOrderStartsAt: Date | null
-} {
-    const openAt = dateAtMinutes(day, config.openTimeMinutes)
-    const closeAt = dateAtMinutes(day, config.closeTimeMinutes)
-
-    if (config.preOrderStartTimeMinutes === config.openTimeMinutes) {
-        return {
-            openAt,
-            closeAt,
-            preOrderStartsAt: null
-        }
-    }
-
-    const preOrderDate = config.preOrderStartTimeMinutes < config.openTimeMinutes
-        ? day
-        : findPreviousBusinessDay(day, config)
-
-    return {
-        openAt,
-        closeAt,
-        preOrderStartsAt: dateAtMinutes(preOrderDate, config.preOrderStartTimeMinutes)
-    }
-}
-
-function getPreOrderTargetDay(now: Date, config: OrderingConfiguration): Date | null {
-    const today = startOfDay(now)
-
-    if (isBusinessDay(today, config)) {
-        const todayWindows = getBusinessDayWindows(today, config)
-        if (todayWindows.preOrderStartsAt != null && isWithinRange(now, todayWindows.preOrderStartsAt, todayWindows.openAt)) {
-            return today
-        }
-    }
-
-    const nextBusinessDay = findNextBusinessDay(today, config, !isBusinessDay(today, config))
-    if (formatDateKey(nextBusinessDay) === formatDateKey(today)) {
-        return null
-    }
-
-    const nextWindows = getBusinessDayWindows(nextBusinessDay, config)
-    if (nextWindows.preOrderStartsAt != null && isWithinRange(now, nextWindows.preOrderStartsAt, nextWindows.openAt)) {
-        return nextBusinessDay
-    }
-
-    return null
-}
-
-function isLiveWindow(now: Date, config: OrderingConfiguration): boolean {
-    const today = startOfDay(now)
-    if (!isBusinessDay(today, config)) {
-        return false
-    }
-
-    const todayWindows = getBusinessDayWindows(today, config)
-    return now.getTime() >= todayWindows.openAt.getTime() && now.getTime() <= todayWindows.closeAt.getTime()
-}
-
-function assignOrderBucket(createdAt: Date, config: OrderingConfiguration): OrderBucketAssignment {
-    const orderDay = startOfDay(createdAt)
-
-    if (!config.enableScheduledAvailability) {
-        return {
-            bucket: 'live',
-            targetDate: orderDay
-        }
-    }
-
-    if (isBusinessDay(orderDay, config)) {
-        const todayWindows = getBusinessDayWindows(orderDay, config)
-        if (todayWindows.preOrderStartsAt != null && isWithinRange(createdAt, todayWindows.preOrderStartsAt, todayWindows.openAt)) {
-            return {
-                bucket: 'preorder',
-                targetDate: orderDay
-            }
-        }
-    }
-
-    const nextBusinessDay = findNextBusinessDay(orderDay, config, !isBusinessDay(orderDay, config))
-    const nextWindows = getBusinessDayWindows(nextBusinessDay, config)
-    if (nextWindows.preOrderStartsAt != null && isWithinRange(createdAt, nextWindows.preOrderStartsAt, nextWindows.openAt)) {
-        return {
-            bucket: 'preorder',
-            targetDate: nextBusinessDay
-        }
-    }
-
-    return {
-        bucket: 'live',
-        targetDate: orderDay
-    }
-}
-
 async function getOrderingConfiguration(): Promise<OrderingConfiguration> {
-    const values = await getConfigValues()
-
-    const openTime = values['open-time'] ?? '10:00'
-    const closeTime = values['close-time'] ?? '15:00'
-    const preOrderStartTime = values['pre-order-start-time'] ?? openTime
-
-    return {
-        enableScheduledAvailability: (values['enable-scheduled-availability'] ?? 'true') === 'true',
-        weekdaysOnly: (values['weekdays-only'] ?? 'true') === 'true',
-        openTime,
-        openTimeMinutes: parseTimeToMinutes(openTime, 10 * 60),
-        closeTime,
-        closeTimeMinutes: parseTimeToMinutes(closeTime, 15 * 60),
-        preOrderStartTime,
-        preOrderStartTimeMinutes: parseTimeToMinutes(preOrderStartTime, parseTimeToMinutes(openTime, 10 * 60)),
-        storeOpen: (values['store-open'] ?? 'true') === 'true',
-        availabilityOverrideDate: values['availability-override-date'] ?? '0000-00-00',
-        availabilityOverrideValue: (values['availability-override-value'] ?? 'false') === 'true',
-        liveLimit: parseFloat(values['maximum-cups-per-day'] ?? '14'),
-        preOrderLimit: parseFloat(values['maximum-pre-order-cups-per-day'] ?? '0')
-    }
+    return parseOrderingConfiguration(await getConfigValues())
 }
 
 type OrderableItemRecord = Pick<ItemType, 'id' | 'name' | 'soldOut' | 'countsTowardLimit' | 'inventoryTrackingEnabled' | 'remainingItems'>
-type OrderableOptionRecord = Pick<OptionItem, 'id' | 'typeId' | 'soldOut'>
 type TransactionClient = Prisma.TransactionClient
+type CartItemLike = { item: { id: number }, amount: number }
 
-function getRequestedItemAmounts(items: OrderedItemTemplate[]): Map<number, number> {
+function getRequestedItemAmounts(items: CartItemLike[]): Map<number, number> {
     const requestedAmounts = new Map<number, number>()
     for (const item of items) {
         requestedAmounts.set(item.item.id, (requestedAmounts.get(item.item.id) ?? 0) + item.amount)
@@ -344,7 +110,7 @@ function getRequestedItemAmounts(items: OrderedItemTemplate[]): Map<number, numb
     return requestedAmounts
 }
 
-function getCurrentCountedAmount(items: OrderedItemTemplate[], itemMap: Map<number, OrderableItemRecord>): number {
+function getCurrentCountedAmount(items: CartItemLike[], itemMap: Map<number, OrderableItemRecord>): number {
     return items.reduce((acc, current) => {
         const item = itemMap.get(current.item.id)
         if (item == null || !countsTowardLimit(item)) {
@@ -364,7 +130,7 @@ function getRemainingLimitForAvailability(availability: OrderingAvailabilityResp
     return 0
 }
 
-function buildCartValidation(items: OrderedItemTemplate[], itemMap: Map<number, OrderableItemRecord>): CartValidationResponse {
+function buildCartValidation(items: CartItemLike[], itemMap: Map<number, OrderableItemRecord>): CartValidationResponse {
     const requestedAmounts = getRequestedItemAmounts(items)
     const issues: CartValidationIssue[] = []
 
@@ -590,37 +356,59 @@ export async function hasAvailableItemsOutsideLimit(): Promise<boolean> {
     }) > 0
 }
 
+
+/**
+ * Changes the payment method or pick-up time of the current user's unpaid order before paying for it.
+ */
 export async function setOrderCheckoutOptions(id: number, paymentMethod: PaymentMethod, pickUpTime: PickUpTimeOption | null): Promise<boolean> {
+    const parsedId = idSchema.safeParse(id)
+    const parsedMethod = paymentMethodSchema.safeParse(paymentMethod)
+    const parsedPickUpTime = pickUpTimeSchema.nullable().safeParse(pickUpTime)
+    if (!parsedId.success || !parsedMethod.success || !parsedPickUpTime.success) {
+        return false
+    }
+    // Only online payment methods can be selected here. Cash and Pay Later have their own rules in createOrder.
+    const selectable: PaymentMethod[] = [ PaymentMethod.wxPay, PaymentMethod.stripe, PaymentMethod.balance, PaymentMethod.payForMe ]
+    if (!selectable.includes(parsedMethod.data)) {
+        return false
+    }
     const order = await prisma.order.findUnique({
         where: {
-            id,
+            id: parsedId.data,
             paymentStatus: PaymentStatus.notPaid
         }
     })
-    if (order == null) {
+    if (order == null || !await canAccessOrder(order, await getMyUser())) {
         return false
     }
-    await prisma.order.update({
-        where: { id },
+    // Pay Later orders are already in the queue; keep them as Pay Later until a payment actually succeeds,
+    // otherwise they would disappear from the queue and be pruned.
+    if (order.paymentMethod === PaymentMethod.payLater) {
+        return true
+    }
+    await prisma.order.updateMany({
+        where: {
+            id: order.id,
+            paymentStatus: PaymentStatus.notPaid
+        },
         data: {
-            paymentMethod,
-            pickUpTime: order.type === OrderType.pickUp ? (pickUpTime ?? DEFAULT_PICK_UP_TIME) : null
+            paymentMethod: parsedMethod.data,
+            pickUpTime: order.type === OrderType.pickUp ? (parsedPickUpTime.data ?? DEFAULT_PICK_UP_TIME) : null
         }
     })
     return true
 }
 
-export async function requireUnpaidOrder(order: number): Promise<HydratedOrder> {
-    const o = await getOrder(order)
-    if (o == null || o.paymentStatus !== PaymentStatus.notPaid) {
-        throw 'Bad request'
+export async function couponQuickValidate(code: string): Promise<Pick<CouponCode, 'id' | 'value'> | null> {
+    if (typeof code !== 'string') {
+        return null
     }
-    return o
-}
-
-export async function couponQuickValidate(code: string): Promise<CouponCode | null> {
     const normalizedCode = normalizeCouponCode(code)
-    if (normalizedCode.length < 1) {
+    if (normalizedCode.length < 1 || normalizedCode.length > 64) {
+        return null
+    }
+    const me = await getMyUser()
+    if (!await checkRateLimit('coupon', me == null ? 300 : 60, 10 * 60 * 1000, me?.id)) {
         return null
     }
     return prisma.couponCode.findUnique({
@@ -629,12 +417,23 @@ export async function couponQuickValidate(code: string): Promise<CouponCode | nu
             remainingUses: {
                 gt: 0
             }
+        },
+        select: {
+            id: true,
+            value: true
         }
     })
 }
 
 export async function validateCartItems(items: OrderedItemTemplate[]): Promise<CartValidationResponse> {
-    const itemIds = Array.from(new Set(items.map(item => item.item.id)))
+    const parsed = cartSchema.safeParse(items)
+    if (!parsed.success) {
+        return {
+            countedAmount: 0,
+            issues: []
+        }
+    }
+    const itemIds = Array.from(new Set(parsed.data.map(item => item.item.id)))
     if (itemIds.length < 1) {
         return {
             countedAmount: 0,
@@ -643,49 +442,40 @@ export async function validateCartItems(items: OrderedItemTemplate[]): Promise<C
     }
 
     const itemMap = await getOrderableItems(itemIds)
-    return buildCartValidation(items, itemMap)
+    return buildCartValidation(parsed.data, itemMap)
 }
 
-function calculatePrice(item: OrderedItemTemplate): Decimal {
-    let price = Decimal(item.item.basePrice)
-    for (const option of item.options) {
-        if (option == null) {
-            continue
-        }
-        price = price.add(Decimal(option.priceChange))
-    }
-    price = price.mul(Decimal(item.item.salePercent))
-    return price.mul(item.amount)
-}
-
+/**
+ * Returns an order if the current visitor is allowed to see it (its owner, the browser that placed it as a guest,
+ * or an administrator).
+ */
 export async function getOrder(id: number): Promise<HydratedOrder | null> {
-    return prisma.order.findUnique({
-        where: {
-            id
-        },
-        include: {
-            items: {
-                include: {
-                    itemType: true,
-                    appliedOptions: true
-                }
-            },
-            user: true
-        }
-    })
+    const parsedId = idSchema.safeParse(id)
+    if (!parsedId.success) {
+        return null
+    }
+    const order = await findHydratedOrder(parsedId.data)
+    if (order == null || !await canAccessOrder(order, await getMyUser())) {
+        return null
+    }
+    return order
 }
 
 export async function canPayWithBalance(totalPrice: string): Promise<boolean> {
     const me = await getMyUser()
-    if (me == null) {
+    if (me == null || me.blocked) {
         return false
     }
-    return Decimal(me.balance).gte(totalPrice)
+    try {
+        return Decimal(me.balance).gte(totalPrice)
+    } catch {
+        return false
+    }
 }
 
 export async function canPayWithPayLater(): Promise<boolean> {
     const me = await getMyUser()
-    if (me == null) {
+    if (me == null || me.blocked) {
         return false
     }
     return await prisma.order.count({
@@ -715,86 +505,76 @@ export async function payLaterBalance(id: number): Promise<boolean> {
 }
 
 export async function payOrderWithBalance(id: number): Promise<boolean> {
+    const parsedId = idSchema.safeParse(id)
+    if (!parsedId.success) {
+        return false
+    }
     const me = await getMyUser()
-    if (me == null) {
+    if (me == null || me.blocked) {
         return false
     }
     const order = await prisma.order.findUnique({
         where: {
-            id,
-            paymentStatus: PaymentStatus.notPaid
+            id: parsedId.data
         }
     })
-    if (order == null) {
+    if (order == null || !await canAccessOrder(order, me)) {
         return false
     }
-    if (order.paymentStatus !== PaymentStatus.notPaid) {
+    if (order.paymentStatus === PaymentStatus.paid) {
         return true
     }
-    if (Decimal(me.balance).lt(order.totalPrice)) {
+    if (order.paymentStatus !== PaymentStatus.notPaid) {
         return false
     }
-    await prisma.user.update({
-        where: {
-            id: me.id
-        },
-        data: {
-            balance: Decimal(me.balance).minus(order.totalPrice).toString()
-        }
-    })
 
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.balanceUsed,
-            user: {
-                connect: {
-                    id: me.id
+    try {
+        await prisma.$transaction(async tx => {
+            // Claim the order first, so it can only ever be paid once
+            const claimed = await tx.order.updateMany({
+                where: {
+                    id: order.id,
+                    paymentStatus: PaymentStatus.notPaid
+                },
+                data: {
+                    paymentStatus: PaymentStatus.paid,
+                    paymentMethod: PaymentMethod.balance
                 }
-            },
-            order: {
-                connect: {
-                    id: order.id
+            })
+            if (claimed.count !== 1) {
+                throw new Error('already-paid')
+            }
+            const newBalance = await adjustUserBalance(tx, me.id, Decimal(order.totalPrice).negated())
+            await tx.userAuditLog.create({
+                data: {
+                    type: UserAuditLogType.balanceUsed,
+                    userId: me.id,
+                    orderId: order.id,
+                    values: [ order.totalPrice, newBalance.toString() ]
                 }
-            },
-            values: [ order.totalPrice, Decimal(me.balance).minus(order.totalPrice).toString() ]
-        }
-    })
-
-    await prisma.order.update({
-        where: {
-            id
-        },
-        data: {
-            paymentStatus: PaymentStatus.paid,
-            paymentMethod: PaymentMethod.balance
-        }
-    })
-
-    await prisma.user.update({
-        where: {
-            id: me.id
-        },
-        data: {
-            points: Decimal(me.points).add(order.totalPriceRaw).toString()
-        }
-    })
-
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.pointsUpdated,
-            user: {
-                connect: {
-                    id: me.id
+            })
+            await tx.userAuditLog.create({
+                data: {
+                    type: UserAuditLogType.orderPaymentSuccess,
+                    userId: me.id,
+                    orderId: order.id,
+                    values: [ 'balance', order.totalPrice ]
                 }
-            },
-            order: {
-                connect: {
-                    id: order.id
+            })
+            const newPoints = await adjustUserPoints(tx, me.id, order.totalPriceRaw)
+            await tx.userAuditLog.create({
+                data: {
+                    type: UserAuditLogType.pointsUpdated,
+                    userId: me.id,
+                    orderId: order.id,
+                    values: [ order.totalPriceRaw, newPoints.toString() ]
                 }
-            },
-            values: [ order.totalPriceRaw, Decimal(me.points).add(order.totalPriceRaw).toString() ]
-        }
-    })
+            })
+        })
+    } catch {
+        return false
+    }
+    await expireStripeSession(order.stripeSession)
     return true
 }
 
@@ -807,36 +587,150 @@ export async function isMaximumCupsReached(): Promise<boolean> {
     return !availability.canOrderNow && availability.unavailableReason !== 'store-closed'
 }
 
+interface PricedLine {
+    itemTypeId: number
+    amount: number
+    optionIds: number[]
+    price: Decimal
+}
+
+/**
+ * Loads the items and options of a cart from the database and prices every line.
+ * Prices supplied by the client are ignored. Returns null if the cart refers to unknown, unavailable,
+ * or mismatched items and options.
+ */
+async function priceCart(items: { item: { id: number }, amount: number, options: { id: number }[] }[]): Promise<PricedLine[] | null> {
+    const itemIds = Array.from(new Set(items.map(item => item.item.id)))
+    const itemTypes = await prisma.itemType.findMany({
+        where: {
+            id: {
+                in: itemIds
+            }
+        },
+        include: {
+            options: {
+                include: {
+                    items: true
+                }
+            }
+        }
+    })
+    const itemTypeMap = new Map(itemTypes.map(itemType => [ itemType.id, itemType ]))
+
+    const lines: PricedLine[] = []
+    for (const item of items) {
+        const itemType = itemTypeMap.get(item.item.id)
+        if (itemType == null) {
+            return null
+        }
+        const chosenByType = new Map<number, OptionItem>()
+        for (const { id } of item.options) {
+            const optionType = itemType.options.find(type => type.items.some(option => option.id === id))
+            const option = optionType?.items.find(option => option.id === id)
+            if (optionType == null || option == null || option.soldOut || chosenByType.has(optionType.id)) {
+                // Option does not belong to this item, is sold out, or two options of the same type were chosen
+                return null
+            }
+            chosenByType.set(optionType.id, option)
+        }
+        // Fill in the default option for any option type the client did not choose
+        for (const optionType of itemType.options) {
+            if (chosenByType.has(optionType.id)) {
+                continue
+            }
+            const fallback = optionType.items.find(option => option.default && !option.soldOut)
+            if (fallback != null) {
+                chosenByType.set(optionType.id, fallback)
+            }
+        }
+        const chosen = Array.from(chosenByType.values())
+        lines.push({
+            itemTypeId: itemType.id,
+            amount: item.amount,
+            optionIds: chosen.map(option => option.id),
+            price: calculateLinePrice(itemType.basePrice, itemType.salePercent, chosen.map(option => option.priceChange), item.amount)
+        })
+    }
+    return lines
+}
+
 export async function createOrder(items: OrderedItemTemplate[],
                                   coupon: string | null,
                                   onSiteOrderMode: boolean,
                                   deliveryRoom: string | null,
                                   paymentMethod: PaymentMethod,
                                   pickUpTime: PickUpTimeOption | null): Promise<HydratedOrder | null> {
+    const parsed = createOrderSchema.safeParse({
+        items,
+        coupon,
+        onSiteOrderMode,
+        deliveryRoom,
+        paymentMethod,
+        pickUpTime
+    })
+    if (!parsed.success) {
+        return null
+    }
+    const input = parsed.data
     const me = await getMyUser()
-    const normalizedCoupon = coupon == null ? null : normalizeCouponCode(coupon)
+    const normalizedCoupon = input.coupon == null ? null : normalizeCouponCode(input.coupon)
+    const hasCoupon = normalizedCoupon != null && normalizedCoupon.length > 0
 
-    if (items.length < 1) {
+    if (me != null && me.blocked) {
         return null
     }
 
-    // SANITY CHECKS - These should be enforced by the frontend as well
+    if (!await checkRateLimit('create-order', me == null ? 200 : 20, 10 * 60 * 1000, me?.id)) {
+        return null
+    }
+
     // On site order mode require administrative permissions
-    if (onSiteOrderMode && (me == null || !me.permissions.includes('admin.manage'))) {
+    if (input.onSiteOrderMode && (me == null || !me.permissions.includes('admin.manage'))) {
         return null
     }
 
     // Ensure we didn't go over maximum cups per order
-    const totalAmount = items.reduce((acc, item) => acc + item.amount, 0)
-    if (totalAmount < 0 || totalAmount > await getConfigValueAsNumber('maximum-cups-per-order')) {
+    const totalAmount = input.items.reduce((acc, item) => acc + item.amount, 0)
+    if (totalAmount < 1 || totalAmount > await getConfigValueAsNumber('maximum-cups-per-order')) {
         return null
     }
 
-    if (!(await getConfigValueAsBoolean('allow-delivery')) && deliveryRoom != null && deliveryRoom != '') {
+    if (input.deliveryRoom != null && !(await getConfigValueAsBoolean('allow-delivery'))) {
         return null
     }
 
-    if (!(await getConfigValueAsBoolean('allow-pay-later')) && paymentMethod === PaymentMethod.payLater) {
+    if (input.paymentMethod === PaymentMethod.payLater && !(await getConfigValueAsBoolean('allow-pay-later'))) {
+        return null
+    }
+
+
+    // Exactly one of pick-up time and delivery room
+    if ((input.deliveryRoom == null) === (input.pickUpTime == null)) {
+        return null
+    }
+
+    // Cash payment is only available with on-site
+    if (input.paymentMethod === PaymentMethod.cash && !input.onSiteOrderMode) {
+        return null
+    }
+
+    // Pay later, balance, and pay for me aren't available with on-site
+    if ((input.paymentMethod === PaymentMethod.payLater || input.paymentMethod === PaymentMethod.balance || input.paymentMethod === PaymentMethod.payForMe) && input.onSiteOrderMode) {
+        return null
+    }
+
+    // Pay later and balance require logging in
+    if ((input.paymentMethod === PaymentMethod.payLater || input.paymentMethod === PaymentMethod.balance) && me == null) {
+        return null
+    }
+
+    // No using pay later if you have unpaid orders before (checked again inside the transaction)
+    if (input.paymentMethod === PaymentMethod.payLater && me != null && await prisma.order.count({
+        where: {
+            userId: me.id,
+            paymentStatus: PaymentStatus.notPaid
+        }
+    }) > 0) {
         return null
     }
 
@@ -845,33 +739,9 @@ export async function createOrder(items: OrderedItemTemplate[],
         return null
     }
 
-    if (deliveryRoom == null && !isValidPickUpTime(pickUpTime)) {
-        return null
-    }
-
-    if (deliveryRoom != null && pickUpTime != null) {
-        return null
-    }
-
-    const itemIds = Array.from(new Set(items.map(item => item.item.id)))
-    const optionIds = Array.from(new Set(items.flatMap(item => item.options.map(option => option.id))))
-    const [ itemMap, currentOptions ] = await Promise.all([
-        getOrderableItems(itemIds),
-        optionIds.length < 1 ? Promise.resolve([] as OrderableOptionRecord[]) : prisma.optionItem.findMany({
-            where: {
-                id: {
-                    in: optionIds
-                }
-            },
-            select: {
-                id: true,
-                typeId: true,
-                soldOut: true
-            }
-        })
-    ])
-    const currentOptionMap = new Map(currentOptions.map(option => [ option.id, option ]))
-    const cartValidation = buildCartValidation(items, itemMap)
+    const itemIds = Array.from(new Set(input.items.map(item => item.item.id)))
+    const itemMap = await getOrderableItems(itemIds)
+    const cartValidation = buildCartValidation(input.items, itemMap)
     if (cartValidation.issues.length > 0) {
         return null
     }
@@ -879,81 +749,40 @@ export async function createOrder(items: OrderedItemTemplate[],
         return null
     }
 
-    // Ensure items and options aren't sold out
-    for (const item of items) {
-        if (!itemMap.has(item.item.id)) {
-            return null
-        }
-        for (const option of item.options) {
-            const currentOption = currentOptionMap.get(option.id)
-            if (currentOption == null || currentOption.soldOut) {
-                return null
-            }
-        }
+    // Calculate prices from the database
+    const lines = await priceCart(input.items)
+    if (lines == null) {
+        return null
+    }
+    const totalPriceNoCoupon = lines.reduce((acc, line) => acc.add(line.price), new Decimal(0))
+    if (totalPriceNoCoupon.isNegative()) {
+        return null
     }
 
-    // Calculate total price
     let usedCoupon = false
-    const totalPriceNoCoupon = items.reduce((acc, item) => acc.add(calculatePrice(item)), new Decimal(0))
-    let totalPrice = totalPriceNoCoupon
-    if (normalizedCoupon != null && normalizedCoupon.length > 0) {
-        const couponCode = await couponQuickValidate(normalizedCoupon)
-        if (couponCode == null) {
-            return null
-        }
-        totalPrice = totalPrice.minus(Decimal.min(totalPrice, Decimal(couponCode.value)))
-    }
-
-    // Cash payment is only available with on-site
-    if (paymentMethod === PaymentMethod.cash && !onSiteOrderMode) {
-        return null
-    }
-
-    // Balance payment is only available with user and when balance is sufficient
-    if (paymentMethod === PaymentMethod.balance) {
-        if (me == null) {
-            return null
-        }
-        if (Decimal(me.balance).lt(totalPrice)) {
-            return null
-        }
-    }
-
-    // Delivery room must be over 3 characters
-    if (deliveryRoom != null && deliveryRoom.length < 3) {
-        return null
-    }
-
-    // No using pay later if you're not logged in or have unpaid orders before
-    if (paymentMethod === PaymentMethod.payLater) {
-        if (me == null) {
-            return null
-        }
-        if (await prisma.order.count({
-            where: {
-                userId: me.id,
-                paymentStatus: PaymentStatus.notPaid
-            }
-        }) > 0) {
-            return null
-        }
-    }
-
-    // Pay later, balance, and pay for me aren't available with on-site
-    if ((paymentMethod === PaymentMethod.payLater || paymentMethod === PaymentMethod.balance || paymentMethod === PaymentMethod.payForMe) && onSiteOrderMode) {
-        return null
-    }
-
     let order: HydratedOrder | null = null
     try {
         order = await prisma.$transaction(async tx => {
+            if (input.paymentMethod === PaymentMethod.payLater && me != null) {
+                // Serialize Pay Later orders per user so two concurrent requests cannot both pass the check
+                await lockUserRow(tx, me.id)
+                if (await tx.order.count({
+                    where: {
+                        userId: me.id,
+                        paymentStatus: PaymentStatus.notPaid
+                    }
+                }) > 0) {
+                    throw new Error('unpaid-orders')
+                }
+            }
+
             const currentItemMap = await getOrderableItems(itemIds, tx)
-            const currentValidation = buildCartValidation(items, currentItemMap)
+            const currentValidation = buildCartValidation(input.items, currentItemMap)
             if (currentValidation.issues.length > 0) {
                 throw new Error('inventory-conflict')
             }
 
-            const requestedAmounts = getRequestedItemAmounts(items)
+            const requestedAmounts = getRequestedItemAmounts(input.items)
             for (const [ itemTypeId, requested ] of requestedAmounts.entries()) {
                 const currentItem = currentItemMap.get(itemTypeId)
                 if (currentItem == null) {
@@ -981,21 +810,15 @@ export async function createOrder(items: OrderedItemTemplate[],
                 }
             }
 
-            if (normalizedCoupon != null && normalizedCoupon.length > 0) {
-                const couponCode = await tx.couponCode.findFirst({
+            let totalPrice = totalPriceNoCoupon
+            if (hasCoupon) {
+                // Decrement only if uses remain, so concurrent orders cannot overuse a coupon
+                const claimed = await tx.couponCode.updateMany({
                     where: {
                         id: normalizedCoupon,
                         remainingUses: {
                             gt: 0
                         }
-                    }
-                })
-                if (couponCode == null) {
-                    throw new Error('coupon-invalid')
-                }
-                await tx.couponCode.update({
-                    where: {
-                        id: couponCode.id
                     },
                     data: {
                         remainingUses: {
@@ -1003,187 +826,117 @@ export async function createOrder(items: OrderedItemTemplate[],
                         }
                     }
                 })
+                if (claimed.count !== 1) {
+                    throw new Error('coupon-invalid')
+                }
+                const couponCode = await tx.couponCode.findUniqueOrThrow({
+                    where: { id: normalizedCoupon }
+                })
+                totalPrice = totalPrice.minus(Decimal.min(totalPrice, Decimal.max(0, Decimal(couponCode.value))))
                 usedCoupon = true
             }
 
-            if (paymentMethod === PaymentMethod.balance && me != null) {
-                await tx.user.update({
-                    where: {
-                        id: me.id
-                    },
-                    data: {
-                        balance: Decimal(me.balance).minus(totalPrice).toString()
-                    }
-                })
-            }
-
-            return tx.order.create({
-                include: {
-                    items: {
-                        include: {
-                            itemType: true,
-                            appliedOptions: true
-                        }
-                    },
-                    user: true
-                },
+            const isPaid = totalPrice.eq(0) || input.paymentMethod === PaymentMethod.cash || input.paymentMethod === PaymentMethod.balance
+            const created = await tx.order.create({
+                include: hydratedOrderInclude,
                 data: {
                     items: {
-                        create: items.map(item => ({
+                        create: lines.map(line => ({
                             itemType: {
                                 connect: {
-                                    id: item.item.id
+                                    id: line.itemTypeId
                                 }
                             },
                             appliedOptions: {
-                                connect: item.options.map(option => ({
-                                    id: option.id
-                                }))
+                                connect: line.optionIds.map(id => ({ id }))
                             },
-                            amount: item.amount,
-                            countsTowardLimit: countsTowardLimit(currentItemMap.get(item.item.id)!),
-                            price: calculatePrice(item).toString()
+                            amount: line.amount,
+                            countsTowardLimit: countsTowardLimit(currentItemMap.get(line.itemTypeId)!),
+                            price: line.price.toString()
                         }))
                     },
                     totalPrice: totalPrice.toString(),
                     totalPriceRaw: totalPriceNoCoupon.toString(),
                     status: OrderStatus.waiting,
-                    type: deliveryRoom == null ? OrderType.pickUp : OrderType.delivery,
-                    pickUpTime: deliveryRoom == null ? pickUpTime : null,
-                    deliveryRoom,
-                    user: (onSiteOrderMode || me == null) ? undefined : {
+                    type: input.deliveryRoom == null ? OrderType.pickUp : OrderType.delivery,
+                    pickUpTime: input.deliveryRoom == null ? input.pickUpTime : null,
+                    deliveryRoom: input.deliveryRoom,
+                    user: (input.onSiteOrderMode || me == null) ? undefined : {
                         connect: {
                             id: me.id
                         }
                     },
-                    paymentStatus: (totalPrice.eq(0) || paymentMethod === PaymentMethod.cash || paymentMethod === PaymentMethod.balance) ? PaymentStatus.paid : PaymentStatus.notPaid,
-                    paymentMethod
+                    paymentStatus: isPaid ? PaymentStatus.paid : PaymentStatus.notPaid,
+                    paymentMethod: input.paymentMethod
                 }
             })
+
+            const userId = (input.onSiteOrderMode || me == null) ? null : me.id
+            await tx.userAuditLog.create({
+                data: {
+                    type: UserAuditLogType.orderCreated,
+                    userId: me?.id ?? null,
+                    orderId: created.id
+                }
+            })
+            if (usedCoupon) {
+                await tx.userAuditLog.create({
+                    data: {
+                        type: UserAuditLogType.couponUsed,
+                        userId: me?.id ?? null,
+                        orderId: created.id,
+                        values: [ normalizedCoupon! ]
+                    }
+                })
+            }
+
+            if (input.paymentMethod === PaymentMethod.balance && userId != null && totalPrice.greaterThan(0)) {
+                const newBalance = await adjustUserBalance(tx, userId, totalPrice.negated())
+                await tx.userAuditLog.create({
+                    data: {
+                        type: UserAuditLogType.balanceUsed,
+                        userId,
+                        orderId: created.id,
+                        values: [ totalPrice.toString(), newBalance.toString() ]
+                    }
+                })
+            }
+
+            if (input.paymentMethod === PaymentMethod.cash || input.paymentMethod === PaymentMethod.balance) {
+                await tx.userAuditLog.create({
+                    data: {
+                        type: UserAuditLogType.orderPaymentSuccess,
+                        userId,
+                        orderId: created.id,
+                        values: [ input.paymentMethod, totalPrice.toString() ]
+                    }
+                })
+            }
+
+            // Add points to user
+            if (userId != null && isPaid) {
+                const newPoints = await adjustUserPoints(tx, userId, totalPriceNoCoupon)
+                await tx.userAuditLog.create({
+                    data: {
+                        type: UserAuditLogType.pointsUpdated,
+                        userId,
+                        orderId: created.id,
+                        values: [ totalPriceNoCoupon.toString(), newPoints.toString() ]
+                    }
+                })
+            }
+
+            return created
         })
     } catch {
         return null
     }
 
-    if (order == null) {
-        return null
+    if (order.userId == null) {
+        await rememberGuestOrder(order.id)
     }
-
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.orderCreated,
-            user: me == null ? undefined : {
-                connect: {
-                    id: me.id
-                }
-            },
-            order: {
-                connect: {
-                    id: order.id
-                }
-            }
-        }
-    })
-    if (usedCoupon) {
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.couponUsed,
-                user: me == null ? undefined : {
-                    connect: {
-                        id: me.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ normalizedCoupon! ]
-            }
-        })
-    }
-
-    // Add points to user
-    if (me != null && !onSiteOrderMode && order.paymentStatus === PaymentStatus.paid) {
-        await prisma.user.update({
-            where: {
-                id: me.id
-            },
-            data: {
-                points: Decimal(me.points).add(totalPriceNoCoupon).toString()
-            }
-        })
-
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.pointsUpdated,
-                user: {
-                    connect: {
-                        id: me.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ totalPriceNoCoupon.toString(), Decimal(me.points).add(totalPriceNoCoupon).toString() ]
-            }
-        })
-    }
-
-    if (order.paymentMethod === PaymentMethod.cash) {
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.orderPaymentSuccess,
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ 'cash', totalPrice.toString() ]
-            }
-        })
-    }
-
-    if (me != null && order.paymentMethod === PaymentMethod.balance) {
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.balanceUsed,
-                user: {
-                    connect: {
-                        id: me.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ totalPrice.toString(), Decimal(me.balance).minus(totalPrice).toString() ]
-            }
-        })
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.orderPaymentSuccess,
-                user: {
-                    connect: {
-                        id: me.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ 'balance', totalPrice.toString() ]
-            }
-        })
-    }
-
     return order
 }
-
 export async function getEstimatedWaitTime(): Promise<EstimatedWaitTimeResponse> {
     const orders = await prisma.order.findMany({
         where: {
@@ -1259,52 +1012,32 @@ export async function getEstimatedWaitTimeFor(order: number): Promise<EstimatedW
     }
 }
 
+
+/**
+ * Cancels an unpaid order placed by the current visitor, returning its items so they can be put back in the cart.
+ */
 export async function cancelUnpaidOrder(id: number): Promise<OrderedItemTemplate[]> {
-    const order = await prisma.order.findUnique({
-        where: {
-            id,
-            paymentStatus: PaymentStatus.notPaid
-        },
-        include: {
-            items: {
-                include: {
-                    itemType: true,
-                    appliedOptions: true
-                }
-            }
-        }
-    })
-    if (order == null) {
+    const parsedId = idSchema.safeParse(id)
+    if (!parsedId.success) {
+        return []
+    }
+    const order = await findHydratedOrder(parsedId.data)
+    if (order == null || order.paymentStatus !== PaymentStatus.notPaid || !await canAccessOrder(order, await getMyUser())) {
+        return []
+    }
+    // Pay Later orders are already being prepared, so they cannot be cancelled by the customer
+    if (order.paymentMethod === PaymentMethod.payLater) {
+        return []
+    }
+    // Make sure the order can no longer be paid through Stripe before deleting it
+    if (!await expireStripeSession(order.stripeSession)) {
         return []
     }
 
-    const requestedAmounts = new Map<number, number>()
-    for (const item of order.items) {
-        if (!item.itemType.inventoryTrackingEnabled) {
-            continue
-        }
-        requestedAmounts.set(item.itemTypeId, (requestedAmounts.get(item.itemTypeId) ?? 0) + item.amount)
+    const deleted = await prisma.$transaction(tx => releaseAndDeleteUnpaidOrder(tx, order.id))
+    if (!deleted) {
+        return []
     }
-
-    await prisma.$transaction(async tx => {
-        for (const [ itemTypeId, amount ] of requestedAmounts.entries()) {
-            await tx.itemType.update({
-                where: {
-                    id: itemTypeId
-                },
-                data: {
-                    remainingItems: {
-                        increment: amount
-                    }
-                }
-            })
-        }
-        await tx.order.delete({
-            where: {
-                id
-            }
-        })
-    })
 
     return order.items.map(item => ({
         item: item.itemType,

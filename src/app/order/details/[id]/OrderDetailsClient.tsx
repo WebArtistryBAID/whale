@@ -38,7 +38,7 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
     }, [ order.id, order.status ])
 
     useEffect(() => {
-        setInterval(async () => {
+        const intervalId = setInterval(async () => {
             const o = await getOrder(order.id)
             if (o == null) {
                 location.href = '/'
@@ -49,7 +49,8 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                 setEstimate(await getEstimatedWaitTimeFor(o.id))
             }
         }, 10000)
-    }, [ order.id, order.totalPrice ])
+        return () => clearInterval(intervalId)
+    }, [ order.id ])
 
     async function cancel() {
         await cancelUnpaidOrder(order.id)

@@ -99,7 +99,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
         ? existingOrder.pickUpTime
         : DEFAULT_PICK_UP_TIME)
     const [ coupon, setCoupon ] = useState('')
-    const [ foundCoupon, setFoundCoupon ] = useState<CouponCode | null>(null)
+    const [ foundCoupon, setFoundCoupon ] = useState<Pick<CouponCode, 'id' | 'value'> | null>(null)
     const [ me, setMe ] = useState<User | null>(null)
     const [ useDelivery, setUseDelivery ] = useState(false)
     const [ deliveryRoom, setDeliveryRoom ] = useState('')

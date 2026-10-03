@@ -214,6 +214,8 @@
       "permissions": "权限",
       "admin": "管理权限",
       "permissionsOwn": "您无法更改自己的权限。",
+      "blocked": "封禁该用户",
+      "blockedHint": "被封禁的用户无法下单、支付或充值。",
       "orders": "用户订单",
       "pointsModal": {
         "title": "更改积分",

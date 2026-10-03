@@ -77,13 +77,17 @@ export default function OrderPayClient({ order, transaction }: PaymentClientProp
                 })()
             }
         }
-        setTimeout(() => {
+        const restartTimeoutId = setTimeout(() => {
             setCanRestart(true)
         }, 10000)
 
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             void pollPaymentStatus()
         }, 3000)
+        return () => {
+            clearTimeout(restartTimeoutId)
+            clearInterval(intervalId)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 

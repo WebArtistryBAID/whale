@@ -29,9 +29,11 @@ export default function StripePollPage() {
 
     useEffect(() => {
         void pollPaymentStatus()
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             void pollPaymentStatus()
         }, 3000)
+        return () => clearInterval(intervalId)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     async function pollPaymentStatus() {

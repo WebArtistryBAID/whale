@@ -15,6 +15,7 @@ import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedCategory, HydratedItemType, HydratedOptionType } from '@/app/lib/ui-data-actions'
 import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 import Decimal from 'decimal.js'
+import { parseMoneyAmount } from '@/app/lib/pricing'
 import { prisma } from '@/app/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import CategoryCreateInput = Prisma.CategoryCreateInput
@@ -373,9 +374,18 @@ export async function upsertTag(id: number | undefined, data: TagCreateInput): P
 
 export async function upsertCouponCode(data: CouponCodeCreateInput): Promise<CouponCode> {
     const user = await requireUserPermission('admin.manage')
+    const value = parseMoneyAmount(String(data.value))
+    if (value == null || !Number.isSafeInteger(data.remainingUses) || data.remainingUses < 0) {
+        throw new Error('Invalid coupon')
+    }
     const normalizedData = {
-        ...data,
-        id: normalizeCouponCode(data.id)
+        id: normalizeCouponCode(String(data.id)),
+        value: value.toString(),
+        allowedUses: Number.isSafeInteger(data.allowedUses) ? data.allowedUses : data.remainingUses,
+        remainingUses: data.remainingUses
+    }
+    if (normalizedData.id.length < 1 || normalizedData.id.length > 64) {
+        throw new Error('Invalid coupon')
     }
     await prisma.userAuditLog.create({
         data: {
@@ -391,8 +401,21 @@ export async function upsertCouponCode(data: CouponCodeCreateInput): Promise<Cou
     })
 }
 
-export async function upsertAd(id: number | undefined, data: AdCreateInput): Promise<Ad> {
+export async function upsertAd(id: number | undefined, input: AdCreateInput): Promise<Ad> {
     const user = await requireUserPermission('admin.manage')
+    // Only allow web links, so an ad can never run a javascript: URL in a customer's browser
+    let url = typeof input.url === 'string' ? input.url.trim() : ''
+    if (url !== '' && !url.startsWith('/') && !/^[a-z][a-z0-9+.-]*:/i.test(url)) {
+        url = `https://${url}`
+    }
+    if (url !== '' && !/^(https?:\/\/|\/(?!\/))/i.test(url)) {
+        throw new Error('Invalid ad URL')
+    }
+    const data = {
+        name: String(input.name),
+        image: input.image == null ? null : String(input.image),
+        url
+    }
     if (id == null) {
         const ad = await prisma.ad.create({ data })
         await prisma.userAuditLog.create({
