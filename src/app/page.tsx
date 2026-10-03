@@ -7,67 +7,79 @@ import { Trans } from 'react-i18next/TransWithoutContext'
 import CookiesBoundary from '@/app/lib/CookiesBoundary'
 import { getOrderingAvailability } from '@/app/lib/ordering-actions'
 import { getCoreItems } from '@/app/lib/ui-data-actions'
+import Beluga from '@/app/core-components/Beluga'
+import Squiggle from '@/app/core-components/Squiggle'
 import Decimal from 'decimal.js'
 import { isItemSoldOut } from '@/app/lib/item-availability'
+import { HiArrowRight } from 'react-icons/hi'
 
 export default async function Home() {
     const { t } = await serverTranslation('welcome')
     const user = await getMyUser()
     const availability = await getOrderingAvailability()
-    const categories = await getCoreItems()
+    const items = (await getCoreItems()).flatMap(category => category.items).slice(0, 8)
+    const uploadPrefix = `/${process.env.UPLOAD_SERVE_PATH}/`
+    const closed = availability.phase === 'closed'
     const statusKey = availability.phase === 'live' ? 'statusLive' : availability.phase === 'preorder' ? 'statusPreorder' : 'statusClosed'
 
-    return <div className="min-h-screen">
+    return <div className="min-h-screen dots">
         <SimpleNav/>
-        <main id="primary-content"
-              className="max-w-6xl mx-auto px-5 lg:px-8 py-10 lg:py-20 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_26rem] gap-12 lg:gap-20">
-            <section aria-label={t('welcome')} className="flex flex-col min-w-0">
-                <p className="text-sm mb-8 flex items-center gap-2">
-                    <span className={`h-2 w-2 rounded-full ${availability.phase === 'closed' ? 'bg-cream-300' : 'bg-leaf'}`}/>
-                    <span className="font-medium">{t(statusKey)}</span>
-                    <span className="secondary">{t('hours', { open: availability.openTime, close: availability.closeTime })}</span>
-                </p>
-                <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15] font-semibold mb-6 [word-break:keep-all]">
-                    <Trans t={t} i18nKey="title" components={{ 1: <span key="soft-break">&shy;</span> }}/>
-                </h1>
-                <p className="text-lg secondary max-w-md mb-10">{t('tagline')}</p>
-
-                <div className="flex flex-wrap gap-3 mb-10">
-                    <Link href="/order" className="inline-flex items-center h-12 px-6 rounded-md bg-caramel text-white
-                    font-semibold hover:bg-caramel-600 transition-colors">{t('startOrder')}</Link>
-                    {user == null
-                        ? <Link href="/login" className="inline-flex items-center h-12 px-6 rounded-md border border-cream-300
-                        dark:border-white/20 font-semibold hover:border-espresso transition-colors">{t('login')}</Link>
-                        : <Link href="/user" className="inline-flex items-center h-12 px-6 rounded-md border border-cream-300
-                        dark:border-white/20 font-semibold hover:border-espresso transition-colors">{t('user')}</Link>}
+        <main id="primary-content" aria-label={t('welcome')}>
+            <section className="max-w-6xl mx-auto px-5 pt-10 lg:pt-16 pb-6 grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
+                <div className="order-2 lg:order-1">
+                    <span className={`inline-flex items-center gap-2 font-toon text-base px-4 py-1.5 rounded-full border-toon
+                    border-ink shadow-toon-sm -rotate-2 mb-6 ${closed ? 'bg-paper' : 'bg-mint text-[#1f3d2a]'}`}>
+                        <span className={`h-2.5 w-2.5 rounded-full border-2 border-current ${closed ? '' : 'bg-white'}`}/>
+                        {t(statusKey)} · {t('hours', { open: availability.openTime, close: availability.closeTime })}
+                    </span>
+                    <h1 className="text-4xl sm:text-5xl lg:text-7xl leading-[1.2] mb-8 lg:[word-break:keep-all]">
+                        <Trans t={t} i18nKey="title" components={{ 1: <span key="soft-break">&shy;</span> }}/>
+                    </h1>
+                    <div className="flex flex-wrap gap-4">
+                        <Link href="/order" className="toon-btn h-14 px-8 text-xl">{t('startOrder')}<HiArrowRight/></Link>
+                        {user == null
+                            ? <Link href="/login" className="toon-btn-ghost h-14 px-7 text-xl">{t('login')}</Link>
+                            : <Link href="/user" className="toon-btn-ghost h-14 px-7 text-xl">{t('user')}</Link>}
+                    </div>
                 </div>
 
-                <CookiesBoundary><RecentOrder/></CookiesBoundary>
+                <div className="order-1 lg:order-2 relative flex flex-col items-center">
+                    <div className="toon relative px-5 py-3 font-toon text-lg lg:text-xl mb-3 rotate-2 self-center lg:self-start lg:ml-10">
+                        {closed ? t('bubbleClosed') : t('bubble')}
+                        <span aria-hidden className="absolute -bottom-[11px] left-1/2 h-5 w-5 rotate-45 bg-paper
+                        border-r-toon border-b-toon border-ink"/>
+                    </div>
+                    <Beluga mood={closed ? 'sleepy' : 'happy'} withCup={!closed} className="w-72 lg:w-[26rem] bob"/>
+                    <Squiggle className="w-80 lg:w-[28rem] h-4 -mt-3 text-whale"/>
+                    <Squiggle className="w-64 lg:w-[22rem] h-4 text-whale/60"/>
+                </div>
             </section>
 
-            <aside aria-label={t('menuTitle')} className="card px-6 lg:px-7 py-8 self-start min-w-0">
-                <h2 className="font-serif text-2xl font-semibold text-center mb-1">{t('menuTitle')}</h2>
-                <p className="text-center text-xs secondary mb-6">{t('hours', { open: availability.openTime, close: availability.closeTime })}</p>
-                {categories.filter(category => category.items.length > 0).map(category =>
-                    <div key={category.id} className="mb-6 last:mb-4">
-                        <p className="text-xs font-semibold secondary mb-2 pb-1 border-b border-cream-200 dark:border-white/10">{category.name}</p>
-                        <ul className="flex flex-col gap-1.5">
-                            {category.items.map(item => {
-                                const soldOut = isItemSoldOut(item)
-                                return <li key={item.id} className={`flex items-baseline text-sm ${soldOut ? 'opacity-50' : ''}`}>
-                                    <span className="truncate">{item.name}</span>
-                                    <span className="leader" aria-hidden/>
-                                    <span className="price">
-                                        {soldOut ? t('soldOut') : `¥${Decimal(item.basePrice).mul(item.salePercent).toString()}`}
-                                    </span>
-                                </li>
-                            })}
-                        </ul>
-                    </div>)}
-                <Link href="/order" className="block text-center text-sm font-semibold text-caramel hover:underline">
-                    {t('viewMenu')} →
-                </Link>
-            </aside>
+            <section className="max-w-6xl mx-auto px-5 pb-12" aria-label={t('menuTitle')}>
+                <div className="flex items-end justify-between mb-5">
+                    <h2 className="text-3xl"><span className="marker">{t('menuTitle')}</span></h2>
+                    <Link href="/order" className="font-toon text-lg flex items-center gap-1 hover:underline
+                    decoration-butter decoration-[3px] underline-offset-4">{t('viewMenu')}<HiArrowRight/></Link>
+                </div>
+                <div className="flex gap-5 overflow-x-auto scrollbar-none pb-3 pt-1 px-1 -mx-1">
+                    {items.map((item, index) => {
+                        const soldOut = isItemSoldOut(item)
+                        return <Link key={item.id} href="/order"
+                                     className={`toon toon-press flex-shrink-0 w-44 p-4 flex flex-col items-center text-center
+                                     ${index % 3 === 0 ? 'rotate-[-1.5deg]' : index % 3 === 1 ? 'rotate-1' : ''}`}>
+                            <img src={uploadPrefix + item.image} alt="" width={256} height={256}
+                                 className={`w-28 h-28 rounded-full object-cover border-toon border-ink mb-3 ${soldOut ? 'grayscale' : ''}`}/>
+                            <span className="font-toon text-lg leading-tight mb-2">{item.name}</span>
+                            <span className="price-tag">
+                                {soldOut ? t('soldOut') : `¥${Decimal(item.basePrice).mul(item.salePercent).toString()}`}
+                            </span>
+                        </Link>
+                    })}
+                </div>
+                <div className="mt-6">
+                    <CookiesBoundary><RecentOrder/></CookiesBoundary>
+                </div>
+            </section>
         </main>
     </div>
 }

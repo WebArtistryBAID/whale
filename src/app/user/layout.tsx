@@ -124,7 +124,7 @@ function UserLayout({ children }: { children: ReactNode }) {
             <button onClick={() => {
                 void logout().then(() => router.replace('/'))
             }}
-                    className="flex items-center gap-3 w-full rounded-full p-3 hover:bg-caramel-50 dark:hover:bg-white/5 transition-colors duration-100">
+                    className="flex items-center gap-3 w-full rounded-full p-3 hover:bg-butter/40 transition-colors duration-100">
                 <Badge color="yellow" icon={HiUser}/>
                 <div className="text-left">
                     <p className="font-bold font-display text-sm">{myUser?.name ?? '...'}</p>

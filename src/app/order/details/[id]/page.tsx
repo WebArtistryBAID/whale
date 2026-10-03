@@ -15,7 +15,7 @@ export default async function OrderDetailsBase({ params }: { params: Promise<{ i
     if (order?.userId != null && order?.userId !== me?.id) {
         redirect('/')
     }
-    return <div className="bg-coffee-1 dark:bg-espresso-900">
+    return <div className="min-h-screen dots">
         <SimpleNav/>
         <CookiesBoundary><OrderDetailsClient initialOrder={order} uploadPrefix={`/${process.env.UPLOAD_SERVE_PATH}/`}/></CookiesBoundary>
     </div>

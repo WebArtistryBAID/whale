@@ -18,53 +18,59 @@ export default function UIItemType({ item, uploadPrefix }: { item: HydratedItemT
 
     return <>
         <If condition={selected && !soldOut}>
-            <div className="z-50 fixed inset-x-0 bottom-0 top-16 lg:right-[26rem] xl:right-[28rem] lg:z-30">
+            <div className="z-50 fixed inset-x-0 bottom-0 top-16 lg:right-1/2 lg:z-30">
                 <UIItemDetailsOverlay item={item} uploadPrefix={uploadPrefix} close={() => setSelected(false)}/>
             </div>
         </If>
 
         <div aria-label={item.name + ' ' + t('a11y.item')}
-             className={`group flex gap-4 py-5 border-b border-cream-200 dark:border-white/10
-             ${soldOut ? '' : 'cursor-pointer'}`}
+             className={`toon flex items-center gap-4 p-4 text-left ${soldOut ? 'opacity-70' : 'toon-press cursor-pointer'}`}
              onClick={() => setSelected(true)}>
-            <img src={uploadPrefix + item.image} alt="" width={512} height={512}
-                 className={`flex-shrink-0 w-20 h-20 lg:w-24 lg:h-24 object-cover rounded-md bg-cream-100
-                 ${soldOut ? 'grayscale opacity-60' : ''}`}/>
-            <div className="flex-grow min-w-0 flex flex-col">
-                <div className="flex items-baseline">
-                    <p className={`font-bold leading-snug group-hover:underline underline-offset-4 decoration-1
-                    ${soldOut ? 'secondary' : ''}`}>{item.name}</p>
-                    <span className="leader" aria-hidden/>
-                    <If condition={!onSale && !soldOut}>
-                        <p className="price text-lg">¥{Decimal(item.basePrice).toString()}</p>
-                    </If>
-                    <If condition={onSale && !soldOut}>
-                        <p aria-hidden className="price text-lg text-caramel dark:text-caramel-100">¥{salePrice}</p>
-                        <p className="sr-only">{t('a11y.sale', { price: item.basePrice, salePrice })}</p>
+            <div className="relative flex-shrink-0">
+                <img src={uploadPrefix + item.image} alt="" width={512} height={512}
+                     className={`w-24 h-24 lg:w-28 lg:h-28 object-cover rounded-full border-toon border-ink bg-latte
+                     ${soldOut ? 'grayscale' : ''}`}/>
+                <If condition={onSale && !soldOut}>
+                    <span aria-hidden className="absolute -top-2 -left-2 rotate-[-12deg] rounded-full border-2 border-ink
+                    bg-tomato text-white font-toon text-sm px-2 leading-6">
+                        -{Decimal(1).minus(item.salePercent).mul(100).toString()}%
+                    </span>
+                </If>
+                <If condition={soldOut}>
+                    <span aria-hidden className="absolute inset-0 flex items-center justify-center">
+                        <span className="rotate-[-12deg] rounded-md border-2 border-ink bg-paper font-toon text-base px-2">
+                            {t('itemDetails.soldOut')}
+                        </span>
+                    </span>
+                </If>
+            </div>
+            <div className="flex-grow min-w-0">
+                <p className="font-toon text-xl leading-tight mb-1">{item.name}</p>
+                <p className="text-sm secondary mb-3 line-clamp-2">{item.shortDescription}</p>
+                <div className="flex gap-3 items-center w-full">
+                    <If condition={!soldOut}>
+                        <span aria-hidden className="mr-auto flex items-baseline gap-2">
+                            <span className="price-tag text-lg">¥{onSale ? salePrice : Decimal(item.basePrice).toString()}</span>
+                            <If condition={onSale}>
+                                <span className="line-through text-sm secondary">¥{Decimal(item.basePrice).toString()}</span>
+                            </If>
+                        </span>
+                        <span className="sr-only">{onSale
+                            ? t('a11y.sale', { price: item.basePrice, salePrice })
+                            : `¥${Decimal(item.basePrice).toString()}`}</span>
                     </If>
                     <If condition={soldOut}>
-                        <p className="text-sm font-medium secondary">{t('itemDetails.soldOut')}</p>
-                    </If>
-                </div>
-                <p className="text-sm secondary line-clamp-2 mt-1">{item.shortDescription}</p>
-                <div className="flex items-center gap-3 mt-auto pt-2">
-                    <If condition={onSale && !soldOut}>
-                        <span aria-hidden className="text-xs secondary">
-                            <span className="line-through">¥{Decimal(item.basePrice).toString()}</span>
-                            <span className="ml-2 font-semibold text-caramel dark:text-caramel-100">
-                                {t('itemDetails.sale', { sale: Decimal(1).minus(item.salePercent).mul(100).toString() })}
-                            </span>
-                        </span>
+                        <span className="mr-auto font-toon secondary">{t('itemDetails.soldOut')}</span>
                     </If>
                     <button disabled={soldOut} aria-label={t('addItem')}
                             onClick={e => {
                                 e.stopPropagation()
                                 setSelected(true)
                             }}
-                            className="ml-auto h-8 w-8 rounded-md border border-espresso dark:border-stone-300 flex items-center
-                            justify-center transition-colors hover:bg-espresso hover:text-cream dark:hover:bg-stone-200
-                            dark:hover:text-espresso disabled:opacity-30 disabled:pointer-events-none">
-                        <HiPlus/>
+                            className="h-11 w-11 flex-shrink-0 rounded-full border-toon border-ink bg-butter text-[#4a2511]
+                            flex items-center justify-center shadow-toon-sm transition-transform hover:rotate-90
+                            active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40">
+                        <HiPlus className="text-xl"/>
                     </button>
                 </div>
             </div>

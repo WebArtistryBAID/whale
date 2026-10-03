@@ -8,27 +8,31 @@ export default async function SimpleNav() {
     const me = await getMyUser()
     const { t } = await serverTranslation('order')
 
-    return <nav className="sticky top-0 z-40 h-16 flex items-center gap-2 px-4 lg:px-8
-    bg-cream/95 dark:bg-espresso-900/95 backdrop-blur-sm border-b border-cream-200 dark:border-white/10">
+    return <nav className="sticky top-0 z-40 h-16 flex items-center gap-2 lg:gap-3 px-3 lg:px-6 bg-paper border-b-toon border-ink">
         <a href="#primary-content" className="sr-only">{t('a11y.skip')}</a>
-        <Link href="/" className="flex items-center gap-2.5 mr-auto">
-            <img width={40} height={40} src="/assets/logo.png" className="w-10 h-10 -my-1" alt="Whale Logo"/>
-            <span className="font-bold text-lg">{t('brand')}</span>
+        <Link href="/" className="flex items-center gap-2 mr-auto group">
+            <img width={40} height={40} src="/assets/logo.png" alt="Whale Logo"
+                 className="w-10 h-10 rounded-full bg-white border-toon border-ink group-hover:rotate-[-10deg] transition-transform"/>
+            <span className="font-toon text-xl lg:text-2xl">{t('brand')}</span>
         </Link>
 
         <If condition={me != null && me.permissions.includes('admin.manage')}>
             <OnSiteOrder/>
-            <Link href="/today" className="hidden lg:flex items-center h-9 px-3 rounded-md text-sm font-medium
-            hover:bg-cream-100 dark:hover:bg-white/5 transition-colors">{t('today')}</Link>
+            <Link href="/today" className="hidden lg:flex items-center h-10 px-4 rounded-full font-toon border-toon border-ink
+            bg-paper shadow-toon-sm hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-transform">
+                {t('today')}
+            </Link>
         </If>
         <If condition={me == null}>
-            <Link href="/login" className="flex items-center h-9 px-4 rounded-md text-sm font-medium
-            bg-espresso text-cream hover:bg-black dark:bg-cream dark:text-espresso transition-colors">{t('login')}</Link>
+            <Link href="/login" className="flex items-center h-10 px-5 rounded-full font-toon border-toon border-ink bg-butter
+            text-[#4a2511] shadow-toon-sm hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-transform">
+                {t('login')}
+            </Link>
         </If>
         <If condition={me != null}>
             <Link href="/user" aria-label="User Icon"
-                  className="ml-1 h-9 w-9 rounded-full border border-cream-300 dark:border-white/20 flex items-center
-                  justify-center text-sm font-bold hover:border-espresso dark:hover:border-white transition-colors">
+                  className="h-10 w-10 rounded-full border-toon border-ink bg-whale text-[#163746] font-toon text-lg
+                  flex items-center justify-center shadow-toon-sm hover:-translate-y-px transition-transform">
                 <span>{me?.name.at(0)}</span>
             </Link>
         </If>

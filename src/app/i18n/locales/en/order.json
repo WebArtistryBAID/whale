@@ -167,9 +167,11 @@
     },
     "goodToKnow": "Good to know"
   },
-  "menu": "Menu",
-  "cartTitle": "Your order",
+  "cartTitle": "My tray",
   "cartCount_one": "{{count}} item",
   "cartCount_other": "{{count}} items",
-  "notice": "Checkout unavailable"
+  "notice": "Can't check out yet",
+  "emptyHint": "Your tray is empty. Pick something you like!",
+  "menu": "Menu",
+  "pickupCode": "Order number"
 }

@@ -12,7 +12,7 @@ import { getConfigValueAsNumber } from '@/app/lib/settings-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 
 /**
- * Shared checkout availability logic for the desktop and mobile shopping carts.
+ * Whether the cart can be checked out right now, and why not. Shared by the desktop and mobile carts.
  */
 export function useCartStatus() {
     const { t } = useTranslationClient('order')
@@ -49,7 +49,7 @@ export function useCartStatus() {
     const isOverMaxCups = shoppingCart.getAmount() > maxCups
 
     const warnings: string[] = []
-    if (availability != null) {
+    if (availability != null && shoppingCart.items.length > 0) {
         if (isClosed) {
             warnings.push(t('storeClosedModal.simple'))
         }
@@ -72,17 +72,9 @@ export function useCartStatus() {
         }
     }
 
-    const checkoutDisabled = availability == null ||
-        isClosed ||
-        isLiveFull ||
-        isPreOrderFull ||
-        hasInventoryIssues ||
-        isOverMaxCups ||
-        shoppingCart.items.length < 1
-
     return {
-        availability,
         warnings,
-        checkoutDisabled
+        checkoutDisabled: availability == null || isClosed || isLiveFull || isPreOrderFull || hasInventoryIssues ||
+            isOverMaxCups || shoppingCart.items.length < 1
     }
 }

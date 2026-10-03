@@ -12,13 +12,14 @@
   "recentOrderSub": "View Details",
   "orderNumber": "(Order Number)",
   "ads": "Sponsored Messages",
-  "tagline": "A small café on campus. Order online, pick up at the lobby counter.",
   "statusLive": "Open",
-  "statusPreorder": "Taking pre-orders",
+  "statusPreorder": "Pre-orders",
   "statusClosed": "Closed",
-  "hours": "Today {{open}} – {{close}}",
-  "menuTitle": "On the menu today",
-  "viewMenu": "See the full menu",
-  "startOrder": "Start an order",
-  "soldOut": "Sold out"
+  "hours": "{{open}} – {{close}}",
+  "bubble": "What are you having today?",
+  "bubbleClosed": "Napping... come back when we open!",
+  "menuTitle": "Today's menu",
+  "viewMenu": "Order now",
+  "soldOut": "Sold out",
+  "startOrder": "Start ordering"
 }

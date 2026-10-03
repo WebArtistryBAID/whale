@@ -165,11 +165,13 @@
       "ready": "可取餐",
       "readyDelivery": "已送出"
     },
-    "goodToKnow": "温馨提示"
+    "goodToKnow": "小贴士"
   },
+  "cartTitle": "我的托盘",
+  "cartCount_one": "{{count}} 杯",
+  "cartCount_other": "{{count}} 杯",
+  "notice": "暂时还不能结账",
+  "emptyHint": "托盘空空的，挑一杯喜欢的吧～",
   "menu": "菜单",
-  "cartTitle": "购物车",
-  "cartCount_one": "{{count}} 件",
-  "cartCount_other": "{{count}} 件",
-  "notice": "暂时无法结账"
+  "pickupCode": "取餐号"
 }

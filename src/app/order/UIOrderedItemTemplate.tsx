@@ -1,10 +1,8 @@
 import { calculatePrice, OrderedItemTemplate, useShoppingCart } from '@/app/lib/shopping-cart'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
+import { HiX } from 'react-icons/hi'
 
-/**
- * One line of a receipt: amount, name, options and price.
- */
 export default function UIOrderedItemTemplate({ item, index, uploadPrefix, price }: {
     item: OrderedItemTemplate,
     index: number,
@@ -14,30 +12,28 @@ export default function UIOrderedItemTemplate({ item, index, uploadPrefix, price
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     const linePrice = price ?? calculatePrice(item).toString()
-    return <div className="flex gap-3" aria-label={item.item.name + ' ' + t('a11y.shoppingCartItem')}>
-        <img src={uploadPrefix + item.item.image} alt="" width={512} height={512}
-             className="flex-shrink-0 w-12 h-12 object-cover rounded bg-cream-100"/>
-        <div className="flex-grow min-w-0">
-            <div className="flex items-baseline gap-2">
-                <span aria-hidden className="font-serif tabular-nums secondary">{item.amount}×</span>
-                <p className="font-semibold truncate">{item.item.name}</p>
-                <span aria-hidden className="price ml-auto">¥{linePrice}</span>
-            </div>
-            <div className="flex items-baseline gap-3">
-                <p className="text-xs secondary truncate">
-                    <span className="sr-only">{t('a11y.appliedOptions')}</span>
-                    {item.options.map(i => i.name).join('，')}
-                </p>
-                <If condition={index !== -1}>
-                    <button onClick={() => shoppingCart.removeItem(index)}
-                            className="ml-auto flex-shrink-0 text-xs secondary underline underline-offset-2
-                            hover:text-caramel">{t('remove')}</button>
-                </If>
-            </div>
-            <span className="sr-only">{t('a11y.priceAmountShoppingCart', {
-                item: item.amount,
-                price: linePrice
-            })}</span>
+    return <div className="flex items-center gap-3" aria-label={item.item.name + ' ' + t('a11y.shoppingCartItem')}>
+        <div className="relative flex-shrink-0">
+            <img src={uploadPrefix + item.item.image} alt="" width={512} height={512}
+                 className="w-14 h-14 lg:w-16 lg:h-16 object-cover rounded-full border-toon border-ink bg-latte"/>
+            <span aria-hidden className="absolute -bottom-1 -right-1 h-6 min-w-6 px-1 rounded-full border-2 border-ink
+            bg-butter text-[#4a2511] font-toon text-sm flex items-center justify-center">{item.amount}</span>
         </div>
+        <div className="flex-grow min-w-0">
+            <p className="font-toon text-lg leading-tight truncate">{item.item.name}</p>
+            <p className="text-xs secondary truncate">
+                <span className="sr-only">{t('a11y.appliedOptions')}</span>
+                {item.options.map(i => i.name).join(' / ')}
+            </p>
+        </div>
+        <p aria-hidden className="font-toon text-lg flex-shrink-0">¥{linePrice}</p>
+        <span className="sr-only">{t('a11y.priceAmountShoppingCart', { item: item.amount, price: linePrice })}</span>
+        <If condition={index !== -1}>
+            <button aria-label={t('remove')} onClick={() => shoppingCart.removeItem(index)}
+                    className="h-8 w-8 flex-shrink-0 rounded-full border-2 border-ink/30 flex items-center justify-center
+                    hover:border-ink hover:bg-tomato hover:text-white transition-colors">
+                <HiX/>
+            </button>
+        </If>
     </div>
 }

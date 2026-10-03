@@ -4,11 +4,11 @@ import { getOrderingAvailability, HydratedOrder, OrderingAvailabilityResponse } 
 import { useTranslationClient } from '@/app/i18n/client'
 import { useEffect, useState } from 'react'
 import { getWaitingOrders, markOrderDone } from '@/app/lib/order-manage-actions'
-import { Button } from 'flowbite-react'
+import { Badge, Button } from 'flowbite-react'
 import Link from 'next/link'
 import { setConfigValue } from '@/app/lib/settings-actions'
 import { HiCheckCircle, HiExclamationTriangle } from 'react-icons/hi2'
-import { HiClock } from 'react-icons/hi'
+import { HiClock, HiHashtag } from 'react-icons/hi'
 import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
 import { isValidPickUpTime } from '@/app/lib/pick-up-times'
 
@@ -70,11 +70,12 @@ function OrderInfo({ order, done, now, openAt }: {
     const { t } = useTranslationClient('user')
     const elapsedSeconds = getElapsedSeconds(order.createdAt, openAt, now)
 
-    return <div className="col-span-1 row-span-1 p-4 card">
-        <h2 className="flex items-baseline mb-3 pb-2 border-b border-dashed border-cream-300 dark:border-white/20">
-            <span className="font-serif text-base secondary mr-1">No.</span>
-            <span className="font-serif text-4xl font-semibold tabular-nums">{order.id}</span>
-            <span className="sr-only">{t('today.orderNumber')}</span>
+    return <div className="col-span-1 row-span-1 p-3 toon">
+        <h2 className="flex items-center mb-3 font-bold">
+            <Badge className="mr-2 rounded-full h-8 w-8 flex justify-center items-center" color="warning">
+                <HiHashtag className="text-xl"/>
+            </Badge>
+            {order.id} <span className="sr-only">{t('today.orderNumber')}</span>
         </h2>
 
         <div className="mb-3">
@@ -85,7 +86,7 @@ function OrderInfo({ order, done, now, openAt }: {
             </p>
             {isValidPickUpTime(order.pickUpTime) &&
                 <p>{t('today.pickUpTime')}: <span
-                    className="text-caramel dark:text-caramel-100 font-bold">{t(`today.pickUpTimeOptions.${order.pickUpTime}`)}</span>
+                    className="text-tomato font-bold">{t(`today.pickUpTimeOptions.${order.pickUpTime}`)}</span>
                 </p>}
             {order.deliveryRoom != null &&
                 <p>{t('today.deliveryRoom')}: <span className="text-green-400 font-bold">{order.deliveryRoom!}</span>
@@ -187,12 +188,12 @@ export default function WaitingOrdersClient({ init }: { init: { [id: number]: Hy
     return <>
         <div className="w-full h-full grid sm:grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4 grid-cols-1 p-5"
              aria-label={t('today.ordersPane')}>
-            <div className="col-span-1 row-span-1 flex flex-col gap-3 p-5 card">
+            <div className="col-span-1 row-span-1 flex flex-col gap-3 p-5 toon">
                 <div className="flex items-center gap-2">
                     {(isOpen || isPreOrder) && !isCapacityBlocked &&
                         <HiCheckCircle className="text-green-500 text-xl"/>}
                     {(isOpen || isPreOrder) && isCapacityBlocked &&
-                        <HiExclamationTriangle className="text-yellow-300 dark:text-yellow-400 text-xl"/>}
+                        <HiExclamationTriangle className="text-tomato text-xl"/>}
                     {!isOpen && !isPreOrder && <HiClock className="text-purple-500 text-xl"/>}
                     <p className="mr-auto">{statusText}</p>
                 </div>

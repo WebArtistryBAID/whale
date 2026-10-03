@@ -92,7 +92,7 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
             <h1 className="mb-5">{user.name}</h1>
 
             <div className="2xl:w-1/2 mb-8">
-                <div className="card p-5" aria-label={t('manage.users.profile')}>
+                <div className="toon p-5" aria-label={t('manage.users.profile')}>
                     <p className="secondary text-sm font-display">{t('manage.users.name')}</p>
                     <p className="text-xl mb-3">{user.name}</p>
 

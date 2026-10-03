@@ -9,7 +9,7 @@ import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Spinner, TextInput } from 'flowbite-react'
 import { IconType } from 'react-icons'
-import { HiCash, HiClock, HiCreditCard, HiCurrencyYen, HiTicket, HiUserGroup } from 'react-icons/hi'
+import { HiCash, HiClock, HiCreditCard, HiCurrencyYen, HiLocationMarker, HiTicket, HiUserGroup } from 'react-icons/hi'
 import { SiWechat } from 'react-icons/si'
 import CartWarnings from '@/app/order/CartWarnings'
 import { CouponCode, OrderType, PaymentMethod, PaymentStatus, User, UserAuditLog } from '@/generated/prisma/browser'
@@ -50,7 +50,7 @@ const PAYMENT_METHOD_ICONS: { [method in PaymentMethod]: IconType } = {
     payForMe: HiUserGroup
 }
 
-function OptionTile({ label, icon: Icon, selected, select, disabled }: {
+function ChoiceButton({ label, icon: Icon, selected, select, disabled }: {
     label: string,
     icon?: IconType,
     selected: boolean,
@@ -59,15 +59,13 @@ function OptionTile({ label, icon: Icon, selected, select, disabled }: {
 }) {
     const { t } = useTranslationClient('order')
     return <button onClick={select} disabled={disabled} aria-pressed={selected}
-                   className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors
+                   className={`flex items-center gap-2 rounded-2xl px-4 h-12 border-toon transition-all text-left
                    disabled:opacity-40 disabled:cursor-not-allowed
-                   ${selected ? 'bg-cream-100 dark:bg-white/5' : 'enabled:hover:bg-cream-100/60 dark:enabled:hover:bg-white/5'}`}>
-        <span aria-hidden className={`h-[18px] w-[18px] rounded-full border flex-shrink-0 flex items-center justify-center
-        ${selected ? 'border-espresso dark:border-stone-200' : 'border-cream-300 dark:border-white/30'}`}>
-            {selected ? <span className="h-2.5 w-2.5 rounded-full bg-espresso dark:bg-stone-200"/> : null}
-        </span>
-        <span className={`flex-1 ${selected ? 'font-semibold' : ''}`}>{label}</span>
-        {Icon != null ? <Icon className="text-lg flex-shrink-0 secondary"/> : null}
+                   ${selected
+                       ? 'bg-butter text-[#4a2511] border-ink shadow-toon-sm -translate-y-px font-semibold'
+                       : 'bg-paper border-ink/25 enabled:hover:border-ink'}`}>
+        {Icon != null ? <Icon className="text-xl flex-shrink-0"/> : null}
+        <span>{label}</span>
         <If condition={selected}>
             <span className="sr-only">{t('a11y.selected')}</span>
         </If>
@@ -81,8 +79,8 @@ function PaymentMethodButton({ paymentMethod, selected, select, disabled }: {
     disabled: boolean
 }) {
     const { t } = useTranslationClient('order')
-    return <OptionTile label={t(`checkout.${paymentMethod}`)} icon={PAYMENT_METHOD_ICONS[paymentMethod]}
-                       selected={selected} select={select} disabled={disabled}/>
+    return <ChoiceButton label={t(`checkout.${paymentMethod}`)} icon={PAYMENT_METHOD_ICONS[paymentMethod]}
+                         selected={selected} select={select} disabled={disabled}/>
 }
 
 function PickUpTimeButton({ value, selected, select, disabled }: {
@@ -92,27 +90,20 @@ function PickUpTimeButton({ value, selected, select, disabled }: {
     disabled: boolean
 }) {
     const { t } = useTranslationClient('order')
-    return <OptionTile label={t(`checkout.pickUpTimeOptions.${value}`)} selected={selected} select={select}
-                       disabled={disabled}/>
+    return <ChoiceButton label={t(`checkout.pickUpTimeOptions.${value}`)} selected={selected} select={select}
+                         disabled={disabled}/>
 }
 
-function Section({ title, children }: { title: string, children: ReactNode }) {
-    return <section className="py-6 border-t border-cream-200 dark:border-white/10" aria-label={title}>
-        <h2 className="text-base font-bold mb-3">{title}</h2>
+function Step({ title, icon: Icon, children }: { title: string, icon: IconType, children: ReactNode }) {
+    return <section className="toon p-5 lg:p-6" aria-label={title}>
+        <h2 className="text-xl mb-4 flex items-center gap-2">
+            <span className="h-9 w-9 rounded-full border-2 border-ink bg-whale text-[#163746] flex items-center justify-center">
+                <Icon className="text-lg"/>
+            </span>
+            {title}
+        </h2>
         {children}
     </section>
-}
-
-function OptionGroup({ children }: { children: ReactNode }) {
-    return <div className="card overflow-hidden divide-y divide-cream-200 dark:divide-white/10 mb-3">{children}</div>
-}
-
-function SummaryRow({ label, value, strong }: { label: string, value: ReactNode, strong?: boolean }) {
-    return <div className="flex items-baseline">
-        <span className={strong ? 'font-semibold' : 'text-sm secondary'}>{label}</span>
-        {strong ? null : <span className="leader" aria-hidden/>}
-        <span className={strong ? 'price text-3xl ml-auto' : 'text-sm tabular-nums'}>{value}</span>
-    </div>
 }
 
 type CheckoutMode = 'cart' | 'order' | 'recharge'
@@ -416,17 +407,17 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
             </ModalFooter>
         </Modal>
 
-        <div className="max-w-6xl mx-auto px-4 lg:px-8 py-6 lg:py-12">
-            <h1 className="mb-6 text-3xl lg:text-4xl">{mode === 'recharge' ? t('checkout.recharge') : t('checkout.title')}</h1>
-            <div className="grid lg:grid-cols-[1fr_24rem] gap-6 lg:gap-16 items-start">
-                <div id="primary-content" className="flex flex-col" aria-label={t('checkout.title')}>
+        <div className="max-w-6xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
+            <h1 className="text-4xl mb-8"><span className="marker">{mode === 'recharge' ? t('checkout.recharge') : t('checkout.title')}</span></h1>
+            <div className="grid lg:grid-cols-[1fr_24rem] gap-6 lg:gap-10 items-start">
+                <div id="primary-content" className="flex flex-col gap-6" aria-label={t('checkout.title')}>
                     <If condition={deliveryEnabled && mode === 'cart'}>
-                        <div className="inline-flex self-start rounded-md border border-cream-300 dark:border-white/20 p-0.5 mb-6">
+                        <div className="inline-flex self-start rounded-full border-toon border-ink bg-paper p-1 shadow-toon-sm">
                             {[ false, true ].map(delivery =>
                                 <button key={delivery ? 'delivery' : 'pickUp'} onClick={() => setUseDelivery(delivery)}
                                         aria-pressed={useDelivery === delivery}
-                                        className={`rounded px-5 py-1.5 text-sm font-semibold transition-colors
-                                        ${useDelivery === delivery ? 'bg-espresso text-cream dark:bg-stone-200 dark:text-espresso' : 'secondary'}`}>
+                                        className={`rounded-full px-6 h-10 font-toon text-lg transition-colors
+                                        ${useDelivery === delivery ? 'bg-butter text-[#4a2511] border-2 border-ink' : 'border-2 border-transparent'}`}>
                                     {delivery ? t('checkout.delivery') : t('checkout.pickUp')}
                                     <If condition={useDelivery === delivery}>
                                         <span className="sr-only">{t('a11y.selected')}</span>
@@ -435,25 +426,22 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                         </div>
                     </If>
 
-                    <Section title={t('checkout.paymentMethod')}>
-                        <OptionGroup>
+                    <Step title={t('checkout.paymentMethod')} icon={HiCreditCard}>
+                        <div className="flex flex-wrap gap-3 mb-3">
                             <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
                                                  selected={paymentMethod === PaymentMethod.wxPay}
                                                  disabled={loading}
                                                  select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
-
                             <PaymentMethodButton paymentMethod={PaymentMethod.stripe}
                                                  selected={paymentMethod === PaymentMethod.stripe}
                                                  disabled={loading}
                                                  select={() => setPaymentMethod(PaymentMethod.stripe)}/>
-
                             <If condition={mode === 'cart' && shoppingCart.onSiteOrderMode}>
                                 <PaymentMethodButton paymentMethod={PaymentMethod.cash}
                                                      selected={paymentMethod === PaymentMethod.cash}
                                                      disabled={loading}
                                                      select={() => setPaymentMethod(PaymentMethod.cash)}/>
                             </If>
-
                             <If condition={me != null && !shoppingCart.onSiteOrderMode && mode !== 'recharge'}>
                                 <PaymentMethodButton paymentMethod={PaymentMethod.balance}
                                                      disabled={!balanceEnabled || loading}
@@ -466,8 +454,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                                          select={() => setPaymentMethod(PaymentMethod.payLater)}/>
                                 </If>
                             </If>
-                        </OptionGroup>
-
+                        </div>
                         <div aria-label={t('a11y.paymentMethods')} className="flex flex-col gap-1 text-sm secondary">
                             <If condition={paymentMethod === PaymentMethod.stripe}>
                                 <p>{t('checkout.stripeInfo')}</p>
@@ -488,35 +475,35 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                 <p>{t('checkout.payLaterDisabled')}</p>
                             </If>
                         </div>
-                    </Section>
+                    </Step>
 
                     <If condition={mode !== 'recharge' && (mode === 'cart' ? !useDelivery : existingOrder?.type === OrderType.pickUp)}>
-                        <Section title={t('checkout.pickUpTime')}>
-                            <OptionGroup>
+                        <Step title={t('checkout.pickUpTime')} icon={HiClock}>
+                            <div className="flex flex-wrap gap-3 mb-3">
                                 {PICK_UP_TIME_OPTIONS.map(option => <PickUpTimeButton key={option} value={option}
                                                                                       selected={pickUpTime === option}
                                                                                       disabled={loading}
                                                                                       select={() => setPickUpTime(option)}/>)}
-                            </OptionGroup>
+                            </div>
                             <p className="secondary text-sm">{t('checkout.pickUpTimeMessage')}</p>
-                        </Section>
+                        </Step>
                     </If>
 
                     <If condition={useDelivery && mode === 'cart'}>
-                        <Section title={t('checkout.deliveryRoom')}>
+                        <Step title={t('checkout.deliveryRoom')} icon={HiLocationMarker}>
                             <TextInput className="w-full" type="text" value={deliveryRoom}
                                        placeholder={t('checkout.deliveryRoom') + '...'}
                                        onChange={e => setDeliveryRoom(e.currentTarget.value)}/>
-                        </Section>
+                        </Step>
                     </If>
 
                     <If condition={mode === 'cart'}>
-                        <Section title={t('checkout.coupon')}>
-                            <TextInput className="w-full" type="text" value={coupon} icon={HiTicket}
+                        <Step title={t('checkout.coupon')} icon={HiTicket}>
+                            <TextInput className="w-full" type="text" value={coupon}
                                        placeholder={t('checkout.coupon') + '...'}
                                        color={hasCartCouponIssue ? 'failure' : foundCoupon != null ? 'success' : 'gray'}
                                        onChange={e => setCoupon(normalizeCouponCode(e.currentTarget.value))}/>
-                            <p className="mt-2 text-sm text-rose-600" aria-live="polite">
+                            <p className="mt-2 text-sm text-tomato font-semibold" aria-live="polite">
                                 <If condition={hasCartCouponIssue}>
                                     {t('checkout.couponInvalid')}
                                 </If>
@@ -526,15 +513,16 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                     {t('checkout.couponTooBig', { original: foundCoupon?.value })}
                                 </If>
                             </p>
-                        </Section>
+                        </Step>
                     </If>
                 </div>
 
-                <aside className="card lg:sticky lg:top-24 flex flex-col"
-                       aria-label={t('checkout.orderDetails')}>
-                    <h2 className="text-base font-bold px-6 pt-5 pb-4">{t('checkout.orderDetails')}</h2>
+                <aside className="toon lg:sticky lg:top-24 flex flex-col overflow-hidden" aria-label={t('checkout.orderDetails')}>
+                    <div className="px-5 py-4 border-b-2 border-dashed border-ink/25 bg-butter/40">
+                        <h2 className="text-xl">{t('checkout.orderDetails')}</h2>
+                    </div>
                     <If condition={mode !== 'recharge'}>
-                        <div className="flex flex-col gap-4 max-h-80 overflow-y-auto px-6 pb-5"
+                        <div className="flex flex-col gap-4 max-h-80 overflow-y-auto px-5 py-5"
                              aria-label={t('a11y.orderedItems')}>
                             <If condition={mode === 'cart'}>
                                 {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate key={index} item={item}
@@ -551,60 +539,64 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                             </If>
                         </div>
                     </If>
-
-                    <div className="perforation"/>
-                    <div className="flex flex-col gap-2 px-6 pt-5 pb-6">
+                    <div className="px-5 py-4 border-t-2 border-dashed border-ink/25 flex flex-col gap-2 text-sm">
                         <If condition={mode !== 'recharge'}>
-                            <SummaryRow label={t('checkout.wait')} value={waitTime === -1 ? '...' :
-                                <Trans t={t} i18nKey="checkout.waitTime" count={waitTime + shoppingCart.getAmount() * 2}/>}/>
+                            <div className="flex justify-between">
+                                <span className="secondary">{t('checkout.wait')}</span>
+                                <span>{waitTime === -1 ? '...' :
+                                    <Trans t={t} i18nKey="checkout.waitTime" count={waitTime + shoppingCart.getAmount() * 2}/>}</span>
+                            </div>
                         </If>
                         <If condition={foundCoupon != null && mode === 'cart'}>
-                            <div aria-hidden>
-                                <SummaryRow label={t('checkout.coupon')}
-                                            value={<span className="text-leaf">-¥{getActualCouponValue().toString()}</span>}/>
+                            <div className="flex justify-between" aria-hidden>
+                                <span className="secondary">{t('checkout.coupon')}</span>
+                                <span className="font-semibold text-tomato">-¥{getActualCouponValue().toString()}</span>
                             </div>
-                            <span className="sr-only"
-                                  aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
+                            <span className="sr-only" aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
                         </If>
                         <If condition={paymentMethod === PaymentMethod.stripe && mode !== 'recharge'}>
-                            <SummaryRow label={t('checkout.stripeFees')}
-                                        value={`¥${getStripeFeeAmount(getBaseTotal()).toFixed(2)} (3.5%)`}/>
+                            <div className="flex justify-between">
+                                <span className="secondary">{t('checkout.stripeFees')}</span>
+                                <span>¥{getStripeFeeAmount(getBaseTotal()).toFixed(2)} (3.5%)</span>
+                            </div>
                         </If>
-                        <div className="mt-3">
-                            <SummaryRow strong label={t('checkout.total')} value={`¥${getDisplayedTotal().toString()}`}/>
+                        <div className="flex items-baseline justify-between mt-1">
+                            <span className="font-toon text-lg">{t('checkout.total')}</span>
+                            <span className="font-toon text-4xl">¥{getDisplayedTotal().toString()}</span>
                         </div>
                     </div>
-
-                    <If condition={hasCheckoutBlockingIssue}>
-                        <div className="px-6 pb-4"><CartWarnings title={t('notice')} warnings={[
-                            ...(hasStoreClosedIssue ? [ t('storeClosedModal.simple') ] : []),
-                            ...(hasLiveLimitIssue ? [ t('maximumCupsModal.simple') ] : []),
-                            ...(hasPreOrderLimitIssue ? [ t('preOrderLimitModal.simple') ] : []),
-                            ...(hasInventoryIssues ? [ t('inventory.cartChanged') ] : []),
-                            ...inventoryMessages
-                        ]}/></div>
-                    </If>
-
-                    <div className="px-6 pb-6"><Button fullSized size="lg" color="warning" onClick={() => {
-                        if (mode === 'cart' && me == null && !shoppingCart.onSiteOrderMode) {
-                            setShowLoginNag(true)
-                            return
-                        }
-                        void order()
-                    }}
-                            disabled={(mode === 'cart' && (((coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3)) || hasCheckoutBlockingIssue)) || loading}>
-                        <If condition={orderFailed}>
-                            {t('tryAgain')}
+                    <div className="px-5 pb-5 flex flex-col gap-3">
+                        <If condition={hasCheckoutBlockingIssue}>
+                            <CartWarnings title={t('notice')} warnings={[
+                                ...(hasStoreClosedIssue ? [ t('storeClosedModal.simple') ] : []),
+                                ...(hasLiveLimitIssue ? [ t('maximumCupsModal.simple') ] : []),
+                                ...(hasPreOrderLimitIssue ? [ t('preOrderLimitModal.simple') ] : []),
+                                ...(hasInventoryIssues ? [ t('inventory.cartChanged') ] : []),
+                                ...inventoryMessages
+                            ]}/>
                         </If>
-                        <If condition={!orderFailed}>
-                            <If condition={getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash}>
-                                {t('continue')}
+                        <button className="toon-btn w-full h-14 text-xl disabled:opacity-40 disabled:pointer-events-none"
+                                onClick={() => {
+                                    if (mode === 'cart' && me == null && !shoppingCart.onSiteOrderMode) {
+                                        setShowLoginNag(true)
+                                        return
+                                    }
+                                    void order()
+                                }}
+                                disabled={(mode === 'cart' && (((coupon.length > 0 && foundCoupon == null) || (useDelivery && deliveryRoom.length < 3)) || hasCheckoutBlockingIssue)) || loading}>
+                            <If condition={orderFailed}>
+                                {t('tryAgain')}
                             </If>
-                            <If condition={!(getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
-                                {t('checkout.pay')} · ¥{getDisplayedTotal().toString()}
+                            <If condition={!orderFailed}>
+                                <If condition={getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash}>
+                                    {t('continue')}
+                                </If>
+                                <If condition={!(getDisplayedTotal().eq(0) || paymentMethod === PaymentMethod.cash)}>
+                                    {t('checkout.pay')} ¥{getDisplayedTotal().toString()}
+                                </If>
                             </If>
-                        </If>
-                    </Button></div>
+                        </button>
+                    </div>
                 </aside>
             </div>
         </div>

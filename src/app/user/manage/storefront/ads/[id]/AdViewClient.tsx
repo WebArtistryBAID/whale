@@ -48,7 +48,7 @@ export default function AdViewClient({ object, uploadPrefix }: { object: Ad, upl
             </Breadcrumb>
             <h1 className="mb-5">{object.id}</h1>
             <div className="2xl:w-1/2 mb-5">
-                <div className="card p-5 mb-3"
+                <div className="toon p-5 mb-3"
                      aria-label={t('manage.storefront.data')}>
                     <p className="secondary text-sm font-display">{t('manage.storefront.adD.id')}</p>
                     <p className="text-xl mb-3">{object.id}</p>

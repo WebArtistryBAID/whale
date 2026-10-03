@@ -1,107 +1,137 @@
 import type { Metadata } from 'next'
+import '@fontsource/zcool-kuaile'
 import './globals.css'
 import { ReactNode } from 'react'
 import NextTopLoader from 'nextjs-toploader'
 import { CustomFlowbiteTheme, Flowbite, ThemeModeScript } from 'flowbite-react'
 import Toaster from '@/app/core-components/Toaster'
 import CookiesBoundary from '@/app/lib/CookiesBoundary'
-import localFont from 'next/font/local'
-
-const newsreader = localFont({
-    src: './fonts/newsreader-latin.woff2',
-    variable: '--font-newsreader',
-    display: 'swap'
-})
 
 export const metadata: Metadata = {
     title: 'The Whale Café',
     description: 'The ordering management platform for Whale Cafe'
 }
 
+// Flowbite components restyled as cartoon stickers. See docs/DESIGN.md.
+const press = 'shadow-toon-sm enabled:hover:-translate-y-px enabled:active:translate-x-[2px] enabled:active:translate-y-[2px] enabled:active:shadow-none'
 const customTheme: CustomFlowbiteTheme = {
     button: {
-        base: 'group relative flex items-stretch justify-center p-0.5 text-center font-medium transition-colors focus:z-10 focus:outline-none',
+        base: 'group relative flex items-stretch justify-center p-0.5 text-center font-toon transition-[transform,box-shadow,background-color] duration-100 focus:z-10 focus:outline-none',
         color: {
-            warning: 'border border-transparent bg-caramel text-white focus:ring-2 focus:ring-caramel/30 enabled:hover:bg-caramel-600',
-            yellow: 'border border-transparent bg-espresso text-cream focus:ring-2 focus:ring-espresso/30 enabled:hover:bg-black dark:bg-cream dark:text-espresso dark:enabled:hover:bg-white',
-            gray: 'border border-cream-300 bg-transparent text-espresso focus:ring-2 focus:ring-espresso/10 enabled:hover:border-espresso enabled:hover:bg-cream-100 dark:border-white/20 dark:text-stone-200 dark:enabled:hover:bg-white/5'
+            warning: `border-toon border-ink bg-butter text-[#4a2511] focus:ring-4 focus:ring-butter/40 enabled:hover:bg-[#ffd36b] ${press}`,
+            yellow: `border-toon border-ink bg-paper text-ink focus:ring-4 focus:ring-butter/40 enabled:hover:bg-cream ${press}`,
+            gray: `border-toon border-ink/30 bg-paper text-ink focus:ring-4 focus:ring-butter/40 enabled:hover:border-ink enabled:hover:bg-cream`,
+            failure: `border-toon border-ink bg-tomato text-white focus:ring-4 focus:ring-tomato/30 ${press}`,
+            success: `border-toon border-ink bg-mint text-[#1f3d2a] focus:ring-4 focus:ring-mint/30 ${press}`
         },
-        pill: {
-            off: 'rounded-md',
-            on: 'rounded-md'
-        },
-        disabled: 'cursor-not-allowed opacity-40'
+        disabled: 'cursor-not-allowed opacity-45'
     },
     badge: {
         root: {
+            base: 'flex h-fit items-center gap-1 font-semibold border-2 border-ink',
             color: {
-                warning: 'bg-caramel-50 text-caramel-700 group-hover:bg-caramel-50 dark:bg-caramel/20 dark:text-caramel-100',
-                yellow: 'bg-cream-100 text-espresso group-hover:bg-cream-200 dark:bg-white/10 dark:text-stone-200'
+                warning: 'bg-butter text-[#4a2511]',
+                yellow: 'bg-paper text-ink',
+                success: 'bg-mint text-[#1f3d2a]',
+                failure: 'bg-tomato text-white',
+                info: 'bg-whale text-[#163746]',
+                gray: 'bg-cream text-ink'
             }
         }
     },
     textInput: {
         field: {
             input: {
+                base: 'block w-full border-toon disabled:cursor-not-allowed disabled:opacity-50',
                 colors: {
-                    gray: 'border-cream-300 bg-[#fffdf9] text-espresso placeholder-espresso-500/60 focus:border-espresso focus:ring-espresso/20 dark:border-white/20 dark:bg-espresso-700 dark:text-white dark:focus:border-stone-300'
+                    gray: 'border-ink/40 bg-paper text-ink placeholder-ink/40 focus:border-ink focus:ring-butter/50',
+                    failure: 'border-tomato bg-paper text-ink placeholder-ink/40 focus:border-tomato focus:ring-tomato/30',
+                    success: 'border-mint bg-paper text-ink placeholder-ink/40 focus:border-mint focus:ring-mint/30'
                 },
                 withAddon: {
-                    off: 'rounded-md'
+                    off: 'rounded-xl'
+                }
+            }
+        }
+    },
+    toggleSwitch: {
+        toggle: {
+            checked: {
+                color: {
+                    yellow: 'border-ink bg-butter',
+                    red: 'border-ink bg-tomato'
                 }
             }
         }
     },
     modal: {
         content: {
-            inner: 'relative flex max-h-[90dvh] flex-col rounded-lg bg-[#fffdf9] border border-cream-200 shadow-lift dark:bg-espresso-700 dark:border-white/10'
+            inner: 'relative flex max-h-[90dvh] flex-col toon rounded-[1.6rem] pop-in'
         },
         header: {
-            base: 'flex items-start justify-between rounded-t-lg border-b border-cream-200 p-5 dark:border-white/10'
+            base: 'flex items-start justify-between rounded-t-[1.6rem] border-b-2 border-dashed border-ink/25 p-5',
+            title: 'font-toon text-xl text-ink'
         },
         footer: {
-            base: 'flex items-center space-x-2 rounded-b-lg border-t border-cream-200 p-5 dark:border-white/10'
+            base: 'flex items-center space-x-3 rounded-b-[1.6rem] border-t-2 border-dashed border-ink/25 p-5'
+        }
+    },
+    alert: {
+        base: 'flex flex-col gap-2 p-4 text-sm border-toon border-ink',
+        color: {
+            green: 'bg-mint/40 text-ink',
+            yellow: 'bg-butter/40 text-ink',
+            warning: 'bg-butter/40 text-ink',
+            failure: 'bg-tomato/25 text-ink'
         }
     },
     sidebar: {
-        cta: {
-            base: 'relative mt-6 rounded-lg border border-cream-200 bg-[#fffdf9] p-4 dark:border-white/10 dark:bg-espresso-700',
-            color: {
-                yellow: 'bg-[#fffdf9] dark:bg-espresso-700'
-            }
-        },
         root: {
-            inner: 'h-full overflow-y-auto overflow-x-hidden bg-cream px-3 py-4 border-r border-cream-200 dark:border-white/10 dark:bg-espresso-900'
+            inner: 'h-full overflow-y-auto overflow-x-hidden bg-paper px-3 py-4 border-r-toon border-ink'
         },
         item: {
-            base: 'flex items-center justify-center rounded-md p-2 text-base font-normal text-espresso hover:bg-cream-100 dark:text-white dark:hover:bg-white/5',
+            base: 'flex items-center justify-center rounded-xl p-2 text-base font-normal text-ink hover:bg-butter/40',
             icon: {
-                base: 'h-6 w-6 flex-shrink-0 text-caramel transition duration-75 dark:text-caramel-100'
+                base: 'h-6 w-6 flex-shrink-0 text-ink transition duration-75'
             },
-            label: 'bg-caramel text-white dark:text-white'
+            label: 'bg-tomato text-white'
         },
         collapse: {
-            button: 'group flex w-full items-center rounded-md p-2 text-base font-normal text-espresso transition duration-75 hover:bg-cream-100 dark:text-white dark:hover:bg-white/5',
+            button: 'group flex w-full items-center rounded-xl p-2 text-base font-normal text-ink transition duration-75 hover:bg-butter/40',
             icon: {
-                base: 'h-6 w-6 text-caramel transition duration-75 dark:text-caramel-100',
+                base: 'h-6 w-6 text-ink transition duration-75',
                 open: {
-                    on: 'text-caramel dark:text-caramel-100'
+                    on: 'text-ink'
                 }
+            }
+        },
+        cta: {
+            base: 'relative mt-6 rounded-2xl border-toon border-ink bg-butter/30 p-4',
+            color: {
+                yellow: 'bg-butter/30'
             }
         }
     },
     tabs: {
         tablist: {
             tabitem: {
-                base: 'flex items-center justify-center rounded-t-lg p-4 text-sm font-medium first:ml-0 focus:outline-none focus:ring-4 focus:ring-caramel-100 disabled:cursor-not-allowed disabled:text-gray-400 disabled:dark:text-gray-500',
+                base: 'flex items-center justify-center rounded-t-lg p-4 text-sm font-medium first:ml-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
                 variant: {
                     underline: {
                         base: 'rounded-t-lg',
                         active: {
-                            on: 'active rounded-t-lg border-b-2 border-caramel text-caramel dark:border-caramel-100 dark:text-caramel-100'
+                            on: 'active rounded-t-lg border-b-[3px] border-ink text-ink',
+                            off: 'border-b-[3px] border-transparent text-ink/60 hover:border-ink/30 hover:text-ink'
                         }
                     }
                 }
+            }
+        }
+    },
+    pagination: {
+        pages: {
+            selector: {
+                active: 'bg-butter text-[#4a2511] font-bold'
             }
         }
     }
@@ -109,19 +139,18 @@ const customTheme: CustomFlowbiteTheme = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
     return (
-        <html lang="en" suppressHydrationWarning className={newsreader.variable}>
+        <html lang="en" suppressHydrationWarning>
         <head>
             <ThemeModeScript mode="auto"/>
             <link rel="icon" href="/assets/logo.png" sizes="any"/>
-            <meta name="theme-color" content="#f6f1e9"/>
         </head>
         <body className="antialiased">
-        <NextTopLoader showSpinner={false} color="#a63a1d"/>
+        <NextTopLoader showSpinner={false} color="#e8603c"/>
         <Flowbite theme={{ theme: customTheme }}>
             {children}
         </Flowbite>
         <CookiesBoundary><Toaster/></CookiesBoundary>
-        <p aria-hidden className="fixed bottom-2 right-2 secondary text-xs pointer-events-auto"><a
+        <p aria-hidden className="fixed bottom-2 right-2 secondary text-xs"><a
             href="https://beian.miit.gov.cn">{process.env.BOTTOM_TEXT}</a></p>
         </body>
         </html>

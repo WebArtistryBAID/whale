@@ -12,47 +12,34 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                display: [ 'system-ui', '-apple-system', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif' ],
-                body: [ 'system-ui', '-apple-system', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif' ],
-                // Latin serif for numbers, prices and the wordmark; CJK falls back to the system serif
-                serif: [ 'var(--font-newsreader)', '"Songti SC"', '"STSong"', '"Noto Serif CJK SC"', '"Source Han Serif SC"', 'serif' ]
+                display: [ 'system-ui', '-apple-system', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif' ],
+                body: [ 'system-ui', '-apple-system', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif' ],
+                // Rounded cartoon face for headings, names and prices (self-hosted, OFL)
+                toon: [ '"ZCOOL KuaiLe"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif' ]
             },
             colors: {
-                'coffee-1': '#f6f1e9',
+                // Colours are CSS variables so dark mode can swap the whole palette (see globals.css)
+                ink: 'rgb(var(--ink) / <alpha-value>)',
+                cream: 'rgb(var(--cream) / <alpha-value>)',
+                paper: 'rgb(var(--paper) / <alpha-value>)',
+                butter: 'rgb(var(--butter) / <alpha-value>)',
+                latte: 'rgb(var(--latte) / <alpha-value>)',
+                tomato: 'rgb(var(--tomato) / <alpha-value>)',
+                whale: 'rgb(var(--whale) / <alpha-value>)',
+                mint: 'rgb(var(--mint) / <alpha-value>)',
+                blush: 'rgb(var(--blush) / <alpha-value>)',
+                'coffee-1': 'rgb(var(--cream) / <alpha-value>)',
                 'coffee-2': '#d79771',
                 'coffee-3': '#b05b3b',
-                'coffee-4': '#241a14',
-                // Paper
-                cream: {
-                    DEFAULT: '#f6f1e9',
-                    100: '#eee6d8',
-                    200: '#e0d5c3',
-                    300: '#cbbca5'
-                },
-                // Ink
-                espresso: {
-                    DEFAULT: '#241a14',
-                    500: '#6e6056',
-                    700: '#211914',
-                    900: '#16100c'
-                },
-                // Brick red from the logo's latte art
-                caramel: {
-                    DEFAULT: '#a63a1d',
-                    50: '#f7e9e2',
-                    100: '#eaa58a',
-                    500: '#a63a1d',
-                    600: '#8c3017',
-                    700: '#6f2512'
-                },
-                leaf: '#3d6b4f'
+                'coffee-4': '#753422'
             },
-            borderRadius: {
-                DEFAULT: '0.375rem'
+            borderWidth: {
+                toon: '2.5px'
             },
             boxShadow: {
-                card: 'none',
-                lift: '0 12px 32px -12px rgba(36, 26, 20, 0.25)'
+                toon: '4px 4px 0 0 rgb(var(--ink))',
+                'toon-sm': '2px 2px 0 0 rgb(var(--ink))',
+                'toon-lg': '6px 6px 0 0 rgb(var(--ink))'
             }
         }
     },

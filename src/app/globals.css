@@ -2,100 +2,131 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Whale Café cartoon palette. See docs/DESIGN.md.
+ * Values are RGB channels so Tailwind can apply opacity (e.g. bg-ink/10).
+ */
+:root {
+    --ink: 74 37 17;        /* outlines and text: dark coffee */
+    --cream: 255 241 214;   /* page background: butter cream */
+    --paper: 255 251 242;   /* stickers and cards */
+    --butter: 255 200 69;   /* primary buttons */
+    --latte: 242 200 148;   /* secondary fills */
+    --tomato: 232 96 60;    /* sale tags, warnings */
+    --whale: 158 216 240;   /* the beluga's water */
+    --mint: 139 215 166;    /* open / done */
+    --blush: 255 179 179;   /* cheeks and soft highlights */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ink: 255 236 204;
+        --cream: 38 24 16;
+        --paper: 58 38 26;
+        --butter: 246 186 52;
+        --latte: 120 80 50;
+        --tomato: 255 128 96;
+        --whale: 60 120 150;
+        --mint: 70 150 100;
+        --blush: 170 90 90;
+    }
+}
+
 body {
-    @apply bg-cream dark:bg-espresso-900 text-espresso dark:text-stone-200;
+    @apply bg-cream text-ink;
     -webkit-tap-highlight-color: transparent;
-    font-feature-settings: "palt";
 }
 
 .bg-default {
-    @apply bg-cream dark:bg-espresso-900 text-espresso dark:text-stone-200;
+    @apply bg-cream text-ink;
 }
 
 @layer components {
-    /* A paper panel for grouping content */
-    .card {
-        @apply bg-[#fffdf9] dark:bg-espresso-700 rounded-lg border border-cream-200 dark:border-white/10;
+    /* A sticker: thick ink outline and a hard offset shadow */
+    .toon {
+        @apply bg-paper border-toon border-ink rounded-[1.4rem] shadow-toon;
     }
 
-    .price {
-        @apply font-serif font-semibold tabular-nums text-espresso dark:text-stone-100;
+    .toon-flat {
+        @apply bg-paper border-toon border-ink rounded-[1.4rem];
     }
 
-    .rule {
-        @apply border-t border-cream-200 dark:border-white/10;
+    /* Clickable sticker that sinks when pressed */
+    .toon-press {
+        @apply transition-[transform,box-shadow] duration-100 hover:-translate-x-px hover:-translate-y-px hover:shadow-toon-lg
+        active:translate-x-[3px] active:translate-y-[3px] active:shadow-none;
     }
 
-    /* Dotted leader between a menu item's name and its price */
-    .leader {
-        @apply flex-1 min-w-4 border-b border-dotted border-cream-300 dark:border-white/20 mx-2 translate-y-[-0.3em];
+    .toon-btn {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border-toon border-ink bg-butter px-6 h-12
+        font-toon text-lg text-[#4a2511] shadow-toon transition-[transform,box-shadow] duration-100
+        hover:-translate-y-px hover:shadow-toon-lg active:translate-x-[3px] active:translate-y-[3px] active:shadow-none;
     }
 
-    /* A perforated tear line with notches, like a receipt or a ticket stub */
-    .perforation {
-        @apply relative border-t border-dashed border-cream-300 dark:border-white/20;
+    .toon-btn-ghost {
+        @apply toon-btn bg-paper text-ink;
     }
 
-    .perforation::before,
-    .perforation::after {
+    /* Butter-cream background with a faint polka-dot pattern */
+    .dots {
+        background-color: rgb(var(--cream));
+        background-image: radial-gradient(rgb(var(--ink) / 0.07) 1.5px, transparent 1.6px);
+        background-size: 22px 22px;
+    }
+
+    /* Highlighter stroke behind a word */
+    .marker {
+        @apply relative z-0 inline-block;
+    }
+
+    .marker::after {
         content: '';
-        @apply absolute -top-2.5 h-5 w-5 rounded-full bg-cream dark:bg-espresso-900 border border-cream-200 dark:border-white/10;
+        @apply absolute -z-10 left-[-0.15em] right-[-0.15em] bottom-[0.08em] h-[0.42em] rounded-full bg-butter;
     }
 
-    .perforation::before {
-        @apply -left-[0.7rem] border-l-transparent border-t-transparent border-b-transparent;
+    .price-tag {
+        @apply inline-block font-toon text-[#4a2511] bg-butter border-toon border-ink rounded-lg px-2 leading-7 shadow-toon-sm;
     }
-
-    .perforation::after {
-        @apply -right-[0.7rem] border-r-transparent border-t-transparent border-b-transparent;
-    }
-}
-
-.scrollbar-none {
-    scrollbar-width: none;
-}
-
-.scrollbar-none::-webkit-scrollbar {
-    display: none;
 }
 
 .messagebox-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    @apply bg-cream dark:bg-espresso-900 h-screen w-screen;
+    @apply dots h-screen w-screen;
 }
 
 .messagebox {
-    @apply bg-[#fffdf9] text-espresso p-8 rounded-lg border border-cream-200 max-w-md max-h-96 overflow-y-auto;
+    @apply toon p-8 max-w-md max-h-96 overflow-y-auto;
 }
 
 .btn {
-    @apply w-full rounded-md bg-caramel hover:bg-caramel-600 transition-colors duration-150 p-2 text-white text-center;
+    @apply toon-btn w-full;
 }
 
 .btn-icon-only {
-    @apply rounded-md bg-caramel hover:bg-caramel-600 transition-colors duration-150 p-2 text-white flex justify-center items-center;
+    @apply rounded-full border-toon border-ink bg-butter p-2 text-[#4a2511] flex justify-center items-center shadow-toon-sm
+    transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
 }
 
 a.inline {
-    @apply text-caramel-600 dark:text-caramel-100 hover:underline;
+    @apply text-ink underline decoration-butter decoration-[3px] underline-offset-2 hover:decoration-tomato;
 }
 
 h1 {
-    @apply font-display text-3xl font-bold;
+    @apply font-toon text-3xl;
 }
 
 h2 {
-    @apply font-display text-2xl;
+    @apply font-toon text-2xl;
 }
 
 h3 {
-    @apply font-display text-xl;
+    @apply font-toon text-xl;
 }
 
 .secondary {
-    @apply text-espresso-500 dark:text-stone-400;
+    @apply text-ink/65;
 }
 
 .container {
@@ -111,11 +142,11 @@ h3 {
 }
 
 .tr {
-    @apply bg-white dark:border-gray-700 dark:bg-gray-800;
+    @apply bg-paper border-ink/15;
 }
 
 .th {
-    @apply whitespace-nowrap font-medium text-gray-900 dark:text-white;
+    @apply whitespace-nowrap font-medium text-ink;
 }
 
 b {
@@ -126,13 +157,45 @@ i {
     @apply italic;
 }
 
-@keyframes fadeIn {
+.scrollbar-none {
+    scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+
+@keyframes pop-in {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(16px) scale(0.97);
     }
     to {
         opacity: 1;
         transform: none;
+    }
+}
+
+.pop-in {
+    animation: pop-in 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* The mascot bobs gently on the water */
+@keyframes bob {
+    0%, 100% {
+        transform: translateY(0) rotate(-2deg);
+    }
+    50% {
+        transform: translateY(-6px) rotate(2deg);
+    }
+}
+
+.bob {
+    animation: bob 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bob, .pop-in {
+        animation: none;
     }
 }

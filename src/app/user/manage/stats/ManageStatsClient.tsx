@@ -15,7 +15,7 @@ function Block({ title, hideTitle, center, children }: {
     center: boolean,
     children: ReactNode
 }) {
-    return <div aria-label={title} className="card p-5">
+    return <div aria-label={title} className="toon p-5">
         <h3 style={{ display: hideTitle ? 'none' : 'block' }}
             className="text-sm secondary font-normal mb-2">{title}</h3>
         <div className={center ? 'flex flex-col justify-center items-center w-full' : 'w-full'}>
@@ -311,14 +311,14 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                     bar: {
                                         horizontal: false,
                                         isDumbbell: true,
-                                        dumbbellColors: [ [ '#d9b48a', '#a63a1d' ] ]
+                                        dumbbellColors: [ [ '#fde047', '#f97316' ] ]
                                     }
                                 },
-                                colors: [ '#d9b48a', '#a63a1d' ],
+                                colors: [ '#fde047', '#f97316' ],
                                 fill: {
                                     type: 'gradient',
                                     gradient: {
-                                        gradientToColors: [ '#a63a1d' ],
+                                        gradientToColors: [ '#f97316' ],
                                         inverseColors: false,
                                         stops: [ 0, 100 ]
                                     }
@@ -340,7 +340,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                         x: days[i].slice(0, 10),
                                         y: parseFloat(data.averageOrderValuePerUnit[i]),
                                         marker: {
-                                            strokeColor: '#6e6056'
+                                            strokeColor: '#fbbf24'
                                         },
                                         label: {
                                             text: `¥${Decimal(data.averageOrderValuePerUnit[i]).toFixed(2)}`
@@ -361,14 +361,14 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                     bar: {
                                         horizontal: false,
                                         isDumbbell: true,
-                                        dumbbellColors: [ [ '#d9b48a', '#a63a1d' ] ]
+                                        dumbbellColors: [ [ '#fde047', '#f97316' ] ]
                                     }
                                 },
-                                colors: [ '#d9b48a', '#a63a1d' ],
+                                colors: [ '#fde047', '#f97316' ],
                                 fill: {
                                     type: 'gradient',
                                     gradient: {
-                                        gradientToColors: [ '#a63a1d' ],
+                                        gradientToColors: [ '#f97316' ],
                                         inverseColors: false,
                                         stops: [ 0, 100 ]
                                     }
@@ -390,7 +390,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                         x: days[i].slice(0, 10),
                                         y: data.averageOrderCupsPerUnit[i],
                                         marker: {
-                                            strokeColor: '#6e6056'
+                                            strokeColor: '#fbbf24'
                                         },
                                         label: {
                                             text: Decimal(data.averageOrderCupsPerUnit[i]).toFixed(2)
