@@ -3,27 +3,51 @@
 @tailwind utilities;
 
 body {
-    @apply bg-cream dark:bg-espresso-900 text-espresso dark:text-stone-100;
+    @apply bg-cream dark:bg-espresso-900 text-espresso dark:text-stone-200;
     -webkit-tap-highlight-color: transparent;
+    font-feature-settings: "palt";
 }
 
 .bg-default {
-    @apply bg-cream dark:bg-espresso-900 text-espresso dark:text-stone-100;
+    @apply bg-cream dark:bg-espresso-900 text-espresso dark:text-stone-200;
 }
 
 @layer components {
-    /* A white surface for grouping content */
+    /* A paper panel for grouping content */
     .card {
-        @apply bg-white dark:bg-espresso-700 rounded-3xl shadow-card border border-cream-200/60 dark:border-white/5;
-    }
-
-    /* Small uppercase label above a section */
-    .eyebrow {
-        @apply text-xs font-semibold tracking-wider uppercase text-caramel-600 dark:text-caramel-100;
+        @apply bg-[#fffdf9] dark:bg-espresso-700 rounded-lg border border-cream-200 dark:border-white/10;
     }
 
     .price {
-        @apply font-semibold tabular-nums text-espresso dark:text-white;
+        @apply font-serif font-semibold tabular-nums text-espresso dark:text-stone-100;
+    }
+
+    .rule {
+        @apply border-t border-cream-200 dark:border-white/10;
+    }
+
+    /* Dotted leader between a menu item's name and its price */
+    .leader {
+        @apply flex-1 min-w-4 border-b border-dotted border-cream-300 dark:border-white/20 mx-2 translate-y-[-0.3em];
+    }
+
+    /* A perforated tear line with notches, like a receipt or a ticket stub */
+    .perforation {
+        @apply relative border-t border-dashed border-cream-300 dark:border-white/20;
+    }
+
+    .perforation::before,
+    .perforation::after {
+        content: '';
+        @apply absolute -top-2.5 h-5 w-5 rounded-full bg-cream dark:bg-espresso-900 border border-cream-200 dark:border-white/10;
+    }
+
+    .perforation::before {
+        @apply -left-[0.7rem] border-l-transparent border-t-transparent border-b-transparent;
+    }
+
+    .perforation::after {
+        @apply -right-[0.7rem] border-r-transparent border-t-transparent border-b-transparent;
     }
 }
 
@@ -43,15 +67,15 @@ body {
 }
 
 .messagebox {
-    @apply bg-white text-espresso p-8 rounded-3xl max-w-md max-h-96 overflow-y-auto shadow-lift;
+    @apply bg-[#fffdf9] text-espresso p-8 rounded-lg border border-cream-200 max-w-md max-h-96 overflow-y-auto;
 }
 
 .btn {
-    @apply w-full rounded-full bg-caramel hover:bg-caramel-600 hover:shadow-lg transition-all duration-150 p-2 text-white text-center;
+    @apply w-full rounded-md bg-caramel hover:bg-caramel-600 transition-colors duration-150 p-2 text-white text-center;
 }
 
 .btn-icon-only {
-    @apply rounded-full bg-caramel hover:bg-caramel-600 hover:shadow-lg transition-all duration-150 p-2 text-white flex justify-center items-center;
+    @apply rounded-md bg-caramel hover:bg-caramel-600 transition-colors duration-150 p-2 text-white flex justify-center items-center;
 }
 
 a.inline {
@@ -59,7 +83,7 @@ a.inline {
 }
 
 h1 {
-    @apply font-display text-3xl font-bold tracking-tight;
+    @apply font-display text-3xl font-bold;
 }
 
 h2 {
@@ -71,7 +95,7 @@ h3 {
 }
 
 .secondary {
-    @apply text-stone-500 dark:text-stone-400;
+    @apply text-espresso-500 dark:text-stone-400;
 }
 
 .container {

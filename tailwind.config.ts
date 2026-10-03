@@ -12,36 +12,47 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                display: [ 'system-ui', 'sans-serif' ],
-                body: [ 'system-ui', 'sans-serif' ]
+                display: [ 'system-ui', '-apple-system', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif' ],
+                body: [ 'system-ui', '-apple-system', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif' ],
+                // Latin serif for numbers, prices and the wordmark; CJK falls back to the system serif
+                serif: [ 'var(--font-newsreader)', '"Songti SC"', '"STSong"', '"Noto Serif CJK SC"', '"Source Han Serif SC"', 'serif' ]
             },
             colors: {
-                'coffee-1': '#fbf6ef',
+                'coffee-1': '#f6f1e9',
                 'coffee-2': '#d79771',
                 'coffee-3': '#b05b3b',
-                'coffee-4': '#3d2418',
+                'coffee-4': '#241a14',
+                // Paper
                 cream: {
-                    DEFAULT: '#fbf6ef',
-                    100: '#f6ede1',
-                    200: '#efe0cc'
+                    DEFAULT: '#f6f1e9',
+                    100: '#eee6d8',
+                    200: '#e0d5c3',
+                    300: '#cbbca5'
                 },
+                // Ink
                 espresso: {
-                    DEFAULT: '#3d2418',
-                    700: '#2c1911',
-                    900: '#1c110c'
+                    DEFAULT: '#241a14',
+                    500: '#6e6056',
+                    700: '#211914',
+                    900: '#16100c'
                 },
+                // Brick red from the logo's latte art
                 caramel: {
-                    DEFAULT: '#c06a2b',
-                    50: '#fdf4ec',
-                    100: '#fae4d1',
-                    500: '#c06a2b',
-                    600: '#a85a22',
-                    700: '#8c4a1c'
-                }
+                    DEFAULT: '#a63a1d',
+                    50: '#f7e9e2',
+                    100: '#eaa58a',
+                    500: '#a63a1d',
+                    600: '#8c3017',
+                    700: '#6f2512'
+                },
+                leaf: '#3d6b4f'
+            },
+            borderRadius: {
+                DEFAULT: '0.375rem'
             },
             boxShadow: {
-                card: '0 1px 2px rgba(61, 36, 24, 0.04), 0 4px 16px rgba(61, 36, 24, 0.06)',
-                lift: '0 2px 4px rgba(61, 36, 24, 0.06), 0 12px 32px rgba(61, 36, 24, 0.12)'
+                card: 'none',
+                lift: '0 12px 32px -12px rgba(36, 26, 20, 0.25)'
             }
         }
     },

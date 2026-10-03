@@ -13,8 +13,7 @@ import If from '@/app/lib/If'
 import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@/generated/prisma/browser'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import { useEffect, useState } from 'react'
-import { Alert, Button, Spinner } from 'flowbite-react'
-import { HiChatAlt2, HiClock, HiInformationCircle, HiLocationMarker } from 'react-icons/hi'
+import { Button, Spinner } from 'flowbite-react'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import Link from 'next/link'
 import { isValidPickUpTime } from '@/app/lib/pick-up-times'
@@ -67,110 +66,99 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
         order.type === OrderType.delivery ? t('details.steps.readyDelivery') : t('details.steps.ready')
     ]
 
-    return <div className="max-w-5xl mx-auto px-4 lg:px-8 py-6 lg:py-10">
-        <div className="grid lg:grid-cols-[1fr_22rem] gap-6 lg:gap-8 items-start">
-            <div id="primary-content" className="flex flex-col gap-5" aria-label={t('a11y.waitTime')}>
-                <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-espresso to-caramel
-                text-white p-6 lg:p-8 shadow-lift">
-                    <div aria-hidden className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10"/>
-                    <p className="text-sm text-white/70 mb-1">{t('details.orderNumberPrompt')}</p>
-                    <h1 className="text-6xl lg:text-7xl font-bold tabular-nums tracking-tight mb-6">
-                        #{order.id}
-                        <span className="sr-only">{t('a11y.orderNumber')}</span>
-                    </h1>
-
-                    <If condition={step > 0}>
-                        <ol className="flex items-center gap-2 mb-6" aria-hidden>
-                            {steps.map((label, index) => <li key={label} className="flex-1">
-                                <div className={`h-1.5 rounded-full mb-2 ${index < step ? 'bg-white' : 'bg-white/25'}`}/>
-                                <span className={`text-xs ${index < step ? 'font-semibold' : 'text-white/60'}`}>{label}</span>
-                            </li>)}
-                        </ol>
-                    </If>
-
-                    <div aria-label={t('a11y.waitTime')} className="min-h-12">
+    return <div className="max-w-5xl mx-auto px-4 lg:px-8 py-6 lg:py-12">
+        <div className="grid lg:grid-cols-[1fr_22rem] gap-8 lg:gap-16 items-start">
+            <div id="primary-content" className="flex flex-col" aria-label={t('a11y.waitTime')}>
+                <section className="card">
+                    <div className="px-6 lg:px-8 pt-6 pb-7 text-center">
+                        <p className="text-sm secondary">{t('details.orderNumberPrompt')}</p>
+                        <h1 className="font-serif text-7xl lg:text-8xl font-semibold tabular-nums my-3">
+                            <span className="text-4xl lg:text-5xl align-top mr-1 secondary">No.</span>{order.id}
+                            <span className="sr-only">{t('a11y.orderNumber')}</span>
+                        </h1>
+                        <If condition={order.type === OrderType.pickUp && isValidPickUpTime(order.pickUpTime)}>
+                            <p className="text-sm">
+                                <span className="secondary">{t('details.pickUpTime')}</span>
+                                <span className="ml-2 font-semibold">{t(`checkout.pickUpTimeOptions.${order.pickUpTime}`)}</span>
+                            </p>
+                        </If>
+                    </div>
+                    <div className="perforation"/>
+                    <div className="px-6 lg:px-8 py-6" aria-label={t('a11y.waitTime')}>
+                        <If condition={step > 0}>
+                            <ol className="flex items-center mb-5 text-sm" aria-hidden>
+                                {steps.map((label, index) => <li key={label}
+                                                                 className={`flex items-center ${index > 0 ? 'flex-1' : ''}`}>
+                                    {index > 0 ? <span className={`flex-1 h-px mx-3 ${index < step ? 'bg-espresso dark:bg-stone-300' : 'bg-cream-300 dark:bg-white/20'}`}/> : null}
+                                    <span className={`h-6 w-6 rounded-full border flex items-center justify-center text-xs mr-2
+                                    ${index < step ? 'bg-espresso border-espresso text-cream dark:bg-stone-200 dark:border-stone-200 dark:text-espresso' : 'border-cream-300 dark:border-white/30 secondary'}`}>
+                                        {index < step ? '✓' : index + 1}
+                                    </span>
+                                    <span className={index < step ? 'font-semibold' : 'secondary'}>{label}</span>
+                                </li>)}
+                            </ol>
+                        </If>
                         <If condition={isActive}>
                             <If condition={order.status === OrderStatus.waiting}>
                                 <If condition={estimate != null}>
-                                    <p className="text-2xl font-bold"><Trans t={t} i18nKey="details.waitTime.minutes"
-                                                                             count={estimate?.time ?? -1}/></p>
-                                    <p className="text-white/80"><Trans t={t} i18nKey="details.waitTime.cups"
-                                                                        count={estimate?.cups ?? -1}/></p>
-                                    <p className="text-xs text-white/60 mt-2">{t('details.waitTime.finePrint')}</p>
+                                    <p className="text-xl font-bold"><Trans t={t} i18nKey="details.waitTime.minutes"
+                                                                            count={estimate?.time ?? -1}/>
+                                        <span className="ml-3 text-sm font-normal secondary"><Trans t={t}
+                                                                                                    i18nKey="details.waitTime.cups"
+                                                                                                    count={estimate?.cups ?? -1}/></span>
+                                    </p>
+                                    <p className="text-xs secondary mt-1">{t('details.waitTime.finePrint')}</p>
                                 </If>
                                 <If condition={estimate == null}>
                                     <Spinner color="warning"/>
                                 </If>
                             </If>
                             <If condition={order.status === OrderStatus.done}>
-                                <p className="text-2xl font-bold">{t(`details.waitTime.done_${order.type}`)}</p>
+                                <p className="text-xl font-bold">{t(`details.waitTime.done_${order.type}`)}</p>
                             </If>
+                        </If>
+                        <If condition={order.paymentStatus === PaymentStatus.refunded}>
+                            <p className="font-semibold text-caramel dark:text-caramel-100">{t('details.refundedPrompt')}</p>
+                        </If>
+                        <If condition={order.paymentStatus === PaymentStatus.notPaid}>
+                            <p className="font-bold mb-1">{t('details.paymentTitle')}</p>
+                            <p className="secondary text-sm mb-4">{order.paymentMethod === PaymentMethod.payLater ? t('details.paymentPromptPayLater') : t('details.paymentPrompt')}</p>
+                            <div className="flex gap-3">
+                                <Link href={`/order/checkout?order=${order.id}`}>
+                                    <Button color="warning">{t('details.payNow')}</Button>
+                                </Link>
+                                <If condition={order.paymentMethod !== PaymentMethod.payLater}>
+                                    <Button color="gray" onClick={cancel}>{t('details.cancelOrder')}</Button>
+                                </If>
+                            </div>
                         </If>
                     </div>
                 </section>
 
-                <If condition={order.paymentStatus === PaymentStatus.notPaid}>
-                    <section className="card p-5 lg:p-6 border-amber-300/70 dark:border-amber-700/50">
-                        <p className="font-bold mb-1">{t('details.paymentTitle')}</p>
-                        <p className="secondary text-sm mb-4">{order.paymentMethod === PaymentMethod.payLater ? t('details.paymentPromptPayLater') : t('details.paymentPrompt')}</p>
-                        <div className="flex gap-3">
-                            <Link href={`/order/checkout?order=${order.id}`}>
-                                <Button pill color="warning">{t('details.payNow')}</Button>
-                            </Link>
-                            <If condition={order.paymentMethod !== PaymentMethod.payLater}>
-                                <Button pill color="gray" onClick={cancel}>{t('details.cancelOrder')}</Button>
-                            </If>
-                        </div>
-                    </section>
-                </If>
-
-                <If condition={order.paymentStatus === PaymentStatus.refunded}>
-                    <Alert color="warning" rounded className="rounded-3xl" icon={HiInformationCircle}>
-                        {t('details.refundedPrompt')}
-                    </Alert>
-                </If>
-
                 <If condition={shoppingCart.onSiteOrderMode}>
-                    <Link href="/order" className="self-start">
-                        <Button color="warning" pill>{t('details.onSiteContinue')}</Button>
+                    <Link href="/order" className="self-start mt-5">
+                        <Button color="warning">{t('details.onSiteContinue')}</Button>
                     </Link>
                 </If>
 
-                <section className="card p-5 lg:p-6">
-                    <p className="font-bold mb-3">{t('details.goodToKnow')}</p>
-                    <ul className="flex flex-col gap-3 text-sm">
+                <section className="mt-8">
+                    <h2 className="text-base font-bold mb-3">{t('details.goodToKnow')}</h2>
+                    <ul className="text-sm divide-y divide-cream-200 dark:divide-white/10 border-y border-cream-200 dark:border-white/10">
                         <If condition={order.type === OrderType.pickUp}>
-                            <li className="flex gap-3">
-                                <HiLocationMarker className="text-lg text-caramel flex-shrink-0 mt-0.5"/>
-                                <span><Trans t={t} i18nKey="details.pickUpPrompt"
-                                             components={{ 1: <span className="font-bold" key="highlight"/> }}/></span>
-                            </li>
+                            <li className="py-3"><Trans t={t} i18nKey="details.pickUpPrompt"
+                                                         components={{ 1: <span className="font-bold" key="highlight"/> }}/></li>
                         </If>
-                        <li className="flex gap-3">
-                            <HiChatAlt2 className="text-lg text-caramel flex-shrink-0 mt-0.5"/>
-                            <span>{t('details.contactPrompt')}</span>
-                        </li>
+                        <li className="py-3">{t('details.contactPrompt')}</li>
                         <If condition={order.paymentStatus === PaymentStatus.paid}>
-                            <li className="flex gap-3">
-                                <HiInformationCircle className="text-lg text-caramel flex-shrink-0 mt-0.5"/>
-                                <span>{t('details.refundTip')}</span>
-                            </li>
+                            <li className="py-3">{t('details.refundTip')}</li>
                         </If>
                     </ul>
                 </section>
             </div>
 
-            <aside className="card p-5 lg:p-6 lg:sticky lg:top-24 flex flex-col gap-5" aria-label={t('a11y.orderedItems')}>
-                <If condition={order.type === OrderType.pickUp && isValidPickUpTime(order.pickUpTime)}>
-                    <div className="rounded-2xl bg-caramel-50 dark:bg-white/5 p-4 flex items-center gap-3">
-                        <HiClock className="text-2xl text-caramel"/>
-                        <div>
-                            <p className="text-xs secondary">{t('details.pickUpTime')}</p>
-                            <p className="font-bold">{t(`checkout.pickUpTimeOptions.${order.pickUpTime}`)}</p>
-                        </div>
-                    </div>
-                </If>
-                <div className="flex flex-col gap-4">
+            <aside className="card lg:sticky lg:top-24 flex flex-col" aria-label={t('a11y.orderedItems')}>
+                <h2 className="text-base font-bold px-6 pt-5 pb-4">{t('checkout.orderDetails')}</h2>
+                <div className="flex flex-col gap-4 px-6 pb-5">
                     {order.items.map((item, index) =>
                         <UIOrderedItemTemplate key={index} item={{
                             item: item.itemType,
@@ -178,9 +166,10 @@ export default function OrderDetailsClient({ initialOrder, uploadPrefix }: {
                             options: item.appliedOptions
                         }} index={-1} uploadPrefix={uploadPrefix} price={item.price}/>)}
                 </div>
-                <div className="flex items-baseline justify-between border-t border-dashed border-cream-200 dark:border-white/10 pt-4">
-                    <span className="font-semibold">{t('checkout.total')}</span>
-                    <span className="price text-2xl">¥{order.totalPrice}</span>
+                <div className="perforation"/>
+                <div className="flex items-baseline px-6 pt-5 pb-6">
+                    <span className="font-semibold mr-auto">{t('checkout.total')}</span>
+                    <span className="price text-3xl">¥{order.totalPrice}</span>
                 </div>
             </aside>
         </div>

@@ -85,12 +85,12 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                 </If>
             </div>
 
-            <div className="border-amber-50 dark:border-amber-900 border shadow-lg rounded-3xl p-5 col-span-1"
+            <div className="card p-5 col-span-1"
                  aria-label={t('today.status')}>
                 <div className="flex w-full h-full gap-3 justify-center items-center">
                     <button
                         aria-label={t('today.waiting') + (order.status === OrderStatus.waiting ? t('selected') : '')}
-                        className="w-40 h-40 rounded-3xl bg-white dark:bg-espresso-700 shadow-card border border-cream-200/60 dark:border-white/5
+                        className="w-40 h-40 rounded-lg bg-[#fffdf9] dark:bg-espresso-700 border border-cream-200 dark:border-white/10
                     hover:bg-caramel-50 dark:hover:bg-white/10 transition-colors duration-100
                     flex flex-col text-center items-center justify-center p-5" disabled={true}>
                         <HiClock
@@ -103,7 +103,7 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                     </button>
 
                     <button aria-label={t('today.done') + (order.status === OrderStatus.done ? t('selected') : '')}
-                            className="w-40 h-40 rounded-3xl bg-white dark:bg-espresso-700 shadow-card border border-cream-200/60 dark:border-white/5
+                            className="w-40 h-40 rounded-lg bg-[#fffdf9] dark:bg-espresso-700 border border-cream-200 dark:border-white/10
                     hover:bg-caramel-50 dark:hover:bg-white/10 transition-colors duration-100
                     flex flex-col text-center items-center justify-center p-5"
                             disabled={order.status === OrderStatus.done || loading}

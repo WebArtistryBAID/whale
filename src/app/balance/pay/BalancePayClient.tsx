@@ -146,7 +146,7 @@ export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
 
     return <div className="flex justify-center items-center flex-col bg-green-50 dark:bg-green-950 h-screen w-screen">
         <div
-            className="lg:rounded-3xl p-4 lg:p-8 xl:p-16 bg-white dark:bg-gray-900 2xl:w-1/2 xl:w-2/3 lg:w-3/4 w-full h-full lg:h-auto">
+            className="lg:rounded-lg lg:border lg:border-cream-200 p-4 lg:p-8 xl:p-16 bg-[#fffdf9] dark:bg-espresso-700 2xl:w-1/2 xl:w-2/3 lg:w-3/4 w-full h-full lg:h-auto">
             <div className="flex items-center mb-5">
                 <h1 className="mr-auto">
                     <img src="/assets/brand/wx-pay-light.svg" alt={t('wechatPay.title')}
@@ -182,7 +182,7 @@ export default function BalancePayClient({ trans }: { trans: UserAuditLog }) {
                             <If condition={qrCodeShowProcessing}>
                                 <p className="mb-3">{t('wechatPay.processing')}</p>
                             </If>
-                            <div aria-label={t('a11y.qrCode')} className="rounded-3xl border-white border-[2rem] mb-3"
+                            <div aria-label={t('a11y.qrCode')} className="rounded-lg border-white border-[2rem] mb-3"
                                  style={{ width: 'calc(200px + 4rem)', height: 'calc(200px + 4rem)' }}>
                                 <QRCode value={qrCode ?? 'Please wait...'} size={200} className="aspect-square"/>
                             </div>

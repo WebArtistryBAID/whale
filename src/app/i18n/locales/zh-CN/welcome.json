@@ -11,9 +11,13 @@
   "recentOrder": "近期订单",
   "recentOrderSub": "查看订单详情",
   "orderNumber": "(订单号)",
-  "tagline": "现做咖啡与茶饮。在线点单，到店即取。",
+  "tagline": "校园里的一间小咖啡馆。在线点单，到大厅柜台取餐。",
   "statusLive": "营业中",
   "statusPreorder": "接受预订",
-  "statusClosed": "休息中",
-  "hours": "营业时间 {{open}} – {{close}}"
+  "statusClosed": "已打烊",
+  "hours": "今日 {{open}} – {{close}}",
+  "menuTitle": "今日菜单",
+  "viewMenu": "查看完整菜单",
+  "startOrder": "开始点单",
+  "soldOut": "售罄"
 }

@@ -79,8 +79,8 @@ export default function UserDashboardClient({ user }: { user: User }) {
             <h1 className="mb-5">{t('dashboard.title')}</h1>
             <div className="flex w-full items-center gap-4 mb-5">
                 <div
-                    className="bg-gradient-to-br from-caramel to-espresso text-white rounded-full h-16 w-16 shadow-card flex justify-center items-center">
-                    <HiUser className="text-white text-3xl"/>
+                    className="border border-espresso dark:border-stone-300 rounded-full h-16 w-16 flex justify-center items-center">
+                    <HiUser className="text-3xl"/>
                 </div>
                 <div className="font-display">
                     <h2>{user.name}</h2>

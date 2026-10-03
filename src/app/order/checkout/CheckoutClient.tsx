@@ -59,15 +59,15 @@ function OptionTile({ label, icon: Icon, selected, select, disabled }: {
 }) {
     const { t } = useTranslationClient('order')
     return <button onClick={select} disabled={disabled} aria-pressed={selected}
-                   className={`relative flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-medium
-                   transition-all disabled:opacity-40 disabled:cursor-not-allowed
-                   ${selected
-                       ? 'border-caramel bg-caramel-50 ring-2 ring-caramel/30 dark:bg-caramel/10'
-                       : 'border-cream-200 bg-white enabled:hover:border-caramel/50 dark:border-white/10 dark:bg-white/5'}`}>
-        {Icon != null ? <Icon className={`text-xl flex-shrink-0 ${selected ? 'text-caramel' : 'secondary'}`}/> : null}
-        <span className="flex-1">{label}</span>
-        <span aria-hidden className={`h-4 w-4 rounded-full border-2 flex-shrink-0
-        ${selected ? 'border-caramel bg-caramel shadow-[inset_0_0_0_2px_white] dark:shadow-[inset_0_0_0_2px_#2c1911]' : 'border-stone-300 dark:border-white/20'}`}/>
+                   className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors
+                   disabled:opacity-40 disabled:cursor-not-allowed
+                   ${selected ? 'bg-cream-100 dark:bg-white/5' : 'enabled:hover:bg-cream-100/60 dark:enabled:hover:bg-white/5'}`}>
+        <span aria-hidden className={`h-[18px] w-[18px] rounded-full border flex-shrink-0 flex items-center justify-center
+        ${selected ? 'border-espresso dark:border-stone-200' : 'border-cream-300 dark:border-white/30'}`}>
+            {selected ? <span className="h-2.5 w-2.5 rounded-full bg-espresso dark:bg-stone-200"/> : null}
+        </span>
+        <span className={`flex-1 ${selected ? 'font-semibold' : ''}`}>{label}</span>
+        {Icon != null ? <Icon className="text-lg flex-shrink-0 secondary"/> : null}
         <If condition={selected}>
             <span className="sr-only">{t('a11y.selected')}</span>
         </If>
@@ -97,16 +97,21 @@ function PickUpTimeButton({ value, selected, select, disabled }: {
 }
 
 function Section({ title, children }: { title: string, children: ReactNode }) {
-    return <section className="card p-5 lg:p-6" aria-label={title}>
-        <h2 className="text-base font-bold mb-4">{title}</h2>
+    return <section className="py-6 border-t border-cream-200 dark:border-white/10" aria-label={title}>
+        <h2 className="text-base font-bold mb-3">{title}</h2>
         {children}
     </section>
 }
 
+function OptionGroup({ children }: { children: ReactNode }) {
+    return <div className="card overflow-hidden divide-y divide-cream-200 dark:divide-white/10 mb-3">{children}</div>
+}
+
 function SummaryRow({ label, value, strong }: { label: string, value: ReactNode, strong?: boolean }) {
-    return <div className="flex items-baseline justify-between gap-3">
-        <span className={strong ? 'font-semibold' : 'secondary text-sm'}>{label}</span>
-        <span className={strong ? 'price text-2xl' : 'tabular-nums'}>{value}</span>
+    return <div className="flex items-baseline">
+        <span className={strong ? 'font-semibold' : 'text-sm secondary'}>{label}</span>
+        {strong ? null : <span className="leader" aria-hidden/>}
+        <span className={strong ? 'price text-3xl ml-auto' : 'text-sm tabular-nums'}>{value}</span>
     </div>
 }
 
@@ -411,17 +416,17 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
             </ModalFooter>
         </Modal>
 
-        <div className="max-w-6xl mx-auto px-4 lg:px-8 py-6 lg:py-10">
-            <h1 className="mb-6">{mode === 'recharge' ? t('checkout.recharge') : t('checkout.title')}</h1>
-            <div className="grid lg:grid-cols-[1fr_24rem] gap-6 lg:gap-8 items-start">
-                <div id="primary-content" className="flex flex-col gap-5" aria-label={t('checkout.title')}>
+        <div className="max-w-6xl mx-auto px-4 lg:px-8 py-6 lg:py-12">
+            <h1 className="mb-6 text-3xl lg:text-4xl">{mode === 'recharge' ? t('checkout.recharge') : t('checkout.title')}</h1>
+            <div className="grid lg:grid-cols-[1fr_24rem] gap-6 lg:gap-16 items-start">
+                <div id="primary-content" className="flex flex-col" aria-label={t('checkout.title')}>
                     <If condition={deliveryEnabled && mode === 'cart'}>
-                        <div className="inline-flex self-start rounded-full bg-cream-100 dark:bg-white/5 p-1">
+                        <div className="inline-flex self-start rounded-md border border-cream-300 dark:border-white/20 p-0.5 mb-6">
                             {[ false, true ].map(delivery =>
                                 <button key={delivery ? 'delivery' : 'pickUp'} onClick={() => setUseDelivery(delivery)}
                                         aria-pressed={useDelivery === delivery}
-                                        className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors
-                                        ${useDelivery === delivery ? 'bg-white dark:bg-espresso-700 shadow-card' : 'secondary'}`}>
+                                        className={`rounded px-5 py-1.5 text-sm font-semibold transition-colors
+                                        ${useDelivery === delivery ? 'bg-espresso text-cream dark:bg-stone-200 dark:text-espresso' : 'secondary'}`}>
                                     {delivery ? t('checkout.delivery') : t('checkout.pickUp')}
                                     <If condition={useDelivery === delivery}>
                                         <span className="sr-only">{t('a11y.selected')}</span>
@@ -431,7 +436,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                     </If>
 
                     <Section title={t('checkout.paymentMethod')}>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <OptionGroup>
                             <PaymentMethodButton paymentMethod={PaymentMethod.wxPay}
                                                  selected={paymentMethod === PaymentMethod.wxPay}
                                                  disabled={loading}
@@ -461,7 +466,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                                          select={() => setPaymentMethod(PaymentMethod.payLater)}/>
                                 </If>
                             </If>
-                        </div>
+                        </OptionGroup>
 
                         <div aria-label={t('a11y.paymentMethods')} className="flex flex-col gap-1 text-sm secondary">
                             <If condition={paymentMethod === PaymentMethod.stripe}>
@@ -487,12 +492,12 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
 
                     <If condition={mode !== 'recharge' && (mode === 'cart' ? !useDelivery : existingOrder?.type === OrderType.pickUp)}>
                         <Section title={t('checkout.pickUpTime')}>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                            <OptionGroup>
                                 {PICK_UP_TIME_OPTIONS.map(option => <PickUpTimeButton key={option} value={option}
                                                                                       selected={pickUpTime === option}
                                                                                       disabled={loading}
                                                                                       select={() => setPickUpTime(option)}/>)}
-                            </div>
+                            </OptionGroup>
                             <p className="secondary text-sm">{t('checkout.pickUpTimeMessage')}</p>
                         </Section>
                     </If>
@@ -525,11 +530,11 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                     </If>
                 </div>
 
-                <aside className="card p-5 lg:p-6 lg:sticky lg:top-24 flex flex-col gap-5"
+                <aside className="card lg:sticky lg:top-24 flex flex-col"
                        aria-label={t('checkout.orderDetails')}>
-                    <h2 className="text-base font-bold">{t('checkout.orderDetails')}</h2>
+                    <h2 className="text-base font-bold px-6 pt-5 pb-4">{t('checkout.orderDetails')}</h2>
                     <If condition={mode !== 'recharge'}>
-                        <div className="flex flex-col gap-4 max-h-80 overflow-y-auto -mx-1 px-1 pt-2"
+                        <div className="flex flex-col gap-4 max-h-80 overflow-y-auto px-6 pb-5"
                              aria-label={t('a11y.orderedItems')}>
                             <If condition={mode === 'cart'}>
                                 {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate key={index} item={item}
@@ -547,7 +552,8 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                         </div>
                     </If>
 
-                    <div className="flex flex-col gap-2 border-t border-dashed border-cream-200 dark:border-white/10 pt-4">
+                    <div className="perforation"/>
+                    <div className="flex flex-col gap-2 px-6 pt-5 pb-6">
                         <If condition={mode !== 'recharge'}>
                             <SummaryRow label={t('checkout.wait')} value={waitTime === -1 ? '...' :
                                 <Trans t={t} i18nKey="checkout.waitTime" count={waitTime + shoppingCart.getAmount() * 2}/>}/>
@@ -555,7 +561,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                         <If condition={foundCoupon != null && mode === 'cart'}>
                             <div aria-hidden>
                                 <SummaryRow label={t('checkout.coupon')}
-                                            value={<span className="text-emerald-600">-¥{getActualCouponValue().toString()}</span>}/>
+                                            value={<span className="text-leaf">-¥{getActualCouponValue().toString()}</span>}/>
                             </div>
                             <span className="sr-only"
                                   aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
@@ -564,22 +570,22 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                             <SummaryRow label={t('checkout.stripeFees')}
                                         value={`¥${getStripeFeeAmount(getBaseTotal()).toFixed(2)} (3.5%)`}/>
                         </If>
-                        <div className="mt-2">
+                        <div className="mt-3">
                             <SummaryRow strong label={t('checkout.total')} value={`¥${getDisplayedTotal().toString()}`}/>
                         </div>
                     </div>
 
                     <If condition={hasCheckoutBlockingIssue}>
-                        <CartWarnings title={t('notice')} warnings={[
+                        <div className="px-6 pb-4"><CartWarnings title={t('notice')} warnings={[
                             ...(hasStoreClosedIssue ? [ t('storeClosedModal.simple') ] : []),
                             ...(hasLiveLimitIssue ? [ t('maximumCupsModal.simple') ] : []),
                             ...(hasPreOrderLimitIssue ? [ t('preOrderLimitModal.simple') ] : []),
                             ...(hasInventoryIssues ? [ t('inventory.cartChanged') ] : []),
                             ...inventoryMessages
-                        ]}/>
+                        ]}/></div>
                     </If>
 
-                    <Button fullSized size="lg" pill color="warning" onClick={() => {
+                    <div className="px-6 pb-6"><Button fullSized size="lg" color="warning" onClick={() => {
                         if (mode === 'cart' && me == null && !shoppingCart.onSiteOrderMode) {
                             setShowLoginNag(true)
                             return
@@ -598,7 +604,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                 {t('checkout.pay')} · ¥{getDisplayedTotal().toString()}
                             </If>
                         </If>
-                    </Button>
+                    </Button></div>
                 </aside>
             </div>
         </div>

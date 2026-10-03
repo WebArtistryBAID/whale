@@ -59,7 +59,7 @@ export default function UploadAreaClient({ uploadPrefix, onDone }: {
                     }
                 }}
                 className="bg-white hover:bg-caramel-50 hover:dark:bg-white/10 dark:bg-espresso-700 border-2 border-dashed border-cream-200 dark:border-white/10
-        rounded-3xl flex flex-col justify-center items-center text-center p-5
+        rounded-lg flex flex-col justify-center items-center text-center p-5
         transition-colors duration-100">
         <input type="file" disabled={loading} className="hidden" ref={inputRef} onChange={e => {
             if (e.currentTarget.files != null && e.currentTarget.files.length > 0) {

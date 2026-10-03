@@ -311,14 +311,14 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                     bar: {
                                         horizontal: false,
                                         isDumbbell: true,
-                                        dumbbellColors: [ [ '#fde047', '#f97316' ] ]
+                                        dumbbellColors: [ [ '#d9b48a', '#a63a1d' ] ]
                                     }
                                 },
-                                colors: [ '#fde047', '#f97316' ],
+                                colors: [ '#d9b48a', '#a63a1d' ],
                                 fill: {
                                     type: 'gradient',
                                     gradient: {
-                                        gradientToColors: [ '#f97316' ],
+                                        gradientToColors: [ '#a63a1d' ],
                                         inverseColors: false,
                                         stops: [ 0, 100 ]
                                     }
@@ -340,7 +340,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                         x: days[i].slice(0, 10),
                                         y: parseFloat(data.averageOrderValuePerUnit[i]),
                                         marker: {
-                                            strokeColor: '#fbbf24'
+                                            strokeColor: '#6e6056'
                                         },
                                         label: {
                                             text: `¥${Decimal(data.averageOrderValuePerUnit[i]).toFixed(2)}`
@@ -361,14 +361,14 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                     bar: {
                                         horizontal: false,
                                         isDumbbell: true,
-                                        dumbbellColors: [ [ '#fde047', '#f97316' ] ]
+                                        dumbbellColors: [ [ '#d9b48a', '#a63a1d' ] ]
                                     }
                                 },
-                                colors: [ '#fde047', '#f97316' ],
+                                colors: [ '#d9b48a', '#a63a1d' ],
                                 fill: {
                                     type: 'gradient',
                                     gradient: {
-                                        gradientToColors: [ '#f97316' ],
+                                        gradientToColors: [ '#a63a1d' ],
                                         inverseColors: false,
                                         stops: [ 0, 100 ]
                                     }
@@ -390,7 +390,7 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                                         x: days[i].slice(0, 10),
                                         y: data.averageOrderCupsPerUnit[i],
                                         marker: {
-                                            strokeColor: '#fbbf24'
+                                            strokeColor: '#6e6056'
                                         },
                                         label: {
                                             text: Decimal(data.averageOrderCupsPerUnit[i]).toFixed(2)

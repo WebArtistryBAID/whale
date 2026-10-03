@@ -4,11 +4,11 @@ import { getOrderingAvailability, HydratedOrder, OrderingAvailabilityResponse } 
 import { useTranslationClient } from '@/app/i18n/client'
 import { useEffect, useState } from 'react'
 import { getWaitingOrders, markOrderDone } from '@/app/lib/order-manage-actions'
-import { Badge, Button } from 'flowbite-react'
+import { Button } from 'flowbite-react'
 import Link from 'next/link'
 import { setConfigValue } from '@/app/lib/settings-actions'
 import { HiCheckCircle, HiExclamationTriangle } from 'react-icons/hi2'
-import { HiClock, HiHashtag } from 'react-icons/hi'
+import { HiClock } from 'react-icons/hi'
 import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
 import { isValidPickUpTime } from '@/app/lib/pick-up-times'
 
@@ -70,12 +70,11 @@ function OrderInfo({ order, done, now, openAt }: {
     const { t } = useTranslationClient('user')
     const elapsedSeconds = getElapsedSeconds(order.createdAt, openAt, now)
 
-    return <div className="col-span-1 row-span-1 p-3 card">
-        <h2 className="flex items-center mb-3 font-bold">
-            <Badge className="mr-2 rounded-full h-8 w-8 flex justify-center items-center" color="warning">
-                <HiHashtag className="text-xl"/>
-            </Badge>
-            {order.id} <span className="sr-only">{t('today.orderNumber')}</span>
+    return <div className="col-span-1 row-span-1 p-4 card">
+        <h2 className="flex items-baseline mb-3 pb-2 border-b border-dashed border-cream-300 dark:border-white/20">
+            <span className="font-serif text-base secondary mr-1">No.</span>
+            <span className="font-serif text-4xl font-semibold tabular-nums">{order.id}</span>
+            <span className="sr-only">{t('today.orderNumber')}</span>
         </h2>
 
         <div className="mb-3">
@@ -86,7 +85,7 @@ function OrderInfo({ order, done, now, openAt }: {
             </p>
             {isValidPickUpTime(order.pickUpTime) &&
                 <p>{t('today.pickUpTime')}: <span
-                    className="text-amber-600 dark:text-amber-300 font-bold">{t(`today.pickUpTimeOptions.${order.pickUpTime}`)}</span>
+                    className="text-caramel dark:text-caramel-100 font-bold">{t(`today.pickUpTimeOptions.${order.pickUpTime}`)}</span>
                 </p>}
             {order.deliveryRoom != null &&
                 <p>{t('today.deliveryRoom')}: <span className="text-green-400 font-bold">{order.deliveryRoom!}</span>

@@ -12,9 +12,13 @@
   "recentOrderSub": "View Details",
   "orderNumber": "(Order Number)",
   "ads": "Sponsored Messages",
-  "tagline": "Freshly made coffee and tea. Order online, pick up in store.",
-  "statusLive": "Open now",
+  "tagline": "A small café on campus. Order online, pick up at the lobby counter.",
+  "statusLive": "Open",
   "statusPreorder": "Taking pre-orders",
   "statusClosed": "Closed",
-  "hours": "Open {{open}} – {{close}}"
+  "hours": "Today {{open}} – {{close}}",
+  "menuTitle": "On the menu today",
+  "viewMenu": "See the full menu",
+  "startOrder": "Start an order",
+  "soldOut": "Sold out"
 }

@@ -1,84 +1,73 @@
 import { serverTranslation } from '@/app/i18n'
 import SimpleNav from '@/app/core-components/SimpleNav'
 import Link from 'next/link'
-import { HiArrowRight, HiCake, HiUser } from 'react-icons/hi'
 import { getMyUser } from '@/app/login/login-actions'
-import If from '@/app/lib/If'
 import RecentOrder from '@/app/core-components/RecentOrder'
-import { IconType } from 'react-icons'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import CookiesBoundary from '@/app/lib/CookiesBoundary'
 import { getOrderingAvailability } from '@/app/lib/ordering-actions'
-
-function HomeBlock({ title, subtitle, icon: Icon, href, primary }: {
-    title: string,
-    subtitle: string,
-    icon: IconType,
-    href: string,
-    primary?: boolean
-}) {
-    return <Link aria-label={title} href={href}
-                 className={`group relative overflow-hidden rounded-3xl p-6 lg:p-8 flex flex-col justify-between
-                 min-h-40 lg:min-h-48 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift
-                 ${primary
-                     ? 'bg-gradient-to-br from-caramel to-espresso text-white shadow-card'
-                     : 'card'}`}>
-        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center
-        ${primary ? 'bg-white/15' : 'bg-caramel-50 dark:bg-white/5'}`}>
-            <Icon className={`text-2xl ${primary ? 'text-white' : 'text-caramel dark:text-caramel-100'}`}/>
-        </div>
-        <div className="flex items-end gap-3 mt-6" aria-hidden>
-            <div className="mr-auto">
-                <p className="font-bold text-xl lg:text-2xl">{title}</p>
-                <p className={`text-sm ${primary ? 'text-white/80' : 'secondary'}`}>{subtitle}</p>
-            </div>
-            <HiArrowRight className={`text-xl transition-transform duration-200 group-hover:translate-x-1
-            ${primary ? 'text-white' : 'text-caramel'}`}/>
-        </div>
-    </Link>
-}
+import { getCoreItems } from '@/app/lib/ui-data-actions'
+import Decimal from 'decimal.js'
+import { isItemSoldOut } from '@/app/lib/item-availability'
 
 export default async function Home() {
     const { t } = await serverTranslation('welcome')
     const user = await getMyUser()
     const availability = await getOrderingAvailability()
+    const categories = await getCoreItems()
     const statusKey = availability.phase === 'live' ? 'statusLive' : availability.phase === 'preorder' ? 'statusPreorder' : 'statusClosed'
 
     return <div className="min-h-screen">
         <SimpleNav/>
-        <main id="primary-content" className="relative overflow-hidden min-h-[calc(100dvh-4rem)] flex items-center">
-            <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_30rem_at_90%_-10%,rgba(192,106,43,0.14),transparent),radial-gradient(40rem_30rem_at_-10%_80%,rgba(251,191,36,0.14),transparent)]"/>
+        <main id="primary-content"
+              className="max-w-6xl mx-auto px-5 lg:px-8 py-10 lg:py-20 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_26rem] gap-12 lg:gap-20">
+            <section aria-label={t('welcome')} className="flex flex-col min-w-0">
+                <p className="text-sm mb-8 flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${availability.phase === 'closed' ? 'bg-cream-300' : 'bg-leaf'}`}/>
+                    <span className="font-medium">{t(statusKey)}</span>
+                    <span className="secondary">{t('hours', { open: availability.openTime, close: availability.closeTime })}</span>
+                </p>
+                <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15] font-semibold mb-6 [word-break:keep-all]">
+                    <Trans t={t} i18nKey="title" components={{ 1: <span key="soft-break">&shy;</span> }}/>
+                </h1>
+                <p className="text-lg secondary max-w-md mb-10">{t('tagline')}</p>
 
-            <div className="relative w-full max-w-5xl mx-auto px-5 py-12 lg:py-16 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-                <div aria-label={t('welcome')}>
-                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium mb-6
-                    ${availability.phase === 'closed'
-                        ? 'bg-stone-200/70 text-stone-600 dark:bg-white/10 dark:text-stone-300'
-                        : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200'}`}>
-                        <span className={`h-2 w-2 rounded-full ${availability.phase === 'closed' ? 'bg-stone-400' : 'bg-emerald-500 animate-pulse'}`}/>
-                        {t(statusKey)}
-                        <span className="opacity-60">·</span>
-                        {t('hours', { open: availability.openTime, close: availability.closeTime })}
-                    </span>
-                    <h1 className="text-4xl lg:text-5xl leading-tight mb-5 [word-break:keep-all]">
-                        <Trans t={t} i18nKey="title" components={{ 1: <span key="soft-break">&shy;</span> }}/>
-                    </h1>
-                    <p className="text-lg secondary max-w-md">{t('tagline')}</p>
+                <div className="flex flex-wrap gap-3 mb-10">
+                    <Link href="/order" className="inline-flex items-center h-12 px-6 rounded-md bg-caramel text-white
+                    font-semibold hover:bg-caramel-600 transition-colors">{t('startOrder')}</Link>
+                    {user == null
+                        ? <Link href="/login" className="inline-flex items-center h-12 px-6 rounded-md border border-cream-300
+                        dark:border-white/20 font-semibold hover:border-espresso transition-colors">{t('login')}</Link>
+                        : <Link href="/user" className="inline-flex items-center h-12 px-6 rounded-md border border-cream-300
+                        dark:border-white/20 font-semibold hover:border-espresso transition-colors">{t('user')}</Link>}
                 </div>
 
-                <div className="flex flex-col gap-4">
-                    <HomeBlock title={t('order')} subtitle={t('orderSub')} href="/order" icon={HiCake} primary/>
-                    <div className="flex flex-col sm:flex-row gap-4 [&>*]:flex-1">
-                        <If condition={user == null}>
-                            <HomeBlock title={t('login')} subtitle={t('loginSub')} href="/login" icon={HiUser}/>
-                        </If>
-                        <If condition={user != null}>
-                            <HomeBlock title={t('user')} subtitle={t('userSub')} href="/user" icon={HiUser}/>
-                        </If>
-                        <CookiesBoundary><RecentOrder/></CookiesBoundary>
-                    </div>
-                </div>
-            </div>
+                <CookiesBoundary><RecentOrder/></CookiesBoundary>
+            </section>
+
+            <aside aria-label={t('menuTitle')} className="card px-6 lg:px-7 py-8 self-start min-w-0">
+                <h2 className="font-serif text-2xl font-semibold text-center mb-1">{t('menuTitle')}</h2>
+                <p className="text-center text-xs secondary mb-6">{t('hours', { open: availability.openTime, close: availability.closeTime })}</p>
+                {categories.filter(category => category.items.length > 0).map(category =>
+                    <div key={category.id} className="mb-6 last:mb-4">
+                        <p className="text-xs font-semibold secondary mb-2 pb-1 border-b border-cream-200 dark:border-white/10">{category.name}</p>
+                        <ul className="flex flex-col gap-1.5">
+                            {category.items.map(item => {
+                                const soldOut = isItemSoldOut(item)
+                                return <li key={item.id} className={`flex items-baseline text-sm ${soldOut ? 'opacity-50' : ''}`}>
+                                    <span className="truncate">{item.name}</span>
+                                    <span className="leader" aria-hidden/>
+                                    <span className="price">
+                                        {soldOut ? t('soldOut') : `¥${Decimal(item.basePrice).mul(item.salePercent).toString()}`}
+                                    </span>
+                                </li>
+                            })}
+                        </ul>
+                    </div>)}
+                <Link href="/order" className="block text-center text-sm font-semibold text-caramel hover:underline">
+                    {t('viewMenu')} →
+                </Link>
+            </aside>
         </main>
     </div>
 }

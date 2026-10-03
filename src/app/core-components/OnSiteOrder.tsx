@@ -14,9 +14,8 @@ function WrappedOnSiteOrder() {
     const active = shoppingCart.onSiteOrderMode
 
     return <button onClick={() => shoppingCart.setOnSiteOrderMode(!active)} aria-pressed={active}
-                   className={`hidden lg:flex items-center gap-2 rounded-full px-4 h-9 text-sm font-medium transition-colors
-                   ${active ? 'bg-amber-400 text-espresso hover:bg-amber-300' : 'bg-white/10 text-white hover:bg-white/20 ring-1 ring-white/20'}`}>
-        <span className={`h-2 w-2 rounded-full ${active ? 'bg-espresso animate-pulse' : 'bg-white/50'}`}/>
+                   className={`hidden lg:flex items-center h-9 px-3 rounded-md text-sm font-medium transition-colors
+                   ${active ? 'bg-caramel text-white hover:bg-caramel-600' : 'hover:bg-cream-100 dark:hover:bg-white/5'}`}>
         {active ? t('orders.onSiteExit') : t('orders.onSite')}
     </button>
 }
