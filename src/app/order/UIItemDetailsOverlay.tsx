@@ -92,7 +92,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                         </span>)}
                     <If condition={!Decimal(item.salePercent).eq(1)}>
                         <span className="font-toon text-sm px-3 rounded-full border-2 border-ink bg-tomato text-white leading-7">
-                            {t('itemDetails.sale', { sale: Decimal(1).minus(Decimal(item.salePercent)).mul(100).toString() })}
+                            {t('itemDetails.sale', { sale: Decimal(1).minus(Decimal(item.salePercent)).mul(100).toDecimalPlaces(0).toString() })}
                             <span className="sr-only">{t('a11y.tag')}</span>
                         </span>
                     </If>

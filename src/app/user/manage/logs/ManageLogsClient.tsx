@@ -20,6 +20,7 @@ import If from '@/app/lib/If'
 import { UserAuditLogType } from '@/generated/prisma/browser'
 import { getAuditLogs } from '@/app/lib/order-manage-actions'
 import Link from 'next/link'
+import { formatDateTime } from '@/app/lib/format-date'
 
 export default function ManageLogsClient({ init }: { init: Paginated<HydratedUserAuditLog> }) {
     const { t } = useTranslationClient('user')
@@ -137,7 +138,7 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
                                 </If>
                             </TableCell>
                             <TableCell>
-                                {log.time.toLocaleString()}
+                                {formatDateTime(log.time)}
                             </TableCell>
                             <TableCell>
                                 {t(`logs.types.${log.type}`, messageData)}
@@ -148,7 +149,7 @@ export default function ManageLogsClient({ init }: { init: Paginated<HydratedUse
             </Table>
             <div className="flex overflow-x-auto sm:justify-center">
                 <If condition={page.pages > 0}>
-                    <Pagination currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}
+                    <Pagination previousLabel={t('pagination.previous')} nextLabel={t('pagination.next')} currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}
                                 totalPages={page.pages}/>
                 </If>
             </div>

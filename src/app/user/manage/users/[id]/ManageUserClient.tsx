@@ -2,7 +2,6 @@
 
 import { Order, User } from '@/generated/prisma/browser'
 import {
-    Badge,
     Breadcrumb,
     BreadcrumbItem,
     Button,
@@ -20,7 +19,7 @@ import {
     TextInput,
     ToggleSwitch
 } from 'flowbite-react'
-import { HiCollection, HiHashtag, HiPencil } from 'react-icons/hi'
+import { HiCollection, HiPencil, HiShieldCheck } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { useEffect, useState } from 'react'
@@ -30,6 +29,10 @@ import Paginated from '@/app/lib/Paginated'
 import Link from 'next/link'
 import Decimal from 'decimal.js'
 import { getUserOrders, setUserPoints } from '@/app/lib/order-manage-actions'
+import { formatDateTime } from '@/app/lib/format-date'
+import OrderStatusChips from '@/app/user/components/OrderStatusChips'
+import Panel from '@/app/user/components/Panel'
+import StatTile from '@/app/user/components/StatTile'
 
 export default function ManageUserClient({ user, init }: { user: User, init: Paginated<Order> }) {
     const { t } = useTranslationClient('user')
@@ -84,67 +87,73 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
         </Modal>
 
         <div className="container">
-            <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-3">
-                <BreadcrumbItem href="/user" icon={HiCollection}>{t('breadcrumb.manage')}</BreadcrumbItem>
-                <BreadcrumbItem href="/user/manage/users">{t('manage.users.title')}</BreadcrumbItem>
-                <BreadcrumbItem>{user.name}</BreadcrumbItem>
-            </Breadcrumb>
-            <h1 className="mb-5">{user.name}</h1>
+            <header className="mb-6">
+                <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-2">
+                    <BreadcrumbItem href="/user" icon={HiCollection}>{t('breadcrumb.manage')}</BreadcrumbItem>
+                    <BreadcrumbItem href="/user/manage/users">{t('manage.users.title')}</BreadcrumbItem>
+                    <BreadcrumbItem>{user.name}</BreadcrumbItem>
+                </Breadcrumb>
+                <h1>{user.name}</h1>
+            </header>
 
-            <div className="2xl:w-1/2 mb-8">
-                <div className="toon p-5" aria-label={t('manage.users.profile')}>
-                    <p className="secondary text-sm font-display">{t('manage.users.name')}</p>
-                    <p className="text-xl mb-3">{user.name}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.users.pinyin')}</p>
-                    <p className="text-xl mb-3">{user.pinyin}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.users.phone')}</p>
-                    <p className="text-xl mb-3">{user.phone ?? t('manage.users.none')}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.users.type')}</p>
-                    <p className="text-xl mb-3">{t(`manage.users.${user.type}`)}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.users.points')}</p>
-                    <p className="text-xl mb-3 flex items-center gap-3">
-                        {user.points}
-                        <button className="btn-icon-only h-6 w-6" onClick={() => setPointsModal(true)}
-                                aria-label={t('edit')}><HiPencil
-                            className="text-lg"/></button>
-                    </p>
-
-                    <p className="secondary text-sm font-display">{t('manage.users.balance')}</p>
-                    <p className="text-xl mb-3">¥{user.balance}</p>
-
-                    <p className="secondary text-sm font-display mb-1">{t('manage.users.permissions')}</p>
-                    <ToggleSwitch className="mb-3" disabled={user.id === myUser?.id || loading}
-                                  color="yellow"
-                                  checked={user.permissions.includes('admin.manage')} label={t('manage.users.admin')}
-                                  onChange={async () => {
-                                      setLoading(true)
-                                      await toggleUserPermission(user.id, 'admin.manage')
-                                      setLoading(false)
-                                      router.refresh()
-                                  }}/>
-                    <ToggleSwitch className="mb-1" disabled={user.id === myUser?.id || loading}
-                                  color="red"
-                                  checked={user.blocked} label={t('manage.users.blocked')}
-                                  onChange={async () => {
-                                      setLoading(true)
-                                      await setUserBlocked(user.id, !user.blocked)
-                                      setLoading(false)
-                                      router.refresh()
-                                  }}/>
-                    <p className="secondary text-sm mb-3">{t('manage.users.blockedHint')}</p>
-                    <If condition={user.id === myUser?.id}>
-                        <p className="secondary text-sm">{t('manage.users.permissionsOwn')}</p>
-                    </If>
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6 mb-8 items-start xl:max-w-5xl">
+                <div className="toon p-5 flex items-center gap-4" aria-label={t('manage.users.profile')}>
+                    <span className={`h-16 w-16 shrink-0 rounded-full border-toon border-ink font-toon text-3xl flex items-center justify-center
+                    ${user.blocked ? 'bg-blush' : 'bg-whale'}`}>{user.name.at(0)}</span>
+                    <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-1 min-w-0">
+                        <dt className="secondary text-sm">{t('manage.users.pinyin')}</dt>
+                        <dd className="truncate">{user.pinyin}</dd>
+                        <dt className="secondary text-sm">{t('manage.users.phone')}</dt>
+                        <dd className="truncate">{user.phone ?? t('manage.users.none')}</dd>
+                        <dt className="secondary text-sm">{t('manage.users.type')}</dt>
+                        <dd>{t(`manage.users.${user.type}`)}</dd>
+                    </dl>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <StatTile tone="butter" label={t('manage.users.balance')} value={`¥${user.balance}`}/>
+                    <StatTile tone="blush" label={t('manage.users.points')} value={user.points}
+                              action={<button className="toon-btn-ghost h-9 text-sm px-4" onClick={() => setPointsModal(true)}>
+                                  <HiPencil/>{t('edit')}
+                              </button>}/>
+                </div>
+
+                <Panel title={t('manage.users.permissions')} icon={HiShieldCheck} className="xl:col-span-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <ToggleSwitch disabled={user.id === myUser?.id || loading}
+                                          color="yellow"
+                                          checked={user.permissions.includes('admin.manage')} label={t('manage.users.admin')}
+                                          onChange={async () => {
+                                              setLoading(true)
+                                              await toggleUserPermission(user.id, 'admin.manage')
+                                              setLoading(false)
+                                              router.refresh()
+                                          }}/>
+                            <p className="secondary text-sm mt-1">{t('manage.users.adminHint')}</p>
+                        </div>
+                        <div>
+                            <ToggleSwitch disabled={user.id === myUser?.id || loading}
+                                          color="red"
+                                          checked={user.blocked} label={t('manage.users.blocked')}
+                                          onChange={async () => {
+                                              setLoading(true)
+                                              await setUserBlocked(user.id, !user.blocked)
+                                              setLoading(false)
+                                              router.refresh()
+                                          }}/>
+                            <p className="secondary text-sm mt-1">{t('manage.users.blockedHint')}</p>
+                        </div>
+                    </div>
+                    <If condition={user.id === myUser?.id}>
+                        <p className="text-sm mt-4 bg-butter/30 border-2 border-dashed border-ink/30 rounded-xl px-3 py-2">{t('manage.users.permissionsOwn')}</p>
+                    </If>
+                </Panel>
             </div>
 
             <If condition={page.pages >= 1}>
                 <div aria-label={t('manage.users.orders')} className="mb-8">
-                    <p className="secondary text-sm font-display mb-3">{t('manage.users.orders')}</p>
+                    <h2 className="mb-3">{t('manage.users.orders')}</h2>
                     <p className="sr-only">{t('a11y.page', { page: page.page + 1, pages: page.pages })}</p>
                     <Table className="mb-5">
                         <TableHead>
@@ -158,17 +167,16 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
                             {page.items.map(order =>
                                 <TableRow className="tr" key={order.id}>
                                     <TableCell className="flex items-center th">
-                                        <Badge className="mr-3" icon={HiHashtag} color="warning"/>
-                                        {order.id}
+                                        <span className="font-toon text-lg">#{order.id}</span>
                                     </TableCell>
                                     <TableCell>
-                                        {t(`orders.${order.status}`)}
+                                        <OrderStatusChips order={order}/>
                                     </TableCell>
                                     <TableCell>
                                         ¥{order.totalPrice}
                                     </TableCell>
                                     <TableCell>
-                                        {order.createdAt.toLocaleString()}
+                                        {formatDateTime(order.createdAt)}
                                     </TableCell>
                                     <TableCell>
                                         <Link href={`/user/manage/orders/${order.id}`}>
@@ -181,7 +189,7 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
                     </Table>
                     <div className="flex overflow-x-auto sm:justify-center">
                         <If condition={page.pages > 0}>
-                            <Pagination currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}
+                            <Pagination previousLabel={t('pagination.previous')} nextLabel={t('pagination.next')} currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}
                                         totalPages={page.pages}/>
                         </If>
                     </div>

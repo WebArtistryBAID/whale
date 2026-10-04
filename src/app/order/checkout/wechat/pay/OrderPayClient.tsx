@@ -22,7 +22,7 @@ import {
 } from '@/app/lib/balance-actions'
 import { PaymentMethod, PaymentStatus, UserAuditLog } from '@/generated/prisma/browser'
 import QRCode from 'react-qr-code'
-import { useShoppingCart } from '@/app/lib/shopping-cart'
+import { useCartHydrated, useShoppingCart } from '@/app/lib/shopping-cart'
 import { Trans } from 'react-i18next/TransWithoutContext'
 
 function isDesktop(): boolean {
@@ -53,12 +53,17 @@ export default function OrderPayClient({ order, transaction }: PaymentClientProp
     const [ qrCode, setQRCode ] = useState<string | null>(null)
     const [ qrCodeShowProcessing, setQRCodeShowProcessing ] = useState(false)
     const shoppingCart = useShoppingCart()
+    const cartHydrated = useCartHydrated()
     const isOrder = order != null
     const payForMe = order?.paymentMethod === PaymentMethod.payForMe
     const amount = useMemo(() => isOrder ? order!.totalPrice : transaction?.values[0] ?? '0', [ isOrder, order?.totalPrice, transaction?.values ])
     const redirectTarget = isOrder ? `/order/details/${order!.id}` : '/user'
 
     useEffect(() => {
+        // On-site order mode decides between the QR code and launching WeChat, so wait for the saved state
+        if (!cartHydrated) {
+            return
+        }
         if (!searchParams.has('oaready')) {
             if (isMobileOriPad() && !payForMe && !shoppingCart.onSiteOrderMode) {
                 void launchWeChat()
@@ -89,7 +94,7 @@ export default function OrderPayClient({ order, transaction }: PaymentClientProp
             clearInterval(intervalId)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [ cartHydrated ])
 
     async function cancel() {
         if (order == null) {

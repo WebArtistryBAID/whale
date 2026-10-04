@@ -1,16 +1,18 @@
 'use client'
 
 import { HydratedOrder } from '@/app/lib/ordering-actions'
-import { Badge, Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react'
+import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react'
 import If from '@/app/lib/If'
 import { OrderStatus, OrderType, PaymentMethod, PaymentStatus } from '@/generated/prisma/browser'
 import { markOrderDone, refundOrder } from '@/app/lib/order-manage-actions'
-import { HiCheck, HiClock, HiHashtag } from 'react-icons/hi'
+import { HiCheck, HiClock } from 'react-icons/hi'
 import Link from 'next/link'
 import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
 import { useState } from 'react'
 import { useTranslationClient } from '@/app/i18n/client'
 import { isValidPickUpTime } from '@/app/lib/pick-up-times'
+import { formatDateTime } from '@/app/lib/format-date'
+import OrderStatusChips from '@/app/user/components/OrderStatusChips'
 
 export default function OrderWithData({ order, forceUpdate, close }: {
     order: HydratedOrder,
@@ -50,15 +52,13 @@ export default function OrderWithData({ order, forceUpdate, close }: {
             </ModalFooter>
         </Modal>
 
-        <h1 className="flex items-center mb-5">
-            <Badge className="mr-3 rounded-full h-8 w-8 flex justify-center items-center" color="warning">
-                <HiHashtag className="text-xl"/>
-            </Badge>
-            {order.id} <span className="sr-only">{t('today.orderNumber')}</span>
-        </h1>
+        <header className="mb-6 flex flex-wrap items-center gap-4">
+            <h1>#{order.id} <span className="sr-only">{t('today.orderNumber')}</span></h1>
+            <OrderStatusChips order={order}/>
+        </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <div className="toon p-5 col-span-1" aria-label={t('today.info')}>
+            <div className="toon sheet px-5 py-3 col-span-1" aria-label={t('today.info')}>
                 <If condition={order.userId != null}>
                     <p className="secondary text-sm font-display">{t('today.user')}</p>
                     <p className="text-xl mb-3"><Link
@@ -66,7 +66,7 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                 </If>
 
                 <p className="secondary text-sm font-display">{t('today.createdAt')}</p>
-                <p className="text-xl mb-3">{order.createdAt.toLocaleString()}</p>
+                <p className="text-xl mb-3">{formatDateTime(order.createdAt)}</p>
 
                 <p className="secondary text-sm font-display">{t('today.price')}</p>
                 <p className="text-xl mb-3">¥{order.totalPrice}</p>
@@ -75,12 +75,12 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                 <p className="text-xl">{t(`today.${order.paymentStatus}`)}</p>
 
                 <If condition={isValidPickUpTime(order.pickUpTime)}>
-                    <p className="secondary text-sm font-display mt-3">{t('today.pickUpTime')}</p>
+                    <p className="secondary text-sm font-display">{t('today.pickUpTime')}</p>
                     <p className="text-xl">{t(`today.pickUpTimeOptions.${order.pickUpTime}`)}</p>
                 </If>
 
                 <If condition={order.type === OrderType.delivery}>
-                    <p className="secondary text-sm font-display mt-3">{t('today.deliveryRoom')}</p>
+                    <p className="secondary text-sm font-display">{t('today.deliveryRoom')}</p>
                     <p className="text-xl">{order.deliveryRoom}</p>
                 </If>
             </div>

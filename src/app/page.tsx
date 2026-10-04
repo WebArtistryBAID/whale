@@ -9,9 +9,9 @@ import { getOrderingAvailability } from '@/app/lib/ordering-actions'
 import { getCoreItems } from '@/app/lib/ui-data-actions'
 import Beluga from '@/app/core-components/Beluga'
 import Squiggle from '@/app/core-components/Squiggle'
-import Decimal from 'decimal.js'
 import { isItemSoldOut } from '@/app/lib/item-availability'
 import { HiArrowRight } from 'react-icons/hi'
+import { calculateUnitPrice } from '@/app/lib/pricing'
 
 export default async function Home() {
     const { t } = await serverTranslation('welcome')
@@ -38,7 +38,7 @@ export default async function Home() {
                     <div className="flex flex-wrap gap-4">
                         <Link href="/order" className="toon-btn h-14 px-8 text-xl">{t('startOrder')}<HiArrowRight/></Link>
                         {user == null
-                            ? <Link href="/login" className="toon-btn-ghost h-14 px-7 text-xl">{t('login')}</Link>
+                            ? <Link prefetch={false} href="/login" className="toon-btn-ghost h-14 px-7 text-xl">{t('login')}</Link>
                             : <Link href="/user" className="toon-btn-ghost h-14 px-7 text-xl">{t('user')}</Link>}
                     </div>
                 </div>
@@ -71,7 +71,7 @@ export default async function Home() {
                                  className={`w-28 h-28 rounded-full object-cover border-toon border-ink mb-3 ${soldOut ? 'grayscale' : ''}`}/>
                             <span className="font-toon text-lg leading-tight mb-2">{item.name}</span>
                             <span className="price-tag">
-                                {soldOut ? t('soldOut') : `¥${Decimal(item.basePrice).mul(item.salePercent).toString()}`}
+                                {soldOut ? t('soldOut') : `¥${calculateUnitPrice(item.basePrice, item.salePercent, []).toString()}`}
                             </span>
                         </Link>
                     })}

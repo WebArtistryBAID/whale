@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { getConfigValues, setConfigValue } from '@/app/lib/settings-actions'
 import Decimal from 'decimal.js'
 import { Breadcrumb, BreadcrumbItem, Button, TextInput, ToggleSwitch } from 'flowbite-react'
-import { HiCollection } from 'react-icons/hi'
+import { HiBeaker, HiCash, HiClock, HiCollection } from 'react-icons/hi'
+import Panel from '@/app/user/components/Panel'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
+import { formatDateKey, formatLegacyDateKey } from '@/app/lib/ordering-schedule'
 
 export default function ManageSettingsClient({ initValues }: { initValues: { [key: string]: string } }) {
     const { t } = useTranslationClient('user')
@@ -20,16 +22,19 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
             return
         }
         setLoading(true)
-        for (const key in tmpValues) {
-            if (values[key] !== tmpValues[key]) {
-                await setConfigValue(key, tmpValues[key])
+        try {
+            for (const key in tmpValues) {
+                if (values[key] !== tmpValues[key]) {
+                    await setConfigValue(key, tmpValues[key])
+                }
             }
+        } finally {
+            const newV = await getConfigValues()
+            setValues(newV)
+            setTmpValues(newV)
+            setHasErrors([])
+            setLoading(false)
         }
-        const newV = await getConfigValues()
-        setValues(newV)
-        setTmpValues(newV)
-        setHasErrors([])
-        setLoading(false)
     }
 
     function setBooleanValue(key: string, value: boolean) {
@@ -57,7 +62,7 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
     }
 
     function BooleanValue(key: string) {
-        return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
+        return <div aria-label={t(`manage.settings.types.${key}`)}>
             <ToggleSwitch checked={tmpValues[key] === 'true'} onChange={v => setBooleanValue(key, v)}
                           label={t(`manage.settings.types.${key}`)} color="yellow"/>
             <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.${key}`)}</p>
@@ -65,8 +70,8 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
     }
 
     function NumberValue(key: string, min: Decimal | undefined = undefined, max: Decimal | undefined = undefined) {
-        return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
-            <p className="mb-1">{t(`manage.settings.types.${key}`)}</p>
+        return <div aria-label={t(`manage.settings.types.${key}`)}>
+            <p className="mb-1.5 font-toon">{t(`manage.settings.types.${key}`)}</p>
             <TextInput value={tmpValues[key]} type="number" placeholder={t(`manage.settings.types.${key}`) + '...'}
                        onChange={e => {
                            setValue(key, e.currentTarget.value)
@@ -80,14 +85,14 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
             <If condition={tmpValues[key] !== ''}>
                 <If condition={isNumericValue(tmpValues[key] === '' ? '0' : tmpValues[key])}>
                     <If condition={min != null && Decimal(tmpValues[key] === '' ? '0' : tmpValues[key]).lt(min)}>
-                        <p className="text-red-500 mt-1 text-sm">{t('manage.settings.minValue', { min })}</p>
+                        <p className="text-tomato mt-1 text-sm">{t('manage.settings.minValue', { min })}</p>
                     </If>
                     <If condition={max != null && Decimal(tmpValues[key] === '' ? '0' : tmpValues[key]).gt(max)}>
-                        <p className="text-red-500 mt-1 text-sm">{t('manage.settings.maxValue', { max })}</p>
+                        <p className="text-tomato mt-1 text-sm">{t('manage.settings.maxValue', { max })}</p>
                     </If>
                 </If>
                 <If condition={!isNumericValue(tmpValues[key] === '' ? '0' : tmpValues[key])}>
-                    <p className="text-red-500 mt-1 text-sm">{t('manage.settings.invalidNumber')}</p>
+                    <p className="text-tomato mt-1 text-sm">{t('manage.settings.invalidNumber')}</p>
                 </If>
             </If>
             <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.${key}`)}</p>
@@ -95,8 +100,8 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
     }
 
     function TimeValue(key: string) {
-        return <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.${key}`)}>
-            <p className="mb-1">{t(`manage.settings.types.${key}`)}</p>
+        return <div aria-label={t(`manage.settings.types.${key}`)}>
+            <p className="mb-1.5 font-toon">{t(`manage.settings.types.${key}`)}</p>
             <TextInput value={tmpValues[key]} type="text" placeholder={t(`manage.settings.types.${key}`) + '...'}
                        onChange={e => {
                            setValue(key, e.currentTarget.value)
@@ -106,7 +111,7 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
                            }
                        }}/>
             <If condition={!isTimeValue(tmpValues[key] ?? '')}>
-                <p className="text-red-500 mt-1 text-sm">{t('manage.settings.invalidTime')}</p>
+                <p className="text-tomato mt-1 text-sm">{t('manage.settings.invalidTime')}</p>
             </If>
             <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.${key}`)}</p>
         </div>
@@ -123,59 +128,75 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
 
     const date = new Date()
 
-    return <div className="container relative">
-        <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-3">
-            <BreadcrumbItem icon={HiCollection} href="/user">{t('breadcrumb.manage')}</BreadcrumbItem>
-            <BreadcrumbItem>{t('manage.settings.title')}</BreadcrumbItem>
-        </Breadcrumb>
-        <h1 className="mb-5">{t('manage.settings.title')}</h1>
-        <div className="flex flex-col gap-3">
-            <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.override`)}>
-                <ToggleSwitch
-                    checked={tmpValues['availability-override-date'] === `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`}
-                    onChange={v => {
-                        if (!v) {
-                            setValue('availability-override-date', '')
-                        }
-                    }}
-                    label={t(`manage.settings.types.override`)} color="yellow"/>
-                <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.override`)}</p>
-            </div>
+    return <div className="container relative pb-28">
+        <header className="mb-6">
+            <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-2">
+                <BreadcrumbItem icon={HiCollection} href="/user">{t('breadcrumb.manage')}</BreadcrumbItem>
+                <BreadcrumbItem>{t('manage.settings.title')}</BreadcrumbItem>
+            </Breadcrumb>
+            <h1>{t('manage.settings.title')}</h1>
+        </header>
 
-            {BooleanValue('enable-scheduled-availability')}
-            <If condition={tmpValues['enable-scheduled-availability'] === 'true'}>
-                {BooleanValue('weekdays-only')}
-                {TimeValue('open-time')}
-                {TimeValue('close-time')}
-                {TimeValue('pre-order-start-time')}
-            </If>
-            <If condition={tmpValues['enable-scheduled-availability'] !== 'true'}>
-                {BooleanValue('store-open')}
-            </If>
-            <div></div>
-            {NumberValue('maximum-cups-per-order', Decimal(1))}
-            {NumberValue('maximum-cups-per-day', Decimal(0))}
-            {NumberValue('maximum-pre-order-cups-per-day', Decimal(0))}
-            <div></div>
-            {NumberValue('maximum-balance', Decimal(0))}
-            {NumberValue('balance-recharge-minimum', Decimal(0))}
-            {BooleanValue('allow-pay-later')}
-            {BooleanValue('allow-delivery')}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+            <Panel title={t('manage.settings.groups.hours')} icon={HiClock}>
+                <div className="flex flex-col gap-5">
+                    <div aria-label={t(`manage.settings.types.override`)}
+                         className="rounded-2xl border-2 border-dashed border-ink/30 bg-butter/20 p-3">
+                        <ToggleSwitch
+                            checked={[ formatDateKey(date), formatLegacyDateKey(date) ].includes(tmpValues['availability-override-date'])}
+                            onChange={v => {
+                                if (!v) {
+                                    setValue('availability-override-date', '0000-00-00')
+                                }
+                            }}
+                            label={t(`manage.settings.types.override`)} color="yellow"/>
+                        <p className="text-sm mt-1 secondary">{t(`manage.settings.descriptions.override`)}</p>
+                    </div>
+
+                    {BooleanValue('enable-scheduled-availability')}
+                    <If condition={tmpValues['enable-scheduled-availability'] === 'true'}>
+                        {BooleanValue('weekdays-only')}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {TimeValue('open-time')}
+                            {TimeValue('close-time')}
+                            {TimeValue('pre-order-start-time')}
+                        </div>
+                    </If>
+                    <If condition={tmpValues['enable-scheduled-availability'] !== 'true'}>
+                        {BooleanValue('store-open')}
+                    </If>
+                </div>
+            </Panel>
+
+            <div className="flex flex-col gap-6">
+                <Panel title={t('manage.settings.groups.limits')} icon={HiBeaker}>
+                    <div className="flex flex-col gap-5">
+                        {NumberValue('maximum-cups-per-order', Decimal(1))}
+                        {NumberValue('maximum-cups-per-day', Decimal(0))}
+                        {NumberValue('maximum-pre-order-cups-per-day', Decimal(0))}
+                    </div>
+                </Panel>
+
+                <Panel title={t('manage.settings.groups.payment')} icon={HiCash}>
+                    <div className="flex flex-col gap-5">
+                        {NumberValue('maximum-balance', Decimal(0))}
+                        {NumberValue('balance-recharge-minimum', Decimal(0))}
+                        {BooleanValue('allow-pay-later')}
+                        {BooleanValue('allow-delivery')}
+                    </div>
+                </Panel>
+            </div>
         </div>
 
         <If condition={hasChanges()}>
-            <div style={{ opacity: hasChanges() ? '1' : '0' }}
-                 aria-hidden
-                 className="sticky transition-opacity duration-100 bottom-3
-            lg:bottom-5 shadow-toon border-toon border-ink left-0 w-full m-3 lg:m-5 bg-paper gap-3
-            rounded-[1.6rem] p-3 flex flex-col lg:flex-row
-             items-center">
-                <p className="lg:flex-grow text-sm">{hasErrors.length > 0 ? t('manage.settings.hasErrors') : t('manage.settings.unsaved')}</p>
-                <div className="flex gap-3 lg:ml-auto">
-                    <Button size="xs" color="gray" pill
-                            onClick={() => setTmpValues({ ...values })}>{t('manage.settings.revert')}</Button>
-                    <Button size="xs" color="warning" pill onClick={commit}
-                            disabled={loading || hasErrors.length > 0}>{loading ? '...' : t('manage.settings.save')}</Button>
+            <div aria-hidden className="fixed bottom-4 left-4 right-4 lg:left-80 lg:right-8 z-30 toon pop-in bg-butter/90
+            p-3 pl-5 flex flex-col sm:flex-row items-center gap-3">
+                <p className="sm:flex-grow font-toon">{hasErrors.length > 0 ? t('manage.settings.hasErrors') : t('manage.settings.unsaved')}</p>
+                <div className="flex gap-3">
+                    <button className="toon-btn-ghost h-10 text-base px-5"
+                            onClick={() => setTmpValues({ ...values })}>{t('manage.settings.revert')}</button>
+                    <button className="toon-btn h-10 text-base px-5 bg-paper disabled:opacity-50 disabled:pointer-events-none" onClick={commit}
+                            disabled={loading || hasErrors.length > 0}>{loading ? '...' : t('manage.settings.save')}</button>
                 </div>
             </div>
         </If>

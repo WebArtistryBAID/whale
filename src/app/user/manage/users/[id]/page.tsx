@@ -1,8 +1,10 @@
 import { getUser } from '@/app/login/login-actions'
 import ManageUserClient from '@/app/user/manage/users/[id]/ManageUserClient'
 import { getUserOrders } from '@/app/lib/order-manage-actions'
+import { requireAdminPage } from '@/app/lib/admin-page'
 
 export default async function StudioUserBase({ params }: { params: Promise<{ id: string }> }) {
+    await requireAdminPage()
     const id = (await params).id
     const user = await getUser(parseInt(id))
     if (user == null) {

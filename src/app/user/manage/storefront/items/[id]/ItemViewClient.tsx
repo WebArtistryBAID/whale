@@ -63,9 +63,9 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
                     href={`/user/manage/storefront/categories/${object.categoryId}`}>{categoryName}</BreadcrumbItem>
                 <BreadcrumbItem>{object.name}</BreadcrumbItem>
             </Breadcrumb>
-            <h1 className="mb-5">{object.name}</h1>
-            <div className="2xl:w-1/2 mb-5">
-                <div className="toon p-5 mb-3"
+            <h1 className="mb-6">{object.name}</h1>
+            <div className="max-w-3xl mb-6">
+                <div className="toon sheet px-5 py-3 mb-3"
                      aria-label={t('manage.storefront.data')}>
                     <p className="secondary text-sm font-display">{t('manage.storefront.itemD.id')}</p>
                     <p className="text-xl mb-3">{object.id}</p>
@@ -117,7 +117,7 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
 
             <If condition={object.tags.length > 0}>
                 <div aria-label={t('manage.storefront.itemD.tags')} className="mb-5">
-                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.itemD.tags')}</p>
+                    <h2 className="mb-3">{t('manage.storefront.itemD.tags')}</h2>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
@@ -144,7 +144,7 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
 
             <If condition={object.options.length > 0}>
                 <div aria-label={t('manage.storefront.itemD.options')} className="mb-5">
-                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.itemD.options')}</p>
+                    <h2 className="mb-3">{t('manage.storefront.itemD.options')}</h2>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>

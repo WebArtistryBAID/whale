@@ -72,7 +72,7 @@ export default function OrderNags() {
                         </div>
                     </ModalBody>
                     <ModalFooter>
-                        <Link href="/login?redirect=%2Forder">
+                        <Link prefetch={false} href="/login?redirect=%2Forder">
                             <Button pill color="warning">
                                 {t('login')}
                             </Button>

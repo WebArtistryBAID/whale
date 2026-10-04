@@ -89,6 +89,46 @@ body {
     }
 }
 
+/* Page titles in the dashboard and admin pages get a highlighter stroke, like `marker` */
+main .container > h1,
+main .container > header h1 {
+    @apply relative z-0 inline-block text-4xl;
+}
+
+main .container > h1::after,
+main .container > header h1::after {
+    content: '';
+    @apply absolute -z-10 left-[-0.15em] right-[-0.15em] bottom-[0.06em] h-[0.4em] rounded-full bg-butter;
+}
+
+/*
+ * A sticker "data sheet": alternating label / value children laid out as a two-column list with dashed rules.
+ * Used by the admin detail pages, whose label is a `p.secondary` followed by its value.
+ */
+.sheet {
+    @apply grid grid-cols-1 sm:grid-cols-[minmax(8rem,max-content)_1fr] gap-x-8;
+}
+
+.sheet > * {
+    @apply m-0 py-2.5 text-base border-t-2 border-dashed border-ink/10;
+}
+
+.sheet > p.secondary {
+    @apply pb-0 sm:pb-2.5 text-sm;
+}
+
+.sheet > :not(.secondary) {
+    @apply border-t-0 sm:border-t-2 pt-1 sm:pt-2.5 font-medium;
+}
+
+.sheet > :nth-child(-n+2) {
+    @apply border-t-0;
+}
+
+.sheet > img {
+    @apply w-auto max-h-48 max-w-full rounded-2xl border-toon border-solid border-ink object-cover;
+}
+
 .messagebox-container {
     display: flex;
     justify-content: center;

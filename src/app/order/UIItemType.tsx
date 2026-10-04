@@ -8,13 +8,14 @@ import UIItemDetailsOverlay from '@/app/order/UIItemDetailsOverlay'
 import Decimal from 'decimal.js'
 import { isItemSoldOut } from '@/app/lib/item-availability'
 import { HiPlus } from 'react-icons/hi'
+import { calculateUnitPrice } from '@/app/lib/pricing'
 
 export default function UIItemType({ item, uploadPrefix }: { item: HydratedItemType, uploadPrefix: string }) {
     const { t } = useTranslationClient('order')
     const [ selected, setSelected ] = useState(false)
     const soldOut = isItemSoldOut(item)
     const onSale = !Decimal(item.salePercent).eq(1)
-    const salePrice = Decimal(item.basePrice).mul(item.salePercent).toString()
+    const salePrice = calculateUnitPrice(item.basePrice, item.salePercent, []).toString()
 
     return <>
         <If condition={selected && !soldOut}>
@@ -33,7 +34,7 @@ export default function UIItemType({ item, uploadPrefix }: { item: HydratedItemT
                 <If condition={onSale && !soldOut}>
                     <span aria-hidden className="absolute -top-2 -left-2 rotate-[-12deg] rounded-full border-2 border-ink
                     bg-tomato text-white font-toon text-sm px-2 leading-6">
-                        -{Decimal(1).minus(item.salePercent).mul(100).toString()}%
+                        -{Decimal(1).minus(item.salePercent).mul(100).toDecimalPlaces(0).toString()}%
                     </span>
                 </If>
                 <If condition={soldOut}>

@@ -2,6 +2,7 @@
 
 import { ItemType, OptionItem } from '@/generated/prisma/browser'
 import Decimal from 'decimal.js'
+import { useEffect, useSyncExternalStore } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
@@ -49,7 +50,9 @@ export const useShoppingCart = create<ShoppingCartState>()(
         }),
         {
             name: 'shopping-cart-storage',
-            storage: createJSONStorage(() => sessionStorage)
+            storage: createJSONStorage(() => sessionStorage),
+            // Loaded by useCartHydrated, see below
+            skipHydration: true
         }
     )
 )
@@ -78,7 +81,38 @@ export const useStoredOrder = create<StoredOrderState>()(
         }),
         {
             name: 'order-local-storage',
-            storage: createJSONStorage(() => localStorage)
+            storage: createJSONStorage(() => localStorage),
+            skipHydration: true
         }
     )
 )
+
+function subscribeHydration(callback: () => void): () => void {
+    const unsubscribe = [
+        useShoppingCart.persist.onFinishHydration(callback),
+        useStoredOrder.persist.onFinishHydration(callback)
+    ]
+    return () => unsubscribe.forEach(u => u())
+}
+
+function isHydrated(): boolean {
+    return useShoppingCart.persist.hasHydrated() && useStoredOrder.persist.hasHydrated()
+}
+
+/**
+ * The cart and the last order live in browser storage, which the server can't see. Loading them before React hydrates
+ * would make the first render differ from the server's HTML, so the stores skip automatic hydration and are loaded
+ * here, after mount. Returns whether they have been loaded; effects that act on the cart should wait for it.
+ */
+export function useCartHydrated(): boolean {
+    const hydrated = useSyncExternalStore(subscribeHydration, isHydrated, () => false)
+    useEffect(() => {
+        if (!useShoppingCart.persist.hasHydrated()) {
+            void useShoppingCart.persist.rehydrate()
+        }
+        if (!useStoredOrder.persist.hasHydrated()) {
+            void useStoredOrder.persist.rehydrate()
+        }
+    }, [])
+    return hydrated
+}

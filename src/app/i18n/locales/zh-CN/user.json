@@ -1,5 +1,5 @@
 {
-  "brand": "The Whale Café",
+  "brand": "白鲸咖啡",
   "anonymous": "访客",
   "confirm": "确认",
   "close": "关闭",
@@ -24,7 +24,14 @@
     "manageOrders": "订单",
     "logOut": "退出登录",
     "beta": "Beta",
-    "betaDetails": "Project Whale 正在测试。如遇问题，请联系 Lin。"
+    "betaDetails": "Project Whale 正在测试。如遇问题，请联系 Lin。",
+    "queue": "等待中订单",
+    "staffArea": "员工后台",
+    "myArea": "我的账户",
+    "sectionMine": "我的",
+    "sectionStore": "店务",
+    "break": "摸鱼一下",
+    "breakHint": "喘口气，玩一局小白鲸"
   },
   "a11y": {
     "page": "第 {{page}} 页，共 {{pages}} 页。分页导航在页面底部。",
@@ -195,6 +202,11 @@
         "balance-recharge-minimum": "用户充值的最低金额，单位为 CN¥。",
         "allow-pay-later": "当启用本设置时，用户可以选择「先喝后付」。已经创建的订单不受影响。",
         "allow-delivery": "当启用本设置时，用户可以选择外送点单。"
+      },
+      "groups": {
+        "hours": "营业时间",
+        "limits": "杯数限额",
+        "payment": "余额与支付"
       }
     },
     "users": {
@@ -222,7 +234,10 @@
         "message": "请输入新的积分值。",
         "placeholder": "积分...",
         "minimum": "必须至少为 0。"
-      }
+      },
+      "noResults": "没有找到这个名字的用户。",
+      "blockedChip": "已封禁",
+      "adminHint": "可以进入员工后台，管理订单、店面和设置。"
     },
     "stats": {
       "title": "统计数据",
@@ -278,7 +293,9 @@
       "notPaid": "未支付",
       "refunded": "已退款",
       "paymentMethod": "按支付方式订单数",
-      "paymentStatus": "按支付状态订单数"
+      "paymentStatus": "按支付状态订单数",
+      "today": "今天",
+      "clear": "清除"
     },
     "storefront": {
       "title": "店面",
@@ -349,9 +366,13 @@
         "imageError": "请等待图片上传完成。",
         "descriptionError": "请输入有效的描述。",
         "shortDescriptionError": "请输入有效的短描述。",
-        "basePriceError": "请输入有效的基础价格。",
-        "salePercentError": "请输入有效的价格乘数。",
-        "remainingItemsError": "请输入有效的剩余库存数量。"
+        "basePriceError": "请输入不小于 0、最多两位小数的价格。",
+        "salePercentError": "请输入大于 0、不超过 1 的价格乘数，例如 0.8 表示八折。",
+        "remainingItemsError": "请输入有效的剩余库存数量。",
+        "preview": "菜单预览",
+        "previewOff": "减价 {{percent}}%",
+        "previewNoSale": "原价",
+        "previewCustomerPays": "顾客每杯付"
       },
       "tagD": {
         "create": "新标签",
@@ -400,7 +421,7 @@
         "default": "是否默认选择",
         "nameError": "请输入有效的名称。",
         "typeError": "请选择有效的选项类型。",
-        "priceChangeError": "请输入有效的价格更改。"
+        "priceChangeError": "请输入最多两位小数的金额，可以是负数。"
       },
       "upload": {
         "label": "上传图片",
@@ -409,6 +430,16 @@
         "error": "再试一次",
         "done": "上传完成",
         "alt": "上传的图片"
+      },
+      "createCategory": "新建类目",
+      "couponUses": "还能用 {{count}} 次",
+      "couponUsedUp": "已用完",
+      "hints": {
+        "categories": "菜单上的分区。拖动左侧的把手可以调整顺序，点进去管理里面的产品。",
+        "optionTypes": "杯型、温度、甜度这类可选项。在产品里关联后，顾客点单时就能选。",
+        "couponCodes": "顾客结账时输入券码抵扣金额。用完的券会变灰。",
+        "tags": "产品卡片上的小标签，比如「新品」「热卖」。",
+        "ads": "首页轮播的横幅，点击会打开对应链接。"
       }
     }
   },
@@ -474,6 +505,106 @@
     "officialLimit": "当日现场总限额: {{count}} 杯",
     "remainingLive": "剩余现场杯数: {{count}}",
     "preOrderUsage": "已使用预定: {{used}} / {{limit}}",
-    "remainingPreOrder": "剩余预定杯数: {{count}}（至 {{time}}）"
+    "remainingPreOrder": "剩余预定杯数: {{count}}（至 {{time}}）",
+    "cups": "共 {{count}} 杯",
+    "remainingShort": "剩余现场杯数",
+    "emptyHint": "新订单会自动出现在这里，每 10 秒刷新一次。",
+    "breakLink": "趁现在摸鱼一下"
+  },
+  "dashboard": {
+    "title": "我的主页",
+    "greeting": {
+      "morning": "早上好，",
+      "afternoon": "下午好，",
+      "evening": "晚上好，",
+      "staff": "今天也辛苦啦。店里的情况都在下面，忙完记得歇一会儿。",
+      "customer": "余额、积分和通知都在这里。"
+    },
+    "store": {
+      "title": "今日店务",
+      "waitingOrders": "等待中订单",
+      "waitingCups": "共 {{count}} 杯",
+      "remaining": "剩余现场杯数",
+      "hours": "营业时间",
+      "queue": "打开订单队列"
+    },
+    "profile": {
+      "title": "个人资料",
+      "name": "姓名",
+      "pinyin": "拼音",
+      "phone": "手机号码",
+      "updateInfo": "这些信息与学校系统同步。如需修改，请联系学校管理员。"
+    },
+    "balance": {
+      "title": "余额",
+      "recharge": "充值",
+      "balanceInfo": "余额不可退款，最多可持有 ¥{{max}}。"
+    },
+    "rechargeModal": {
+      "title": "充值",
+      "message": "请输入充值金额。余额不可退款。",
+      "placeholder": "金额...",
+      "minimum": "最低充值金额为 ¥{{value}}。",
+      "maximum": "最多还能充值 ¥{{value}}。",
+      "cta": "付款"
+    },
+    "points": {
+      "title": "积分",
+      "pointsInfo": "每次消费都能获得积分，积分可以兑换奖励。"
+    },
+    "notifications": {
+      "title": "通知",
+      "smsInfo": "如果没有在 OneLogin 中授权短信，将不会收到短信通知。",
+      "inbox": "收件箱",
+      "sms": "短信",
+      "type": "类型",
+      "types": {
+        "orderCreated": "订单已创建",
+        "pickupReminder": "取餐提醒",
+        "orderRefunded": "订单已退款",
+        "balanceToppedUp": "余额已充值",
+        "pointsEarned": "获得积分",
+        "payLaterReminder": "先喝后付提醒"
+      }
+    },
+    "others": {
+      "title": "其他",
+      "logOut": "退出登录",
+      "credits": "Project Whale 由 WebArtistry 与白鲸咖啡合作开发。感谢所有贡献者。"
+    }
+  },
+  "pagination": {
+    "previous": "上一页",
+    "next": "下一页"
+  },
+  "break": {
+    "title": "摸鱼一下",
+    "subtitle": "没单的时候陪小白鲸玩一局。有新订单记得先去做咖啡哦。",
+    "score": "{{score}} 分",
+    "lives": "还剩 {{count}} 条命",
+    "best": "最高 {{score}}",
+    "canvas": "小白鲸接咖啡豆游戏画面",
+    "readyTitle": "小白鲸接咖啡豆",
+    "rules": "左右移动小白鲸，接住咖啡豆和咖啡杯。闹钟是店长来查岗，千万别碰！",
+    "start": "开始摸鱼",
+    "paused": "暂停中",
+    "resume": "继续",
+    "over": "被抓到啦",
+    "again": "再来一局",
+    "newBest": "新纪录！",
+    "ouch": "店长来了!",
+    "howTo": "玩法",
+    "bean": "咖啡豆 +1 分",
+    "cup": "咖啡杯 +5 分",
+    "clock": "闹钟：店长查岗，扣一条命",
+    "controls": "电脑用 ← → 或 A D 移动，空格开始，P 暂停，B 是老板键。手机直接在画面上左右拖动。",
+    "pause": "暂停",
+    "boss": "老板键",
+    "bossLines": [
+      "店长：上班时间在干嘛呢？",
+      "今天的豆子都磨好了吗？",
+      "下次记得把闹钟关掉。",
+      "小白鲸表示：再给我一次机会！"
+    ]
   }
 }

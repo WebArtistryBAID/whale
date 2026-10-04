@@ -24,7 +24,7 @@ export default async function SimpleNav() {
             </Link>
         </If>
         <If condition={me == null}>
-            <Link href="/login" className="flex items-center h-10 px-5 rounded-full font-toon border-toon border-ink bg-butter
+            <Link prefetch={false} href="/login" className="flex items-center h-10 px-5 rounded-full font-toon border-toon border-ink bg-butter
             text-[#4a2511] shadow-toon-sm hover:-translate-y-px active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-transform">
                 {t('login')}
             </Link>

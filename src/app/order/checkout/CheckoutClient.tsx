@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslationClient } from '@/app/i18n/client'
-import { useShoppingCart, useStoredOrder } from '@/app/lib/shopping-cart'
+import { useCartHydrated, useShoppingCart, useStoredOrder } from '@/app/lib/shopping-cart'
 import { useRouter } from 'next/navigation'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
@@ -117,6 +117,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     const storedOrder = useStoredOrder()
+    const cartHydrated = useCartHydrated()
     const router = useRouter()
     const mode: CheckoutMode = rechargeTransaction != null ? 'recharge' : (existingOrder != null ? 'order' : 'cart')
     const [ paymentMethod, setPaymentMethod ] = useState<PaymentMethod>(existingOrder?.paymentStatus === PaymentStatus.notPaid && existingOrder.paymentMethod !== PaymentMethod.payLater ? existingOrder.paymentMethod : PaymentMethod.wxPay)
@@ -144,11 +145,11 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
 
     useEffect(() => {
         router.prefetch('/order/checkout/wechat/pay')
-        if (mode === 'cart' && shoppingCart.items.length < 1) {
+        if (cartHydrated && mode === 'cart' && shoppingCart.items.length < 1) {
             router.replace('/order')
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ router, mode ])
+    }, [ router, mode, cartHydrated ])
 
     useEffect(() => {
         (async () => {
@@ -178,7 +179,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
 
     useEffect(() => {
         const syncAvailability = async () => {
-            if (mode !== 'cart') {
+            if (mode !== 'cart' || !cartHydrated) {
                 setAvailability(null)
                 setCartValidation(null)
                 return
@@ -188,7 +189,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
         }
 
         void syncAvailability()
-        if (mode !== 'cart') {
+        if (mode !== 'cart' || !cartHydrated) {
             return
         }
 
@@ -196,7 +197,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
             void syncAvailability()
         }, 10000)
         return () => clearInterval(id)
-    }, [ mode, shoppingCart.items ])
+    }, [ mode, shoppingCart.items, cartHydrated ])
 
     useEffect(() => {
         (async () => {
@@ -385,7 +386,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 </div>
             </ModalBody>
             <ModalFooter>
-                <Link href="/login?redirect=%2Forder%2Fcheckout">
+                <Link prefetch={false} href="/login?redirect=%2Forder%2Fcheckout">
                     <Button pill color="warning">{t('login')}</Button>
                 </Link>
                 <Button pill color="yellow" onClick={() => {
@@ -463,7 +464,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                 <p>
                                     <Trans t={t} i18nKey="checkout.loginNag"
                                            components={{
-                                               1: <Link key="login" href="/login?redirect=%2Forder%2Fcheckout"
+                                               1: <Link key="login" prefetch={false} href="/login?redirect=%2Forder%2Fcheckout"
                                                         className="inline"/>
                                            }}/>
                                 </p>

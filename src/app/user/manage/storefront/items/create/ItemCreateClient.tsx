@@ -20,6 +20,8 @@ import If from '@/app/lib/If'
 import { Category, Tag } from '@/generated/prisma/browser'
 import { HydratedItemType, HydratedOptionType } from '@/app/lib/ui-data-actions'
 import UploadAreaClient from '@/app/user/manage/storefront/upload/UploadAreaClient'
+import Decimal from 'decimal.js'
+import { calculateUnitPrice, isValidBasePrice, isValidSalePercent } from '@/app/lib/pricing'
 
 export default function ItemCreateClient({
                                              editMode,
@@ -96,11 +98,11 @@ export default function ItemCreateClient({
             setShortDescriptionError(true)
             return
         }
-        if (basePrice === '' || isNaN(parseFloat(basePrice))) {
+        if (!isValidBasePrice(basePrice)) {
             setBasePriceError(true)
             return
         }
-        if (salePercent === '' || isNaN(parseFloat(salePercent))) {
+        if (!isValidSalePercent(salePercent)) {
             setSalePercentError(true)
             return
         }
@@ -135,6 +137,13 @@ export default function ItemCreateClient({
         setLoading(false)
     }
 
+    const pricesValid = isValidBasePrice(basePrice) && isValidSalePercent(salePercent)
+    const previewPrice = pricesValid ? calculateUnitPrice(basePrice, salePercent, []).toString() : null
+    const previewSale = pricesValid && !Decimal(salePercent).eq(1)
+        ? Decimal(1).minus(salePercent).mul(100).toDecimalPlaces(0).toString()
+        : null
+    const previewSoldOut = inventoryTrackingEnabled ? parseInt(remainingItems, 10) < 1 : soldOut
+
     return <div className="container">
         <Breadcrumb aria-label={t('breadcrumb.bc')} className="mb-3">
             <BreadcrumbItem icon={HiCollection} href="/user">{t('breadcrumb.manage')}</BreadcrumbItem>
@@ -151,9 +160,10 @@ export default function ItemCreateClient({
                 <BreadcrumbItem>{t('manage.storefront.create')}</BreadcrumbItem>
             </If>
         </Breadcrumb>
-        <h1 className="mb-5">{editMode ? t('manage.storefront.itemD.edit') : t('manage.storefront.itemD.create')}</h1>
+        <h1 className="mb-6">{editMode ? t('manage.storefront.itemD.edit') : t('manage.storefront.itemD.create')}</h1>
 
-        <div className="2xl:w-1/2 flex flex-col gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px] gap-6 items-start">
+        <div className="toon p-5 flex flex-col gap-4 order-2 xl:order-1">
             <div className="w-full">
                 <div className="mb-2">
                     <Label htmlFor="name" value={t('manage.storefront.itemD.name')}/>
@@ -283,6 +293,57 @@ export default function ItemCreateClient({
             </div>
             <Button color="warning" pill disabled={loading} className="w-full" onClick={submit}
                     fullSized>{t('confirm')}</Button>
+        </div>
+
+        {/* Live preview of the menu card */}
+        <aside className="order-1 xl:order-2 xl:sticky xl:top-6" aria-label={t('manage.storefront.itemD.preview')}>
+            <p className="font-toon mb-2">{t('manage.storefront.itemD.preview')}</p>
+            <div className="dots rounded-[1.6rem] border-2 border-dashed border-ink/30 p-4">
+                <div className="toon flex items-center gap-4 p-4">
+                    <div className="relative flex-shrink-0">
+                        {image !== ''
+                            ? <img src={uploadPrefix + image} alt="" width={512} height={512}
+                                   className={`w-24 h-24 object-cover rounded-full border-toon border-ink bg-latte ${previewSoldOut ? 'grayscale' : ''}`}/>
+                            : <span className="w-24 h-24 rounded-full border-toon border-dashed border-ink/50 bg-latte/40 flex items-center justify-center text-xs secondary">
+                                {t('manage.storefront.itemD.image')}
+                            </span>}
+                        <If condition={previewSale != null && !previewSoldOut}>
+                            <span aria-hidden className="absolute -top-2 -left-2 rotate-[-12deg] rounded-full border-2 border-ink
+                            bg-tomato text-white font-toon text-sm px-2 leading-6">-{previewSale}%</span>
+                        </If>
+                    </div>
+                    <div className="flex-grow min-w-0">
+                        <p className="font-toon text-xl leading-tight mb-1 break-words">{name || t('manage.storefront.itemD.name')}</p>
+                        <p className="text-sm secondary mb-3 line-clamp-2">{shortDescription || t('manage.storefront.itemD.shortDescription')}</p>
+                        <div className="flex flex-wrap gap-2 items-baseline">
+                            {previewSoldOut
+                                ? <span className="font-toon secondary">{t('manage.storefront.itemD.soldOut')}</span>
+                                : <>
+                                    <span className="price-tag text-lg">¥{previewPrice ?? '?'}</span>
+                                    <If condition={previewSale != null}>
+                                        <span className="line-through text-sm secondary">¥{basePrice}</span>
+                                    </If>
+                                </>}
+                        </div>
+                    </div>
+                </div>
+                <If condition={tags.length > 0}>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                        {availableTags.filter(tag => tags.includes(tag.id)).map(tag =>
+                            <span key={tag.id} className="h-6 px-2.5 rounded-full border-2 border-ink text-xs font-bold flex items-center text-white"
+                                  style={{ backgroundColor: tag.color }}>{tag.name}</span>)}
+                    </div>
+                </If>
+            </div>
+            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+                <dt className="secondary">{t('manage.storefront.itemD.basePrice')}</dt>
+                <dd>{isValidBasePrice(basePrice) ? `¥${basePrice}` : '—'}</dd>
+                <dt className="secondary">{t('manage.storefront.itemD.salePercent')}</dt>
+                <dd>{isValidSalePercent(salePercent) ? (previewSale != null ? t('manage.storefront.itemD.previewOff', { percent: previewSale }) : t('manage.storefront.itemD.previewNoSale')) : '—'}</dd>
+                <dt className="secondary">{t('manage.storefront.itemD.previewCustomerPays')}</dt>
+                <dd className="font-toon">{previewPrice != null ? `¥${previewPrice}` : '—'}</dd>
+            </dl>
+        </aside>
         </div>
     </div>
 }
