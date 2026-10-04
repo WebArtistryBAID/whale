@@ -1,7 +1,7 @@
 'use server'
 
 import { requireUnpaidOrder } from '@/app/lib/order-queries'
-import { stripe } from '@/app/lib/stripe'
+import { getStripe } from '@/app/lib/stripe'
 import Decimal from 'decimal.js'
 import { prisma } from '@/app/lib/prisma'
 import { getMyTransaction } from '@/app/lib/balance-actions'
@@ -23,7 +23,7 @@ export async function getStripeRedirectURI(id: number, type: 'order' | 'balance'
         if (trans.values[1] !== 'await') {
             throw new Error('Transaction already completed')
         }
-        const session = await stripe.checkout.sessions.create({
+        const session = await getStripe().checkout.sessions.create({
             line_items: [ {
                 price_data: {
                     currency: 'cny',
@@ -47,12 +47,12 @@ export async function getStripeRedirectURI(id: number, type: 'order' | 'balance'
 
     const order = await requireUnpaidOrder(parsedId)
     if (order.stripeSession) {
-        const session = await stripe.checkout.sessions.retrieve(order.stripeSession)
+        const session = await getStripe().checkout.sessions.retrieve(order.stripeSession)
         if (session.status === 'open' && session.url != null) {
             return session.url
         }
     }
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
         line_items: [ {
             price_data: {
                 currency: 'cny',

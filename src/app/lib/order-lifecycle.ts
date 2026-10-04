@@ -1,6 +1,6 @@
 import 'server-only'
 import { PaymentStatus, Prisma, UserAuditLogType } from '@/generated/prisma/client'
-import { stripe } from '@/app/lib/stripe'
+import { getStripe } from '@/app/lib/stripe'
 
 type TransactionClient = Prisma.TransactionClient
 
@@ -70,12 +70,12 @@ export async function expireStripeSession(sessionId: string | null): Promise<boo
         return true
     }
     try {
-        const session = await stripe.checkout.sessions.retrieve(sessionId)
+        const session = await getStripe().checkout.sessions.retrieve(sessionId)
         if (session.status === 'complete') {
             return false
         }
         if (session.status === 'open') {
-            await stripe.checkout.sessions.expire(sessionId)
+            await getStripe().checkout.sessions.expire(sessionId)
         }
         return true
     } catch (e) {

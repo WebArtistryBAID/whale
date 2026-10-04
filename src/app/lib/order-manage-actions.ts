@@ -15,7 +15,7 @@ import Decimal from 'decimal.js'
 import type { HydratedOrder } from '@/app/lib/ordering-actions'
 import { sendNotification } from '@/app/lib/notification-send'
 import { prisma } from '@/app/lib/prisma'
-import { stripe } from '@/app/lib/stripe'
+import { getStripe } from '@/app/lib/stripe'
 import { findHydratedOrder } from '@/app/lib/order-queries'
 import { adjustUserBalance, adjustUserPoints } from '@/app/lib/user-balance'
 import { parseMoneyAmount } from '@/app/lib/pricing'
@@ -256,7 +256,7 @@ export async function refundOrder(id: number): Promise<boolean> {
 
 async function refundStripe(paymentIntent: string): Promise<boolean> {
     try {
-        await stripe.refunds.create({
+        await getStripe().refunds.create({
             payment_intent: paymentIntent
         })
     } catch (e) {

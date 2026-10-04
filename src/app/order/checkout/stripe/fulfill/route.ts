@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe } from '@/app/lib/stripe'
+import { getStripe } from '@/app/lib/stripe'
 import { fulfillStripePayment } from '@/app/lib/stripe-fulfillment'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
     let event
     try {
-        event = stripe.webhooks.constructEvent(Buffer.from(payload), sig, process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET!)
+        event = getStripe().webhooks.constructEvent(Buffer.from(payload), sig, process.env.STRIPE_WEBHOOK_ENDPOINT_SECRET!)
     } catch (err) {
         console.error('Invalid Stripe webhook', err)
         return new NextResponse('Webhook Error', { status: 400 })

@@ -2,7 +2,7 @@ import 'server-only'
 import Stripe from 'stripe'
 import Decimal from 'decimal.js'
 import { prisma } from '@/app/lib/prisma'
-import { stripe } from '@/app/lib/stripe'
+import { getStripe } from '@/app/lib/stripe'
 import { fulfillBalanceTopUp, fulfillOrderPayment, logUnappliedPayment } from '@/app/lib/payment-fulfillment'
 import { getStripeChargedAmountMinorUnit } from '@/app/lib/pricing'
 
@@ -11,7 +11,7 @@ async function refundSession(session: Stripe.Checkout.Session, reason: string): 
     let refunded = false
     if (paymentIntent != null) {
         try {
-            await stripe.refunds.create({ payment_intent: paymentIntent })
+            await getStripe().refunds.create({ payment_intent: paymentIntent })
             refunded = true
         } catch (e) {
             console.error('Stripe refund failed', paymentIntent, e)
