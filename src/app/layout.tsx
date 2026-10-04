@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 const press = 'shadow-toon-sm enabled:hover:-translate-y-px enabled:active:translate-x-[2px] enabled:active:translate-y-[2px] enabled:active:shadow-none'
 const customTheme: CustomFlowbiteTheme = {
     button: {
-        base: 'group relative flex items-stretch justify-center p-0.5 text-center font-toon transition-[transform,box-shadow,background-color] duration-100 focus:z-10 focus:outline-none',
+        base: 'group relative flex items-stretch justify-center whitespace-nowrap p-0.5 text-center font-toon transition-[transform,box-shadow,background-color] duration-100 focus:z-10 focus:outline-none',
         color: {
             warning: `border-toon border-ink bg-butter text-[#4a2511] focus:ring-4 focus:ring-butter/40 enabled:hover:bg-[#ffd36b] ${press}`,
             yellow: `border-toon border-ink bg-paper text-ink focus:ring-4 focus:ring-butter/40 enabled:hover:bg-cream ${press}`,
