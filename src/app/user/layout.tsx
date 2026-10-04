@@ -29,8 +29,7 @@ import {
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { User } from '@/generated/prisma/browser'
-import { getMyUser } from '@/app/login/login-actions'
-import { useCookies } from 'react-cookie'
+import { getMyUser, logout } from '@/app/login/login-actions'
 import { useRouter } from 'next/navigation'
 import { getMyNotificationsCount } from '@/app/lib/notification-actions'
 import CookiesBoundary from '@/app/lib/CookiesBoundary'
@@ -43,7 +42,6 @@ export default function WrappedUserLayout({ children }: { children: ReactNode })
 function UserLayout({ children }: { children: ReactNode }) {
     const { t } = useTranslationClient('user')
     const [ myUser, setMyUser ] = useState<User>()
-    const deleteCookie = useCookies()[2]
     const router = useRouter()
     const [ drawerOpen, setDrawerOpen ] = useState(false)
     const [ notifications, setNotifications ] = useState(0)
@@ -54,9 +52,10 @@ function UserLayout({ children }: { children: ReactNode }) {
             setMyUser((await getMyUser())!)
         })()
 
-        setInterval(async () => {
+        const intervalId = setInterval(async () => {
             setNotifications(await getMyNotificationsCount())
         }, 10000)
+        return () => clearInterval(intervalId)
     }, [])
 
     const sidebar = <Sidebar className="h-screen w-full lg:w-64 relative">
@@ -123,10 +122,9 @@ function UserLayout({ children }: { children: ReactNode }) {
         </SidebarItems>
         <div className="mr-3 mb-3 absolute bottom-0 hidden lg:block">
             <button onClick={() => {
-                deleteCookie('access_token', { path: '/' })
-                router.replace('/')
+                void logout().then(() => router.replace('/'))
             }}
-                    className="flex items-center gap-3 w-full rounded-full p-3 hover:bg-yellow-100 dark:hover:bg-yellow-800 transition-colors duration-100">
+                    className="flex items-center gap-3 w-full rounded-full p-3 hover:bg-butter/40 transition-colors duration-100">
                 <Badge color="yellow" icon={HiUser}/>
                 <div className="text-left">
                     <p className="font-bold font-display text-sm">{myUser?.name ?? '...'}</p>

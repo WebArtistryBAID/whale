@@ -5,8 +5,7 @@ import { useEffect, useState } from 'react'
 import { HydratedOrder } from '@/app/lib/ordering-actions'
 import { useStoredOrder } from '@/app/lib/shopping-cart'
 import Link from 'next/link'
-import { Badge } from 'flowbite-react'
-import { HiHashtag } from 'react-icons/hi'
+import { HiArrowRight } from 'react-icons/hi'
 
 export default function RecentOrder() {
     const { t } = useTranslationClient('welcome')
@@ -23,17 +22,17 @@ export default function RecentOrder() {
         return <></>
     }
 
-    return <Link aria-label={t('recentOrder')} className="w-40 h-40 rounded-3xl bg-amber-50 dark:bg-amber-800
-                    hover:bg-amber-100 dark:hover:bg-amber-700 transition-colors duration-100
-                    flex flex-col text-center items-center justify-center p-5" href={`/order/details/${order.id}`}>
-        <p className="text-3xl font-serif mb-1 flex items-center font-bold">
-            <Badge className="mr-3 rounded-full h-8 w-8 flex justify-center items-center" color="warning">
-                <HiHashtag className="text-xl"/>
-            </Badge>
-            {order.id}
+    return <Link aria-label={t('recentOrder')} href={`/order/details/${order.id}`}
+                 className="toon toon-press inline-flex items-center gap-4 pl-3 pr-6 py-3 bg-whale/40">
+        <span className="h-14 min-w-14 px-2 rounded-2xl border-toon border-ink bg-paper font-toon text-2xl
+        flex items-center justify-center">
+            #{order.id}
             <span className="sr-only">{t('orderNumber')}</span>
-        </p>
-        <p className="font-bold font-serif text-lg" aria-hidden>{t('recentOrder')}</p>
-        <p className="secondary text-xs" aria-hidden>{t('recentOrderSub')}</p>
+        </span>
+        <span>
+            <span className="block font-toon text-lg">{t('recentOrder')}</span>
+            <span className="block text-sm secondary">{t('recentOrderSub')}</span>
+        </span>
+        <HiArrowRight className="text-xl"/>
     </Link>
 }

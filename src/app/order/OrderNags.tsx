@@ -2,7 +2,6 @@
 
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'flowbite-react'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import {
@@ -17,7 +16,6 @@ export default function OrderNags() {
     const { t } = useTranslationClient('order')
 
     const [ loginModal, setLoginModal ] = useState(false)
-    const [ cookies ] = useCookies()
 
     const [ storeClosedModal, setStoreClosedModal ] = useState(false)
     const [ atCapacityModal, setAtCapacityModal ] = useState(false)
@@ -46,19 +44,6 @@ export default function OrderNags() {
             }
         })()
     }, [])
-
-    useEffect(() => {
-        if (!cookies.access_token) {
-            // Nag users every 16 hours.
-            const lastShown = localStorage.getItem('login-nag')
-            localStorage.setItem('login-nag', new Date().toISOString())
-            if (lastShown == null) {
-                //setLoginModal(true)
-            } else if (new Date().getTime() - new Date(lastShown).getTime() > 16 * 60 * 60 * 1000) {
-                //setLoginModal(true)
-            }
-        }
-    }, [ cookies.access_token ])
 
     const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6
 

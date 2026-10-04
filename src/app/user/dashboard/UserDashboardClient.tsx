@@ -1,5 +1,6 @@
 'use client'
 
+import { logout } from '@/app/login/login-actions'
 import { NotificationType, User } from '@/generated/prisma/browser'
 import {
     Breadcrumb,
@@ -17,7 +18,6 @@ import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
 import { getConfigValue } from '@/app/lib/settings-actions'
 import Decimal from 'decimal.js'
 import { beginTransaction } from '@/app/lib/balance-actions'
@@ -31,7 +31,6 @@ export default function UserDashboardClient({ user }: { user: User }) {
     const [ rechargeMin, setRechargeMin ] = useState(Decimal(-1))
     const [ rechargeModal, setRechargeModal ] = useState(false)
     const [ toRecharge, setToRecharge ] = useState('')
-    const removeCookie = useCookies()[2]
 
     useEffect(() => {
         (async () => {
@@ -80,7 +79,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
             <h1 className="mb-5">{t('dashboard.title')}</h1>
             <div className="flex w-full items-center gap-4 mb-5">
                 <div
-                    className="bg-yellow-300 dark:bg-yellow-500 rounded-full h-16 w-16 flex justify-center items-center">
+                    className="bg-whale border-toon border-ink rounded-full h-16 w-16 flex justify-center items-center">
                     <HiUser className="text-white text-3xl"/>
                 </div>
                 <div className="font-display">
@@ -92,7 +91,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
             <div className="2xl:w-1/2">
                 <div className="mb-8" aria-label={t('dashboard.profile.title')}>
                     <h2 className="text-sm font-normal mb-3">{t('dashboard.profile.title')}</h2>
-                    <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
+                    <div className="toon p-5">
                         <p className="secondary text-sm font-display">{t('dashboard.profile.name')}</p>
                         <p className="text-xl mb-3">{user.name}</p>
 
@@ -110,7 +109,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
 
                 <div className="mb-8" aria-label={t('dashboard.balance.title')}>
                     <h2 className="text-sm font-normal mb-3">{t('dashboard.balance.title')}</h2>
-                    <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
+                    <div className="toon p-5">
                         <p className="text-xl mb-3">¥{user.balance}</p>
                         <If condition={Decimal(user.balance).lte(balanceMax.minus(rechargeMin))}>
                             <Button color="warning" pill className="mb-3"
@@ -122,7 +121,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
 
                 <div className="mb-8" aria-label={t('dashboard.points.title')}>
                     <h2 className="text-sm font-normal mb-3">{t('dashboard.points.title')}</h2>
-                    <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
+                    <div className="toon p-5">
                         <p className="text-xl mb-3">{user.points}</p>
                         <p className="text-sm secondary">{t('dashboard.points.pointsInfo')}</p>
                     </div>
@@ -130,7 +129,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
 
                 <div className="mb-8" aria-label={t('dashboard.notifications.title')}>
                     <h2 className="text-sm font-normal mb-3">{t('dashboard.notifications.title')}</h2>
-                    <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
+                    <div className="toon p-5">
                         <table className="w-full mb-5">
                             <thead>
                             <tr>
@@ -180,10 +179,9 @@ export default function UserDashboardClient({ user }: { user: User }) {
 
                 <div aria-label={t('dashboard.others.title')} className="mb-8">
                     <h2 className="text-sm font-normal mb-3">{t('dashboard.others.title')}</h2>
-                    <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
+                    <div className="toon p-5">
                         <Button pill color="warning" className="mb-3" onClick={() => {
-                            removeCookie('access_token', { path: '/' })
-                            router.replace('/')
+                            void logout().then(() => router.replace('/'))
                         }}>{t('dashboard.others.logOut')}</Button>
                         <p className="text-sm secondary">{t('dashboard.others.credits')}</p>
                     </div>

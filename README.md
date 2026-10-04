@@ -2,20 +2,70 @@
 
 The ordering management platform of The Whale Café. Built with Next.js.
 
+## Screenshots
+
+The UI is a cartoon sticker style built around the café's beluga mascot. See [docs/DESIGN.md](docs/DESIGN.md)
+for the design rules.
+
+### Before and after
+
+| Page | Comparison |
+|------|------------|
+| Home (desktop) | ![Home, desktop](docs/screenshots/compare-home-desktop.png) |
+| Menu (desktop) | ![Menu, desktop](docs/screenshots/compare-order-desktop.png) |
+| Item details (desktop) | ![Item details, desktop](docs/screenshots/compare-item-overlay-desktop.png) |
+| Checkout (desktop) | ![Checkout, desktop](docs/screenshots/compare-checkout-desktop.png) |
+| User dashboard | ![User dashboard](docs/screenshots/compare-dashboard-desktop.png) |
+
+| Home (mobile) | Menu (mobile) |
+|---------------|---------------|
+| ![Home, mobile](docs/screenshots/compare-home-mobile.png) | ![Menu, mobile](docs/screenshots/compare-order-mobile.png) |
+
+### Current pages
+
+| Tray (desktop) | Order ticket | Waiting orders (staff) |
+|----------------|--------------|------------------------|
+| ![Tray](docs/screenshots/cart-desktop.png) | ![Order ticket](docs/screenshots/order-details-desktop.png) | ![Waiting orders](docs/screenshots/today-desktop.png) |
+
+| Item details (mobile) | Tray (mobile) | Checkout (mobile) |
+|-----------------------|---------------|-------------------|
+| ![Item details, mobile](docs/screenshots/item-overlay-mobile.png) | ![Tray, mobile](docs/screenshots/cart-mobile.png) | ![Checkout, mobile](docs/screenshots/checkout-mobile.png) |
+
 ## Get Started
 
 To run in production:
 
 * Using `pm2` allows for proper deployment in production.
 * Remember to set the environment variables.
+* Run `npm install` (this also runs `prisma generate`), then `npm run db:migrate` and `npm run build`.
 * Set up scheduled tasks.
+* Serve the site over HTTPS (`HOST` must start with `https://`) so that login cookies are marked `Secure`.
 
 To run in development:
 
-* Ensure that you have node.js and npm available.
+* Ensure that you have node.js (20.19+) and npm available, and a PostgreSQL database.
 * Run `npm install`.
 * Copy `.env.example` to `.env` and fill the environment variables.
+* Run `npm run db:migrate` to create the tables, and optionally `npm run db:seed` for demo data
+  (this **wipes** the store; it refuses to run with `NODE_ENV=production`).
 * Run `npm run dev`.
+
+Checks (also run by CI on every push):
+
+* `npm run lint`
+* `npm run typecheck`
+* `npm test` (database tests run when `DATABASE_URI` is set)
+
+### Upgrading an existing database to migrations
+
+Database migrations are now tracked in `prisma/migrations`. A database created before this (with `prisma db push`)
+already has the tables of the `0_init` migration, so mark it as applied once:
+
+```bash
+npx prisma migrate resolve --applied 0_init
+```
+
+After that, always use `npm run db:migrate` to apply new migrations.
 
 ## Environment Variables
 
@@ -37,10 +87,22 @@ To run in development:
 | `STRIPE_WEBHOOK_ENDPOINT_SECRET` | Stripe webhook endpoint secret.                                                                                 |
 | `CRON_KEY`                       | Cron task verification key.                                                                                     |
 | `WAITING_ORDERS_API_KEY`         | API key required to access the waiting orders JSON endpoint.                                                    |
+| `TZ`                             | Optional. Time zone for store hours and limits. Defaults to `Asia/Shanghai`.                                    |
 
 ## Cron Tasks
 
-For each task, you need to pass the query parameter `key={CRON_KEY}`.
+For each task, send the key as `Authorization: Bearer {CRON_KEY}` (preferred, keeps it out of access logs) or as the
+query parameter `key={CRON_KEY}`. Requests are rejected when `CRON_KEY` is not set.
+
+Example:
+
+```bash
+curl -H "Authorization: Bearer ${CRON_KEY}" https://example.com/order/prune
+```
+
+Pruning an unpaid order returns its reserved inventory and coupon use, and expires its Stripe Checkout session.
+A payment that arrives for an order or top-up that no longer exists is refunded automatically and recorded as a
+failed payment in the audit logs.
 
 | Path               | Time              | Description                               |
 |--------------------|-------------------|-------------------------------------------|
@@ -64,6 +126,7 @@ curl \
 
 The response is a JSON array of hydrated waiting orders in reverse chronological order. Each order includes its
 `items`, `itemType`, `appliedOptions`, and `user`, matching the data used by the waiting orders page.
+For privacy, `user` only contains `id`, `name`, and `pinyin`.
 
 ## Stripe Webhook
 

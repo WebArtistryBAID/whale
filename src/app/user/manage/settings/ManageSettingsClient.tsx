@@ -167,8 +167,8 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
             <div style={{ opacity: hasChanges() ? '1' : '0' }}
                  aria-hidden
                  className="sticky transition-opacity duration-100 bottom-3
-            lg:bottom-5 shadow-lg left-0 w-full m-3 lg:m-5 bg-yellow-50 gap-3
-            dark:bg-yellow-800 rounded-full p-3 flex flex-col lg:flex-row
+            lg:bottom-5 shadow-toon border-toon border-ink left-0 w-full m-3 lg:m-5 bg-paper gap-3
+            rounded-[1.6rem] p-3 flex flex-col lg:flex-row
              items-center">
                 <p className="lg:flex-grow text-sm">{hasErrors.length > 0 ? t('manage.settings.hasErrors') : t('manage.settings.unsaved')}</p>
                 <div className="flex gap-3 lg:ml-auto">

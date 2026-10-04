@@ -2,8 +2,8 @@
 
 import { HydratedOptionType } from '@/app/lib/ui-data-actions'
 import { useTranslationClient } from '@/app/i18n/client'
-import { Button } from 'flowbite-react'
 import If from '@/app/lib/If'
+import Decimal from 'decimal.js'
 
 export default function UIOptionType({ optionType, selected, onChange }: {
     optionType: HydratedOptionType,
@@ -12,18 +12,28 @@ export default function UIOptionType({ optionType, selected, onChange }: {
 }) {
     const { t } = useTranslationClient('order')
 
-    return <div className="mb-5" aria-label={optionType.name + ' ' + t('a11y.option')}>
-        <p className="mb-1 text-sm">{optionType.name}</p>
-        <div className="flex gap-3 flex-wrap">
-            {optionType.items.map(item =>
-                item.soldOut ? <Button key={item.id} color="gray" pill size="xs" disabled={true}>{item.name}</Button> :
-                    <Button key={item.id} color={selected === item.id ? 'warning' : 'gray'} pill size="xs"
-                            onClick={() => onChange(item.id)}>
-                        {item.name}
-                        <If condition={selected === item.id}>
-                            <span className="sr-only">{t('a11y.selected')}</span>
-                        </If>
-                    </Button>)}
+    return <fieldset className="mb-6" aria-label={optionType.name + ' ' + t('a11y.option')}>
+        <legend className="font-toon text-lg mb-2">{optionType.name}</legend>
+        <div className="flex gap-2.5 flex-wrap">
+            {optionType.items.map(item => {
+                const isSelected = selected === item.id
+                const priceChange = Decimal(item.priceChange)
+                return <button key={item.id} disabled={item.soldOut} onClick={() => onChange(item.id)}
+                               aria-pressed={isSelected}
+                               className={`rounded-full px-4 h-10 border-toon transition-all
+                               disabled:opacity-40 disabled:line-through disabled:cursor-not-allowed
+                               ${isSelected
+                                   ? 'bg-butter text-[#4a2511] border-ink shadow-toon-sm font-semibold -translate-y-px'
+                                   : 'bg-paper border-ink/25 hover:border-ink'}`}>
+                    {item.name}
+                    <If condition={!priceChange.eq(0)}>
+                        <span className="ml-1 text-sm opacity-70">{priceChange.gt(0) ? '+' : ''}¥{priceChange.toString()}</span>
+                    </If>
+                    <If condition={isSelected}>
+                        <span className="sr-only">{t('a11y.selected')}</span>
+                    </If>
+                </button>
+            })}
         </div>
-    </div>
+    </fieldset>
 }

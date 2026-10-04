@@ -1,16 +1,8 @@
-import { listHydratedWaitingOrders } from '@/app/lib/waiting-orders'
+import { listHydratedWaitingOrders } from '@/app/lib/order-queries'
 import { NextRequest, NextResponse } from 'next/server'
+import { isAuthorizedWithKey } from '@/app/lib/api-auth'
 
 export const dynamic = 'force-dynamic'
-
-function getProvidedApiKey(request: NextRequest): string | null {
-    const authorization = request.headers.get('authorization')
-    if (authorization != null && authorization.startsWith('Bearer ')) {
-        return authorization.slice('Bearer '.length).trim()
-    }
-
-    return request.headers.get('x-api-key')
-}
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
     const expectedApiKey = process.env.WAITING_ORDERS_API_KEY?.trim()
@@ -23,7 +15,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         })
     }
 
-    if (getProvidedApiKey(request) !== expectedApiKey) {
+    if (!isAuthorizedWithKey(request, expectedApiKey, false)) {
         return NextResponse.json({
             error: 'Unauthorized'
         }, {
@@ -31,5 +23,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         })
     }
 
+    // Users only carry id, name and pinyin; see orderUserSelect
     return NextResponse.json(await listHydratedWaitingOrders())
 }

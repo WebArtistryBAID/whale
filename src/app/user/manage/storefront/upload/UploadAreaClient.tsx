@@ -58,7 +58,7 @@ export default function UploadAreaClient({ uploadPrefix, onDone }: {
                         void upload(e.dataTransfer.files[0])
                     }
                 }}
-                className="bg-yellow-50 hover:bg-yellow-100 hover:dark:bg-yellow-700 dark:bg-yellow-800
+                className="bg-paper hover:bg-butter/30 border-toon border-dashed border-ink
         rounded-3xl flex flex-col justify-center items-center text-center p-5
         transition-colors duration-100">
         <input type="file" disabled={loading} className="hidden" ref={inputRef} onChange={e => {
@@ -66,7 +66,7 @@ export default function UploadAreaClient({ uploadPrefix, onDone }: {
                 void upload(e.currentTarget.files[0])
             }
         }}/>
-        <HiUpload className="text-yellow-400 dark:text-yellow-300 text-4xl mb-3"/>
+        <HiUpload className="text-ink text-4xl mb-3"/>
         <p className="text-xl font-bold" aria-hidden>{t('manage.storefront.upload.label')}</p>
         <button aria-live="polite" disabled={loading} className="text-sm" onClick={() => inputRef.current?.click()}>
             <If condition={loading}>

@@ -1,13 +1,14 @@
 import 'dotenv/config'
-import { defineConfig, env } from 'prisma/config'
+import { defineConfig } from 'prisma/config'
 
 export default defineConfig({
     schema: 'prisma/schema.prisma',
     migrations: {
         path: 'prisma/migrations',
-        seed: 'tsx prisma/seed.ts'
+        seed: 'node prisma/seed.mjs'
     },
     datasource: {
-        url: env('DATABASE_URI')
+        // Not required for `prisma generate`, so a missing value must not fail installs
+        url: process.env.DATABASE_URI ?? ''
     }
 })

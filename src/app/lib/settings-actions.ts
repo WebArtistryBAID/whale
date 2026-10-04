@@ -2,46 +2,38 @@
 
 import { requireUserPermission } from '@/app/login/login-actions'
 import { prisma } from '@/app/lib/prisma'
+import { CONFIG_DEFAULTS, isValidConfigValue } from '@/app/lib/settings-schema'
 
-void initialize()
+// Initialization only needs to happen once per process. Keeping the promise avoids
+// running ~15 queries on every settings read.
+let initialization: Promise<void> | null = null
 
-async function initialize() {
-    const defaults: { [key: string]: string } = {
-        initialized: new Date().getTime().toString(),
-        'enable-scheduled-availability': 'true',
-        'weekdays-only': 'true',
-        'open-time': '10:00',
-        'close-time': '15:00',
-        'pre-order-start-time': '10:00',
-        'store-open': 'true',
-        'maximum-cups-per-order': '2',
-        'maximum-cups-per-day': '14',
-        'maximum-pre-order-cups-per-day': '0',
-        'maximum-balance': '500',
-        'balance-recharge-minimum': '20',
-        'allow-pay-later': 'true',
-        'allow-delivery': 'true',
-        'availability-override-date': '0000-00-00',
-        'availability-override-value': 'false'
-    }
-
-    for (const [ key, value ] of Object.entries(defaults)) {
-        const existing = await prisma.settingsItem.findUnique({
-            where: {
-                key
+function initialize(): Promise<void> {
+    if (initialization == null) {
+        initialization = (async () => {
+            const existing = new Set((await prisma.settingsItem.findMany({ select: { key: true } })).map(item => item.key))
+            const missing = Object.entries({
+                initialized: new Date().getTime().toString(),
+                ...CONFIG_DEFAULTS
+            }).filter(([ key ]) => !existing.has(key))
+            if (missing.length > 0) {
+                await prisma.settingsItem.createMany({
+                    data: missing.map(([ key, value ]) => ({ key, value })),
+                    skipDuplicates: true
+                })
             }
+        })().catch(e => {
+            initialization = null
+            throw e
         })
-        if (existing != null) {
-            continue
-        }
-        await setConfigValueInternal(key, value)
     }
+    return initialization
 }
 
 export async function getConfigValues(): Promise<{ [key: string]: string }> {
     await initialize()
     const items = await prisma.settingsItem.findMany()
-    const result: { [key: string]: string } = {}
+    const result: { [key: string]: string } = { ...CONFIG_DEFAULTS }
     for (const item of items) {
         result[item.key] = item.value
     }
@@ -49,14 +41,13 @@ export async function getConfigValues(): Promise<{ [key: string]: string }> {
 }
 
 export async function getConfigValue(key: string): Promise<string> {
-    if (key !== 'initialized') {
-        await initialize()
-    }
-    return (await prisma.settingsItem.findUnique({
+    await initialize()
+    const item = await prisma.settingsItem.findUnique({
         where: {
             key
         }
-    }))!.value
+    })
+    return item?.value ?? CONFIG_DEFAULTS[key] ?? ''
 }
 
 export async function getConfigValueAsBoolean(key: string): Promise<boolean> {
@@ -69,28 +60,31 @@ export async function getConfigValueAsNumber(key: string): Promise<number> {
 
 export async function setConfigValue(key: string, value: string | null): Promise<void> {
     await requireUserPermission('admin.manage')
-    await setConfigValueInternal(key, value)
-}
-
-async function setConfigValueInternal(key: string, value: string | null): Promise<void> {
-    if (value == null) {
-        await prisma.settingsItem.delete({
-            where: {
-                key
-            }
-        })
-    } else {
-        await prisma.settingsItem.upsert({
-            where: {
-                key
-            },
-            update: {
-                value
-            },
-            create: {
-                key,
-                value
-            }
-        })
+    if (typeof key !== 'string' || !(key in CONFIG_DEFAULTS)) {
+        throw new Error('Unknown setting')
     }
+    if (value == null) {
+        // Deleting a setting resets it to its default
+        await prisma.settingsItem.upsert({
+            where: { key },
+            update: { value: CONFIG_DEFAULTS[key] },
+            create: { key, value: CONFIG_DEFAULTS[key] }
+        })
+        return
+    }
+    if (typeof value !== 'string' || !isValidConfigValue(key, value)) {
+        throw new Error('Invalid setting value')
+    }
+    await prisma.settingsItem.upsert({
+        where: {
+            key
+        },
+        update: {
+            value: value.trim()
+        },
+        create: {
+            key,
+            value: value.trim()
+        }
+    })
 }

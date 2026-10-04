@@ -10,14 +10,15 @@ export default function Toaster() {
     const { t } = useTranslationClient('user')
 
     useEffect(() => {
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             (async () => {
                 const notifications = await getUntoastedNotifications()
                 for (const notification of notifications) {
                     toast.info(t(`inbox.types.${notification.type}`, getNotificationMessageParams(notification)))
                 }
             })()
-        }, 10000, 0)
+        }, 10000)
+        return () => clearInterval(intervalId)
     }, [ t ])
     return <ToastContainer transition={Slide} hideProgressBar/>
 }

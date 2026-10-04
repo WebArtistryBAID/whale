@@ -30,9 +30,9 @@ export async function GET(request: NextRequest, { params }: {
     })
     const resp = await r.json()
     if (resp.code === 0) {
-        redirect(`/balance/pay?openid=${resp.data.openId}&id=${(await params).id}`)
+        redirect(`/balance/pay?openid=${encodeURIComponent(resp.data.openId)}&id=${parseInt((await params).id) || 0}`)
     } else {
         console.error('An error occurred when requesting Weixin Pay:', resp)
     }
-    redirect(`/balance/pay?openid=error&id=${(await params).id}`)
+    redirect(`/balance/pay?openid=error&id=${parseInt((await params).id) || 0}`)
 }

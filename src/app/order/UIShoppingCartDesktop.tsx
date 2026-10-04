@@ -2,99 +2,31 @@
 
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { useTranslationClient } from '@/app/i18n/client'
-import { Button, Modal, ModalBody, ModalFooter, ModalHeader, Popover } from 'flowbite-react'
 import If from '@/app/lib/If'
-import { HiClock } from 'react-icons/hi'
 import { useRouter } from 'next/navigation'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
-import { useEffect, useState } from 'react'
-import {
-    CartValidationResponse,
-    getOrderingAvailability,
-    OrderingAvailabilityResponse,
-    validateCartItems
-} from '@/app/lib/ordering-actions'
-import { getConfigValueAsNumber } from '@/app/lib/settings-actions'
-import { Trans } from 'react-i18next/TransWithoutContext'
+import { useCartStatus } from '@/app/order/useCartStatus'
+import CartWarnings from '@/app/order/CartWarnings'
+import Beluga from '@/app/core-components/Beluga'
 
 export default function UIShoppingCartDesktop({ uploadPrefix }: { uploadPrefix: string }) {
     const { t } = useTranslationClient('order')
     const shoppingCart = useShoppingCart()
     const router = useRouter()
+    const { warnings, checkoutDisabled } = useCartStatus()
 
-    const [ availability, setAvailability ] = useState<OrderingAvailabilityResponse | null>(null)
-    const [ cartValidation, setCartValidation ] = useState<CartValidationResponse | null>(null)
-    const [ maxCups, setMaxCups ] = useState(0)
-    const [ preOrderLimitModal, setPreOrderLimitModal ] = useState(false)
-
-    useEffect(() => {
-        const sync = async () => {
-            setAvailability(await getOrderingAvailability())
-            setCartValidation(await validateCartItems(shoppingCart.items))
-            setMaxCups(await getConfigValueAsNumber('maximum-cups-per-order'))
-        }
-
-        void sync()
-        const id = setInterval(() => {
-            void sync()
-        }, 10000)
-        return () => clearInterval(id)
-    }, [ shoppingCart.items ])
-
-    const isClosed = availability?.unavailableReason === 'store-closed'
-    const remainingLimit = availability == null
-        ? 0
-        : availability.phase === 'preorder'
-            ? availability.currentDay.remainingPreOrderCups
-            : availability.phase === 'live'
-                ? availability.currentDay.remainingLiveCups
-                : 0
-    const isPreOrderFull = availability?.phase === 'preorder' && (cartValidation?.countedAmount ?? 0) > remainingLimit
-    const isLiveFull = availability?.phase === 'live' && (cartValidation?.countedAmount ?? 0) > remainingLimit
-    const hasInventoryIssues = (cartValidation?.issues.length ?? 0) > 0
-    const inventoryMessages = cartValidation?.issues.map(issue =>
-        issue.available <= 0
-            ? t('inventory.soldOut', { item: issue.itemName })
-            : t('inventory.onlyLeft', { count: issue.available, item: issue.itemName })
-    ) ?? []
-    const showWarning = availability != null && (isClosed || isLiveFull || isPreOrderFull || hasInventoryIssues || shoppingCart.getAmount() > maxCups)
-    const buttonDisabled = availability == null ||
-        isClosed ||
-        isLiveFull ||
-        isPreOrderFull ||
-        hasInventoryIssues ||
-        shoppingCart.getAmount() > maxCups ||
-        shoppingCart.items.length < 1
-
-    const checkout = <Button pill
-                             disabled={buttonDisabled}
-                             color="yellow" onClick={() => {
-        if (shoppingCart.items.length < 1) {
-            return
-        }
-        if (isPreOrderFull) {
-            setPreOrderLimitModal(true)
-            return
-        }
-        router.replace('/order/checkout')
-    }}>{t('checkout.title')}</Button>
-
-    return <div aria-label={t('a11y.shoppingCart')}
-                className="bg-amber-50 dark:bg-yellow-800 rounded-3xl h-full relative">
-        <Modal show={preOrderLimitModal} onClose={() => setPreOrderLimitModal(false)}>
-            <ModalHeader>{t('preOrderLimitModal.title')}</ModalHeader>
-            <ModalBody>
-                <p>{t('preOrderLimitModal.message', { time: availability?.openTime ?? '' })}</p>
-            </ModalBody>
-            <ModalFooter>
-                <Button pill color="warning" onClick={() => setPreOrderLimitModal(false)}>
-                    {t('confirm')}
-                </Button>
-            </ModalFooter>
-        </Modal>
+    return <div aria-label={t('a11y.shoppingCart')} className="toon h-full flex flex-col overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b-2 border-dashed border-ink/25">
+            <h2 className="text-2xl mr-auto">{t('cartTitle')}</h2>
+            <If condition={shoppingCart.items.length > 0}>
+                <span className="font-toon text-base px-3 rounded-full border-2 border-ink bg-whale text-[#163746] leading-7">
+                    {t('cartCount', { count: shoppingCart.getAmount() })}
+                </span>
+            </If>
+        </div>
 
         <If condition={shoppingCart.items.length > 0}>
-            <div className="flex flex-col gap-5 mb-8 p-8 h-full overflow-y-auto">
+            <div className="flex flex-col gap-4 px-6 py-5 flex-1 overflow-y-auto">
                 {shoppingCart.items.map((item, index) => <UIOrderedItemTemplate uploadPrefix={uploadPrefix} item={item}
                                                                                 key={JSON.stringify(item) + index.toString()}
                                                                                 index={index}/>)}
@@ -102,62 +34,28 @@ export default function UIShoppingCartDesktop({ uploadPrefix }: { uploadPrefix: 
         </If>
 
         <If condition={shoppingCart.items.length < 1}>
-            <div className="flex flex-col justify-center items-center h-4/5 w-full">
-                <HiClock className="text-6xl mb-1 text-amber-400 dark:text-yellow-400"/>
-                <p>{t('empty')}</p>
+            <div className="flex flex-col justify-center items-center flex-1 px-6 text-center">
+                <Beluga mood="sleepy" className="w-40 mb-2"/>
+                <p className="font-toon text-lg">{t('empty')}</p>
+                <p className="text-sm secondary">{t('emptyHint')}</p>
             </div>
         </If>
 
-        <div className="absolute z-20 bottom-0 w-full flex items-center rounded-3xl p-5">
-            <p className="text-lg mr-auto">{t('total', { price: shoppingCart.getTotalPrice().toString() })}</p>
-
-            <If condition={showWarning}>
-                <span className="sr-only">
-                    <If condition={isClosed}>
-                        <span className="text-sm">{t('storeClosedModal.simple')}</span>
-                    </If>
-                    <If condition={isLiveFull}>
-                        <span className="text-sm">{t('maximumCupsModal.simple')}</span>
-                    </If>
-                    <If condition={isPreOrderFull}>
-                        <span className="text-sm">{t('preOrderLimitModal.simple')}</span>
-                    </If>
-                    <If condition={hasInventoryIssues}>
-                        <span className="text-sm">{t('inventory.cartChanged')}</span>
-                    </If>
-                    {inventoryMessages.map((message, index) => <span key={`${message}-${index}`}
-                                                                     className="text-sm">{message}</span>)}
-                    <If condition={shoppingCart.getAmount() > maxCups}>
-                        <span className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
-                                                         count={maxCups}/></span>
-                    </If>
-                </span>
-                <Popover trigger="hover" aria-hidden content={<div className="p-3 flex flex-col gap-1">
-                    <If condition={isClosed}>
-                        <p className="text-sm">{t('storeClosedModal.simple')}</p>
-                    </If>
-                    <If condition={isLiveFull}>
-                        <p className="text-sm">{t('maximumCupsModal.simple')}</p>
-                    </If>
-                    <If condition={isPreOrderFull}>
-                        <p className="text-sm">{t('preOrderLimitModal.simple')}</p>
-                    </If>
-                    <If condition={hasInventoryIssues}>
-                        <p className="text-sm">{t('inventory.cartChanged')}</p>
-                    </If>
-                    {inventoryMessages.map((message, index) => <p key={`${message}-${index}`}
-                                                                  className="text-sm">{message}</p>)}
-                    <If condition={shoppingCart.getAmount() > maxCups}>
-                        <p className="text-sm"><Trans t={t} i18nKey="maximumCupsPerOrder"
-                                                      count={maxCups}/></p>
-                    </If>
-                </div>}>
-                    {checkout}
-                </Popover>
-            </If>
-            <If condition={!showWarning}>
-                {checkout}
-            </If>
+        <div className="px-6 py-4 border-t-2 border-dashed border-ink/25 flex flex-col gap-3 bg-cream/50">
+            <CartWarnings title={t('notice')} warnings={warnings}/>
+            <div className="flex items-center gap-4">
+                <p className="mr-auto">
+                    <span className="sr-only">{t('total', { price: shoppingCart.getTotalPrice().toString() })}</span>
+                    <span aria-hidden className="font-toon text-3xl">¥{shoppingCart.getTotalPrice().toString()}</span>
+                </p>
+                <button className="toon-btn disabled:opacity-40 disabled:pointer-events-none" disabled={checkoutDisabled}
+                        onClick={() => {
+                            if (shoppingCart.items.length < 1) {
+                                return
+                            }
+                            router.replace('/order/checkout')
+                        }}>{t('checkout.title')}</button>
+            </div>
         </div>
     </div>
 }

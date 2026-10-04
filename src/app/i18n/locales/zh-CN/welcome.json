@@ -10,5 +10,15 @@
   "userSub": "余额充值",
   "recentOrder": "近期订单",
   "recentOrderSub": "查看订单详情",
-  "orderNumber": "(订单号)"
+  "orderNumber": "(订单号)",
+  "statusLive": "营业中",
+  "statusPreorder": "接受预订",
+  "statusClosed": "休息中",
+  "hours": "{{open}} – {{close}}",
+  "bubble": "今天想喝点什么呀？",
+  "bubbleClosed": "我在打盹…开门了再来吧！",
+  "menuTitle": "今天的菜单",
+  "viewMenu": "去点单",
+  "soldOut": "售罄",
+  "startOrder": "开始点单"
 }

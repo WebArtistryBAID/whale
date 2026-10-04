@@ -25,12 +25,11 @@ import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getMyUser, toggleUserPermission } from '@/app/login/login-actions'
+import { getMyUser, setUserBlocked, toggleUserPermission } from '@/app/login/login-actions'
 import Paginated from '@/app/lib/Paginated'
-import { getMyOrders } from '@/app/lib/user-actions'
 import Link from 'next/link'
 import Decimal from 'decimal.js'
-import { setUserPoints } from '@/app/lib/order-manage-actions'
+import { getUserOrders, setUserPoints } from '@/app/lib/order-manage-actions'
 
 export default function ManageUserClient({ user, init }: { user: User, init: Paginated<Order> }) {
     const { t } = useTranslationClient('user')
@@ -46,10 +45,10 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
     useEffect(() => {
         (async () => {
             if (page.page !== currentPage) {
-                setPage(await getMyOrders(currentPage))
+                setPage(await getUserOrders(currentPage, user.id))
             }
         })()
-    }, [ currentPage, page.page ])
+    }, [ currentPage, page.page, user.id ])
 
     useEffect(() => {
         (async () => {
@@ -93,7 +92,7 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
             <h1 className="mb-5">{user.name}</h1>
 
             <div className="2xl:w-1/2 mb-8">
-                <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5" aria-label={t('manage.users.profile')}>
+                <div className="toon p-5" aria-label={t('manage.users.profile')}>
                     <p className="secondary text-sm font-display">{t('manage.users.name')}</p>
                     <p className="text-xl mb-3">{user.name}</p>
 
@@ -127,6 +126,16 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
                                       setLoading(false)
                                       router.refresh()
                                   }}/>
+                    <ToggleSwitch className="mb-1" disabled={user.id === myUser?.id || loading}
+                                  color="red"
+                                  checked={user.blocked} label={t('manage.users.blocked')}
+                                  onChange={async () => {
+                                      setLoading(true)
+                                      await setUserBlocked(user.id, !user.blocked)
+                                      setLoading(false)
+                                      router.refresh()
+                                  }}/>
+                    <p className="secondary text-sm mb-3">{t('manage.users.blockedHint')}</p>
                     <If condition={user.id === myUser?.id}>
                         <p className="secondary text-sm">{t('manage.users.permissionsOwn')}</p>
                     </If>

@@ -11,5 +11,15 @@
   "recentOrder": "Recent Order",
   "recentOrderSub": "View Details",
   "orderNumber": "(Order Number)",
-  "ads": "Sponsored Messages"
+  "ads": "Sponsored Messages",
+  "statusLive": "Open",
+  "statusPreorder": "Pre-orders",
+  "statusClosed": "Closed",
+  "hours": "{{open}} – {{close}}",
+  "bubble": "What are you having today?",
+  "bubbleClosed": "Napping... come back when we open!",
+  "menuTitle": "Today's menu",
+  "viewMenu": "Order now",
+  "soldOut": "Sold out",
+  "startOrder": "Start ordering"
 }

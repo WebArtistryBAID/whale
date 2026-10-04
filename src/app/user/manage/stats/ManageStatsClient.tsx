@@ -15,7 +15,7 @@ function Block({ title, hideTitle, center, children }: {
     center: boolean,
     children: ReactNode
 }) {
-    return <div aria-label={title} className="rounded-3xl p-5 bg-gray-50 dark:bg-amber-900">
+    return <div aria-label={title} className="toon p-5">
         <h3 style={{ display: hideTitle ? 'none' : 'block' }}
             className="text-sm secondary font-normal mb-2">{title}</h3>
         <div className={center ? 'flex flex-col justify-center items-center w-full' : 'w-full'}>

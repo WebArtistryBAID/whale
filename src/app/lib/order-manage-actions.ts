@@ -12,15 +12,15 @@ import {
 import { requireUserPermission } from '@/app/login/login-actions'
 import { HydratedUserAuditLog } from '@/app/lib/user-actions'
 import Decimal from 'decimal.js'
-import { getOrder, HydratedOrder } from '@/app/lib/ordering-actions'
-import { sendNotification } from '@/app/lib/notification-actions'
-import { me } from '@/app/login/login'
-import signData from '@/app/lib/wx-pay-sign'
+import type { HydratedOrder } from '@/app/lib/ordering-actions'
+import { sendNotification } from '@/app/lib/notification-send'
 import { prisma } from '@/app/lib/prisma'
-import { stripe } from '@/app/lib/stripe'
-import { listHydratedWaitingOrders } from '@/app/lib/waiting-orders'
-
-const userAgent = 'Whale Cafe (Weixin Pay Client)'
+import { getStripe } from '@/app/lib/stripe'
+import { findHydratedOrder } from '@/app/lib/order-queries'
+import { adjustUserBalance, adjustUserPoints } from '@/app/lib/user-balance'
+import { parseMoneyAmount } from '@/app/lib/pricing'
+import { getOrderTransactionNo, refundWeixinPay } from '@/app/lib/wx-pay-api'
+import { listHydratedWaitingOrders } from '@/app/lib/order-queries'
 
 export async function getAuditLogs(page: number): Promise<Paginated<HydratedUserAuditLog>> {
     await requireUserPermission('admin.manage')
@@ -68,35 +68,26 @@ export async function getUserOrders(page: number, userId: number): Promise<Pagin
 
 export async function setUserPoints(userId: number, points: string): Promise<void> {
     const me = await requireUserPermission('admin.manage')
-    const user = await prisma.user.findUnique({
-        where: {
-            id: userId
-        },
-        select: {
-            points: true
-        }
-    })
-    if (user == null) {
-        return
+    const value = parseMoneyAmount(points)
+    if (!Number.isSafeInteger(userId) || value == null) {
+        throw new Error('Bad request')
     }
-    await prisma.user.update({
-        where: {
-            id: userId
-        },
-        data: {
-            points: Decimal(points).toString()
+    await prisma.$transaction(async tx => {
+        const user = await tx.user.findUnique({
+            where: { id: userId },
+            select: { points: true }
+        })
+        if (user == null) {
+            return
         }
-    })
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.pointsUpdated,
-            user: {
-                connect: {
-                    id: userId
-                }
-            },
-            values: [ Decimal(points).minus(user.points).toString(), Decimal(points).toString(), me.id.toString() ]
-        }
+        const updated = await adjustUserPoints(tx, userId, value.minus(user.points))
+        await tx.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.pointsUpdated,
+                userId,
+                values: [ value.minus(user.points).toString(), updated.toString(), me.id.toString() ]
+            }
+        })
     })
 }
 
@@ -119,161 +110,160 @@ export async function getOrders(page: number): Promise<Paginated<Order>> {
 
 export async function markOrderDone(id: number): Promise<void> {
     const me = await requireUserPermission('admin.manage')
-    const order = await prisma.order.update({
+    const updated = await prisma.order.updateMany({
         where: {
-            id
+            id,
+            status: OrderStatus.waiting
         },
         data: {
             status: OrderStatus.done
-        },
-        include: {
-            user: true
         }
     })
-    if (order == null) {
+    if (updated.count < 1) {
+        // Already done (e.g. double click) or missing
         return
     }
+    const order = await prisma.order.findUniqueOrThrow({
+        where: { id },
+        select: { id: true, userId: true }
+    })
     await prisma.userAuditLog.create({
         data: {
             type: UserAuditLogType.orderSetStatus,
-            user: {
-                connect: {
-                    id: me.id
-                }
-            },
-            order: {
-                connect: {
-                    id
-                }
-            },
+            userId: me.id,
+            orderId: id,
             values: [ 'done' ]
         }
     })
-    if (order.user != null) {
-        await sendNotification(order.user, NotificationType.pickupReminder, [], order.id)
+    if (order.userId != null) {
+        await sendNotification(order.userId, NotificationType.pickupReminder, [], order.id)
     }
 }
 
+type RefundChannel = 'none' | 'balance' | 'wxPay' | 'stripe'
+
+function getRefundChannel(order: HydratedOrder): RefundChannel | null {
+    if (order.paymentMethod === PaymentMethod.cash || Decimal(order.totalPrice).eq(0)) {
+        return 'none'
+    }
+    if (order.paymentMethod === PaymentMethod.balance) {
+        return 'balance'
+    }
+    if (order.wxPayId != null) {
+        return 'wxPay'
+    }
+    if (order.stripePaymentIntent != null) {
+        return 'stripe'
+    }
+    if (order.paymentMethod === PaymentMethod.wxPay) {
+        return 'wxPay'
+    }
+    return null
+}
+
 export async function refundOrder(id: number): Promise<boolean> {
-    await requireUserPermission('admin.manage')
-    const order = await getOrder(id)
+    const admin = await requireUserPermission('admin.manage')
+    const order = await findHydratedOrder(id)
     if (order == null) {
         return false
     }
     if (new Date().getTime() - order.createdAt.getTime() > 90 * 24 * 60 * 60 * 1000) {
         return false
     }
-    if (order.paymentStatus !== PaymentStatus.paid) {
+    const channel = getRefundChannel(order)
+    if (channel == null || (channel === 'balance' && order.userId == null)) {
         return false
     }
 
-    if (order.paymentMethod === PaymentMethod.cash) {
-        await finishRefunding(order)
-        return true
-    }
-    if (order.paymentMethod === PaymentMethod.balance || (order.paymentMethod === PaymentMethod.payLater && order.wxPayId == null)) {
-        await refundBalance(order)
-        await finishRefunding(order)
-        return true
-    }
-    if (order.paymentMethod === PaymentMethod.wxPay || (order.paymentMethod === PaymentMethod.payLater && order.wxPayId != null)) {
-        if (!(await refundWeixinPay(order))) {
-            return false
-        }
-        await finishRefunding(order)
-        return true
-    }
-    if (order.paymentMethod === PaymentMethod.stripe || (order.paymentMethod === PaymentMethod.payLater && order.stripeSession != null)) {
-        if (!(await refundStripe(order))) {
-            return false
-        }
-        await finishRefunding(order)
-        return true
-    }
-    return false
-}
-
-async function finishRefunding(order: HydratedOrder): Promise<void> {
-    await prisma.order.update({
+    // Claim the refund first so that concurrent requests (e.g. a double click) can only refund once
+    const claimed = await prisma.order.updateMany({
         where: {
-            id: order.id
+            id: order.id,
+            paymentStatus: PaymentStatus.paid
         },
         data: {
             paymentStatus: PaymentStatus.refunded
         }
     })
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.orderRefunded,
-            user: {
-                connect: {
-                    id: (await me())!
-                }
-            },
-            order: {
-                connect: {
-                    id: order.id
-                }
-            },
-            values: [ order.totalPrice ]
-        }
-    })
-    if (order.user != null) {
-        await sendNotification(order.user, NotificationType.orderRefunded, [ order.totalPrice ], order.id)
-    }
-}
-
-function getOrderTransactionNo(order: HydratedOrder): string {
-    return `${order.id}-ORDER${order.createdAt.getTime()}`
-}
-
-async function refundStripe(order: HydratedOrder): Promise<boolean> {
-    if (order.stripeSession == null) {
+    if (claimed.count !== 1) {
         return false
     }
-    try {
-        await stripe.refunds.create({
-            payment_intent: order.stripePaymentIntent!
+
+    let success = true
+    if (channel === 'wxPay') {
+        success = await refundWeixinPay(getOrderTransactionNo(order), order.totalPrice)
+    } else if (channel === 'stripe') {
+        success = await refundStripe(order.stripePaymentIntent!)
+    }
+    if (!success) {
+        // Give the order back its paid status so the refund can be retried
+        await prisma.order.update({
+            where: { id: order.id },
+            data: { paymentStatus: PaymentStatus.paid }
         })
-    } catch {
         return false
+    }
+
+    await prisma.$transaction(async tx => {
+        if (channel === 'balance') {
+            const balance = await adjustUserBalance(tx, order.userId!, order.totalPrice)
+            await tx.userAuditLog.create({
+                data: {
+                    type: UserAuditLogType.balanceUsed,
+                    userId: order.userId,
+                    orderId: order.id,
+                    values: [ Decimal(order.totalPrice).negated().toString(), balance.toString() ]
+                }
+            })
+        }
+        // Take back the points earned with this order
+        if (order.userId != null) {
+            const points = await adjustUserPoints(tx, order.userId, Decimal(order.totalPriceRaw).negated())
+            await tx.userAuditLog.create({
+                data: {
+                    type: UserAuditLogType.pointsUpdated,
+                    userId: order.userId,
+                    orderId: order.id,
+                    values: [ Decimal(order.totalPriceRaw).negated().toString(), points.toString() ]
+                }
+            })
+        }
+        // If the order was not prepared yet, the inventory it reserved becomes available again
+        if (order.status === OrderStatus.waiting) {
+            for (const item of order.items) {
+                if (item.itemType.inventoryTrackingEnabled) {
+                    await tx.itemType.update({
+                        where: { id: item.itemTypeId },
+                        data: { remainingItems: { increment: item.amount } }
+                    })
+                }
+            }
+        }
+        await tx.userAuditLog.create({
+            data: {
+                type: UserAuditLogType.orderRefunded,
+                userId: admin.id,
+                orderId: order.id,
+                values: [ order.totalPrice ]
+            }
+        })
+    })
+    if (order.userId != null) {
+        await sendNotification(order.userId, NotificationType.orderRefunded, [ order.totalPrice ], order.id)
     }
     return true
 }
 
-async function refundWeixinPay(order: HydratedOrder): Promise<boolean> {
-    if (process.env.WX_PAY_MCH_ID == null || process.env.WX_PAY_MCH_ID === '') {
-        return true
-    }
-    const data = {
-        out_trade_no: getOrderTransactionNo(order),
-        mch_id: process.env.WX_PAY_MCH_ID,
-        money: order.totalPrice
-    }
-    const r = await fetch('https://api.pay.yungouos.com/api/pay/wxpay/refundOrder', {
-        method: 'POST',
-        headers: {
-            'User-Agent': userAgent,
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-            ...data,
-            sign: signData(data)
+async function refundStripe(paymentIntent: string): Promise<boolean> {
+    try {
+        await getStripe().refunds.create({
+            payment_intent: paymentIntent
         })
-    })
-    const resp = await r.json()
-    return resp.code === 0
-}
-
-async function refundBalance(order: HydratedOrder): Promise<void> {
-    await prisma.user.update({
-        where: {
-            id: order.userId!
-        },
-        data: {
-            balance: Decimal(order.user!.balance).plus(order.totalPrice).toString()
-        }
-    })
+    } catch (e) {
+        console.error('Stripe refund failed', paymentIntent, e)
+        return false
+    }
+    return true
 }
 
 export async function getWaitingOrders(): Promise<{ [id: number]: HydratedOrder }> {

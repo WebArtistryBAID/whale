@@ -5,20 +5,18 @@ import { getMyUser } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 import { getConfigValue } from '@/app/lib/settings-actions'
 import { me } from '@/app/login/login'
-import signData from '@/app/lib/wx-pay-sign'
 import { prisma } from '@/app/lib/prisma'
+import { parseMoneyAmount } from '@/app/lib/pricing'
+import { callWeixinPay, getBalanceTransactionNo, isWeixinPayConfigured } from '@/app/lib/wx-pay-api'
+import { idSchema } from '@/app/lib/validation'
 
-const userAgent = 'Whale Cafe (Weixin Pay Client)'
 const orderBody = '白鲸咖啡馆余额充值 The Whale Café Balance Recharge'
 
-function getTransactionNo(auditLog: UserAuditLog): string {
-    return `${auditLog.id}-BALANCE${auditLog.time.getTime()}`
-}
-
-async function requireTransaction(id: number): Promise<UserAuditLog> {
-    const transaction = await prisma.userAuditLog.findUnique({
-        where: { id }
-    })
+/**
+ * Returns one of the current user's pending balance top-ups.
+ */
+async function requireMyPendingTransaction(id: number): Promise<UserAuditLog> {
+    const transaction = await getMyTransaction(idSchema.parse(id))
     if (transaction == null) {
         throw new Error('Transaction not found')
     }
@@ -29,9 +27,13 @@ async function requireTransaction(id: number): Promise<UserAuditLog> {
 }
 
 export async function getMyTransaction(id: number): Promise<UserAuditLog | null> {
+    if (!Number.isSafeInteger(id)) {
+        return null
+    }
     return prisma.userAuditLog.findFirst({
         where: {
             id,
+            type: UserAuditLogType.balanceTransaction,
             userId: await me() ?? -1
         }
     })
@@ -44,145 +46,74 @@ export async function isTransactionFinished(id: number): Promise<boolean> {
 
 export async function beginTransaction(value: string): Promise<UserAuditLog | null> {
     const me = await getMyUser()
-    if (me == null) {
+    if (me == null || me.blocked) {
         return null
     }
-    if (Decimal(me.balance).add(value).greaterThan(await getConfigValue('maximum-balance'))
-        || Decimal(value).lessThan(await getConfigValue('balance-recharge-minimum'))) {
+    const amount = parseMoneyAmount(value)
+    if (amount == null || amount.lte(0)) {
+        return null
+    }
+    if (Decimal(me.balance).add(amount).greaterThan(await getConfigValue('maximum-balance'))
+        || amount.lessThan(await getConfigValue('balance-recharge-minimum'))) {
         return null
     }
     return prisma.userAuditLog.create({
         data: {
             type: UserAuditLogType.balanceTransaction,
             userId: me.id,
-            values: [ value, 'await' ]
+            values: [ amount.toString(), 'await' ]
         }
     })
 }
 
-export async function getPaymentQRCode(id: number): Promise<string | null> {
-    const trans = await requireTransaction(id)
-    if (process.env.WX_PAY_MCH_ID == null || process.env.WX_PAY_MCH_ID === '') {
-        return 'https://example.com' // Development
-    }
-    const data = {
-        out_trade_no: getTransactionNo(trans),
+async function getPaymentData(id: number) {
+    const trans = await requireMyPendingTransaction(id)
+    return {
+        out_trade_no: getBalanceTransactionNo(trans),
         total_fee: trans.values[0],
-        mch_id: process.env.WX_PAY_MCH_ID,
+        mch_id: process.env.WX_PAY_MCH_ID!,
         body: orderBody
     }
-    const r = await fetch('https://api.pay.yungouos.com/api/pay/wxpay/nativePay', {
-        method: 'POST',
-        headers: {
-            'User-Agent': userAgent,
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-            ...data,
-            notify_url: `${process.env.HOST}/balance/notify`,
-            sign: signData(data)
-        })
-    })
-    const resp = await r.json()
-    if (resp.code === 0) {
-        return resp.data
-    } else {
-        console.error('An error occurred when requesting Weixin Pay:', resp)
+}
+
+export async function getPaymentQRCode(id: number): Promise<string | null> {
+    if (!isWeixinPayConfigured()) {
+        return 'https://example.com' // Development
     }
-    return null
+    return callWeixinPay('/pay/wxpay/nativePay', await getPaymentData(id), {
+        notify_url: `${process.env.HOST}/balance/notify`
+    })
 }
 
 export async function getWeChatOAuthRedirect(id: number): Promise<string | null> {
-    if (process.env.WX_PAY_MCH_ID == null || process.env.WX_PAY_MCH_ID === '') {
+    if (!isWeixinPayConfigured()) {
         return 'https://example.com' // Development
     }
-    const data = {
-        mch_id: process.env.WX_PAY_MCH_ID,
-        callback_url: `${process.env.HOST}/balance/${id}/authorize`
-    }
-    const r = await fetch('https://api.pay.yungouos.com/api/wx/getOauthUrl', {
-        method: 'POST',
-        headers: {
-            'User-Agent': userAgent,
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-            ...data,
-            sign: signData(data)
-        })
+    return callWeixinPay('/wx/getOauthUrl', {
+        mch_id: process.env.WX_PAY_MCH_ID!,
+        callback_url: `${process.env.HOST}/balance/${idSchema.parse(id)}/authorize`
     })
-    const resp = await r.json()
-    if (resp.code === 0) {
-        return resp.data
-    } else {
-        console.error('An error occurred when requesting Weixin Pay:', resp)
-    }
-    return null
 }
 
 export async function getOAPaymentPackage(id: number, openid: string): Promise<string | null> {
-    const trans = await requireTransaction(id)
-    if (process.env.WX_PAY_MCH_ID == null || process.env.WX_PAY_MCH_ID === '') {
+    if (!isWeixinPayConfigured()) {
         return 'development' // Development
     }
-    const data = {
-        out_trade_no: getTransactionNo(trans),
-        total_fee: trans.values[0],
-        mch_id: process.env.WX_PAY_MCH_ID,
-        body: orderBody,
-        openId: openid
+    if (typeof openid !== 'string' || openid.length < 1 || openid.length > 128) {
+        return null
     }
-    const r = await fetch('https://api.pay.yungouos.com/api/pay/wxpay/jsapi', {
-        method: 'POST',
-        headers: {
-            'User-Agent': userAgent,
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-            ...data,
-            notify_url: `${process.env.HOST}/balance/notify`,
-            return_url: `${process.env.HOST}/user`,
-            sign: signData(data)
-        })
+    return callWeixinPay('/pay/wxpay/jsapi', { ...await getPaymentData(id), openId: openid }, {
+        notify_url: `${process.env.HOST}/balance/notify`,
+        return_url: `${process.env.HOST}/user`
     })
-    const resp = await r.json()
-    if (resp.code === 0) {
-        return resp.data
-    } else {
-        console.error('An error occurred when requesting Weixin Pay:', resp)
-    }
-    return null
 }
 
 export async function getExternalPaymentRedirect(id: number): Promise<string | null> {
-    const trans = await requireTransaction(id)
-    if (process.env.WX_PAY_MCH_ID == null || process.env.WX_PAY_MCH_ID === '') {
+    if (!isWeixinPayConfigured()) {
         return 'development' // Development
     }
-    const data = {
-        out_trade_no: getTransactionNo(trans),
-        total_fee: trans.values[0],
-        mch_id: process.env.WX_PAY_MCH_ID,
-        body: orderBody
-    }
-    const r = await fetch('https://api.pay.yungouos.com/api/pay/wxpay/wapPay', {
-        method: 'POST',
-        headers: {
-            'User-Agent': userAgent,
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-            ...data,
-            notify_url: `${process.env.HOST}/balance/notify`,
-            return_url: `${process.env.HOST}/user`,
-            sign: signData(data)
-        })
+    return callWeixinPay('/pay/wxpay/wapPay', await getPaymentData(id), {
+        notify_url: `${process.env.HOST}/balance/notify`,
+        return_url: `${process.env.HOST}/user`
     })
-    const resp = await r.json()
-    if (resp.code === 0) {
-        return resp.data
-    } else {
-        console.error('An error occurred when requesting Weixin Pay:', resp)
-    }
-    return null
 }

@@ -77,13 +77,17 @@ export default function OrderPayClient({ order, transaction }: PaymentClientProp
                 })()
             }
         }
-        setTimeout(() => {
+        const restartTimeoutId = setTimeout(() => {
             setCanRestart(true)
         }, 10000)
 
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             void pollPaymentStatus()
         }, 3000)
+        return () => {
+            clearTimeout(restartTimeoutId)
+            clearInterval(intervalId)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -179,7 +183,7 @@ export default function OrderPayClient({ order, transaction }: PaymentClientProp
 
     return <div className="flex justify-center items-center flex-col bg-green-50 dark:bg-green-950 h-screen w-screen">
         <div
-            className="lg:rounded-3xl p-4 lg:p-8 xl:p-16 bg-white dark:bg-gray-900 2xl:w-1/2 xl:w-2/3 lg:w-3/4 w-full h-full lg:h-auto">
+            className="lg:border-toon lg:border-ink lg:rounded-[1.6rem] lg:shadow-toon p-4 lg:p-8 xl:p-16 bg-paper 2xl:w-1/2 xl:w-2/3 lg:w-3/4 w-full h-full lg:h-auto">
             <div className="flex items-center mb-5">
                 <h1 className="mr-auto">
                     <img src="/assets/brand/wx-pay-light.svg" alt={t('wechatPay.title')}

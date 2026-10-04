@@ -6,7 +6,6 @@ import { HiMinus, HiPlus, HiX } from 'react-icons/hi'
 import Markdown from 'react-markdown'
 import UIOptionType from '@/app/order/UIOptionType'
 import { useEffect, useRef, useState } from 'react'
-import { Badge, Button } from 'flowbite-react'
 import { calculatePrice, OrderedItemTemplate, useShoppingCart } from '@/app/lib/shopping-cart'
 import If from '@/app/lib/If'
 import Decimal from 'decimal.js'
@@ -68,56 +67,68 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
         }
     }
 
-    return <div tabIndex={0} aria-label={t('a11y.itemDetails')}
-                className="w-full h-full overflow-y-auto bg-default p-4 lg:p-8 xl:p-16 relative">
-        <div className="flex items-center mb-5">
-            <p className="text-2xl font-bold font-serif mr-auto" tabIndex={0} ref={ref}>{item.name} <span
-                className="sr-only">({t('a11y.itemDetails')})</span></p>
+    const price = calculatePrice(getThisItem()).toString()
 
-            <button className="btn-icon-only" onClick={close} aria-label={t('close')}><HiX/></button>
+    return <div tabIndex={-1} aria-label={t('a11y.itemDetails')}
+                className="w-full h-full overflow-y-auto dots flex flex-col pop-in focus:outline-none">
+        <div className="flex-1 p-5 lg:p-8">
+            <div className="flex justify-end mb-2">
+                <button className="h-11 w-11 rounded-full border-toon border-ink bg-paper flex items-center justify-center
+                shadow-toon-sm hover:rotate-90 transition-transform" onClick={close} aria-label={t('close')}>
+                    <HiX className="text-xl"/>
+                </button>
+            </div>
+            <div className="flex flex-col items-center text-center mb-6">
+                <div className="relative mb-5">
+                    <span aria-hidden className="absolute -inset-4 rounded-full bg-whale/60 border-toon border-ink rotate-6"/>
+                    <img src={uploadPrefix + item.image} alt="" width={512} height={512}
+                         className="relative w-48 h-48 lg:w-56 lg:h-56 object-cover rounded-full border-toon border-ink bg-latte"/>
+                </div>
+                <div className="flex gap-2 mb-3 justify-center flex-wrap">
+                    {item.tags.map(tag =>
+                        <span key={tag.id} className="font-toon text-sm px-3 rounded-full border-2 border-ink leading-7"
+                              style={{ backgroundColor: tag.color, color: getTextColor(tag.color) }}>
+                            {tag.name} <span className="sr-only">{t('a11y.tag')}</span>
+                        </span>)}
+                    <If condition={!Decimal(item.salePercent).eq(1)}>
+                        <span className="font-toon text-sm px-3 rounded-full border-2 border-ink bg-tomato text-white leading-7">
+                            {t('itemDetails.sale', { sale: Decimal(1).minus(Decimal(item.salePercent)).mul(100).toString() })}
+                            <span className="sr-only">{t('a11y.tag')}</span>
+                        </span>
+                    </If>
+                </div>
+                <p className="font-toon text-3xl mb-1 focus:outline-none" tabIndex={0} ref={ref}>{item.name} <span
+                    className="sr-only">({t('a11y.itemDetails')})</span></p>
+                <p className="secondary">{item.shortDescription}</p>
+            </div>
+
+            <div className="toon-flat p-4 mb-6 text-sm leading-relaxed border-dashed">
+                <Markdown>{item.description}</Markdown>
+            </div>
+
+            <div className="pb-4">
+                {item.options.map(option =>
+                    <UIOptionType key={option.id} optionType={option}
+                                  selected={selectedOptions[option.id.toString()]} onChange={n => {
+                        selectedOptions[option.id.toString()] = n
+                        setSelectedOptions(selectedOptions)
+                        setTypical(typical + 1)
+                    }}/>)}
+            </div>
         </div>
-        <img src={uploadPrefix + item.image} alt="" width={512} height={512}
-             className="object-cover w-full rounded-3xl h-72 mb-3"/>
 
-        <div className="flex gap-3 mb-3 items-center">
-            {item.tags.map(tag =>
-                <Badge key={tag.id}
-                       style={{ backgroundColor: tag.color, color: getTextColor(tag.color) }}
-                       className="rounded-full">{tag.name} <span
-                    className="sr-only">{t('a11y.tag')}</span></Badge>)}
-
-            <If condition={!Decimal(item.salePercent).eq(1)}>
-                <Badge color="success" className="rounded-full">
-                    {t('itemDetails.sale', { sale: Decimal(1).minus(Decimal(item.salePercent)).mul(100).toString() })}
-                    <span className="sr-only">{t('a11y.tag')}</span>
-                </Badge>
-            </If>
-        </div>
-
-        <div className="mb-5 text-sm p-5 bg-amber-50 dark:bg-amber-800 rounded-3xl">
-            <Markdown>{item.description}</Markdown></div>
-
-        <div className="mb-48">
-            {item.options.map(option =>
-                <UIOptionType key={option.id} optionType={option}
-                              selected={selectedOptions[option.id.toString()]} onChange={n => {
-                    selectedOptions[option.id.toString()] = n
-                    setSelectedOptions(selectedOptions)
-                    setTypical(typical + 1)
-                }}/>)}
-        </div>
-
-        <div className="fixed flex items-center bottom-0 left-0 w-full lg:w-1/2 bg-amber-50 dark:bg-amber-800 p-5">
-            <p className="mr-auto text-lg"
-               aria-hidden>¥{calculatePrice(getThisItem()).toString()}</p>
+        <div className="sticky bottom-0 flex items-center gap-2 lg:gap-3 px-4 py-4 lg:px-8 bg-paper border-t-toon border-ink
+        pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            <p className="mr-auto font-toon text-2xl lg:text-3xl" aria-hidden>¥{price}</p>
             <span aria-live="polite" className="sr-only">
                 {t('a11y.priceAmount', {
                     item: amount,
-                    price: calculatePrice(getThisItem()).toString()
+                    price
                 })}
             </span>
-            <div className="flex bg-white dark:bg-amber-900 rounded-full items-center p-2 mr-3 gap-2">
-                <Button pill size="xs" color="warning" aria-label={t('itemDetails.minus')}
+            <div className="flex items-center rounded-full border-toon border-ink bg-cream p-1 gap-1">
+                <button className="h-9 w-9 rounded-full bg-paper border-2 border-ink flex items-center justify-center
+                disabled:opacity-30" aria-label={t('itemDetails.minus')} disabled={amount <= 1}
                         onClick={() => {
                             if (amount > 1) {
                                 setAmount(amount - 1)
@@ -126,9 +137,10 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                         }}>
                     <HiMinus/>
                     <If condition={amount <= 1}><span className="sr-only">{t('itemDetails.cannotMinusMore')}</span></If>
-                </Button>
-                <p aria-hidden>{amount}</p>
-                <Button pill size="xs" color="warning" aria-label={t('itemDetails.add')}
+                </button>
+                <p aria-hidden className="w-7 text-center font-toon text-xl">{amount}</p>
+                <button className="h-9 w-9 rounded-full bg-butter text-[#4a2511] border-2 border-ink flex items-center
+                justify-center disabled:opacity-30" aria-label={t('itemDetails.add')}
                         disabled={availableToAdd != null && amount >= availableToAdd}
                         onClick={() => {
                             if (availableToAdd != null && amount >= availableToAdd) {
@@ -140,15 +152,15 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                     <If condition={availableToAdd != null && amount >= availableToAdd}>
                         <span className="sr-only">{t('itemDetails.cannotAddMore')}</span>
                     </If>
-                </Button>
+                </button>
             </div>
-            <Button pill color="warning" disabled={soldOut || availableToAdd === 0} onClick={() => {
+            <button className="toon-btn px-4 lg:px-6" disabled={soldOut || availableToAdd === 0} onClick={() => {
                 if (soldOut || availableToAdd === 0) {
                     return
                 }
                 shoppingCart.addItem(getThisItem())
                 close()
-            }}>{t('addConfirm')}</Button>
+            }}>{t('addConfirm')}</button>
         </div>
     </div>
 }
