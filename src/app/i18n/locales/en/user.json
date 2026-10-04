@@ -349,8 +349,8 @@
         "imageError": "Please wait for the image to finish uploading.",
         "descriptionError": "Enter a valid description.",
         "shortDescriptionError": "Enter a valid short description.",
-        "basePriceError": "Enter a valid base price.",
-        "salePercentError": "Enter a valid price multiplier.",
+        "basePriceError": "Enter a price of at least 0 with at most two decimals.",
+        "salePercentError": "Enter a multiplier above 0 and at most 1, e.g. 0.8 for 20% off.",
         "remainingItemsError": "Enter a valid remaining inventory count."
       },
       "tagD": {
@@ -400,7 +400,7 @@
         "default": "Select by Default",
         "nameError": "Enter a valid name.",
         "typeError": "Choose a valid option type.",
-        "priceChangeError": "Enter a valid price change."
+        "priceChangeError": "Enter an amount with at most two decimals. It can be negative."
       },
       "upload": {
         "label": "Image Upload",

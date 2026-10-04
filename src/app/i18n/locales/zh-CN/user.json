@@ -349,8 +349,8 @@
         "imageError": "请等待图片上传完成。",
         "descriptionError": "请输入有效的描述。",
         "shortDescriptionError": "请输入有效的短描述。",
-        "basePriceError": "请输入有效的基础价格。",
-        "salePercentError": "请输入有效的价格乘数。",
+        "basePriceError": "请输入不小于 0、最多两位小数的价格。",
+        "salePercentError": "请输入大于 0、不超过 1 的价格乘数，例如 0.8 表示八折。",
         "remainingItemsError": "请输入有效的剩余库存数量。"
       },
       "tagD": {
@@ -400,7 +400,7 @@
         "default": "是否默认选择",
         "nameError": "请输入有效的名称。",
         "typeError": "请选择有效的选项类型。",
-        "priceChangeError": "请输入有效的价格更改。"
+        "priceChangeError": "请输入最多两位小数的金额，可以是负数。"
       },
       "upload": {
         "label": "上传图片",

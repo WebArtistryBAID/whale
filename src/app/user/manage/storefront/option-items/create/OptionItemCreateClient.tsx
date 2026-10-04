@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { upsertOptionItem } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
 import { OptionItem, OptionType } from '@/generated/prisma/browser'
+import { isValidPriceChange } from '@/app/lib/pricing'
 
 export default function OptionItemCreateClient({ editMode, existing, currentType, availableTypes }: {
     editMode: boolean,
@@ -43,7 +44,7 @@ export default function OptionItemCreateClient({ editMode, existing, currentType
             setTypeError(true)
             return
         }
-        if (isNaN(parseFloat(priceChange))) {
+        if (!isValidPriceChange(priceChange)) {
             setPriceChangeError(true)
             return
         }

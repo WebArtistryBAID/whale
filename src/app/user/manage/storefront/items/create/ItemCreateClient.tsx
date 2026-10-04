@@ -20,6 +20,7 @@ import If from '@/app/lib/If'
 import { Category, Tag } from '@/generated/prisma/browser'
 import { HydratedItemType, HydratedOptionType } from '@/app/lib/ui-data-actions'
 import UploadAreaClient from '@/app/user/manage/storefront/upload/UploadAreaClient'
+import { isValidBasePrice, isValidSalePercent } from '@/app/lib/pricing'
 
 export default function ItemCreateClient({
                                              editMode,
@@ -96,11 +97,11 @@ export default function ItemCreateClient({
             setShortDescriptionError(true)
             return
         }
-        if (basePrice === '' || isNaN(parseFloat(basePrice))) {
+        if (!isValidBasePrice(basePrice)) {
             setBasePriceError(true)
             return
         }
-        if (salePercent === '' || isNaN(parseFloat(salePercent))) {
+        if (!isValidSalePercent(salePercent)) {
             setSalePercentError(true)
             return
         }

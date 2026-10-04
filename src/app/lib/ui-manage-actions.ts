@@ -24,6 +24,7 @@ import OptionItemCreateInput = Prisma.OptionItemCreateInput
 import TagCreateInput = Prisma.TagCreateInput
 import CouponCodeCreateInput = Prisma.CouponCodeCreateInput
 import AdCreateInput = Prisma.AdCreateInput
+import { isValidBasePrice, isValidPriceChange, isValidSalePercent } from '@/app/lib/pricing'
 
 async function getNextCategoryDisplayOrder() {
     const result = await prisma.category.aggregate({
@@ -306,6 +307,9 @@ export async function upsertOptionItem(id: number | undefined, data: OptionItemC
     if (typeId == null) {
         throw new Error('Option items must be connected to a type.')
     }
+    if (!isValidPriceChange(String(data.priceChange))) {
+        throw new Error('Invalid price change')
+    }
     await prisma.userAuditLog.create({
         data: {
             type: UserAuditLogType.upsertOptionItem,
@@ -439,6 +443,9 @@ export async function upsertAd(id: number | undefined, input: AdCreateInput): Pr
 
 export async function upsertItemType(id: number | undefined, data: HydratedItemType): Promise<HydratedItemType> {
     const user = await requireUserPermission('admin.manage')
+    if (!isValidBasePrice(String(data.basePrice)) || !isValidSalePercent(String(data.salePercent))) {
+        throw new Error('Invalid price or sale multiplier')
+    }
     await prisma.userAuditLog.create({
         data: {
             type: UserAuditLogType.upsertItemType,
