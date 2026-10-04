@@ -46,9 +46,9 @@ export default function AdViewClient({ object, uploadPrefix }: { object: Ad, upl
                 <BreadcrumbItem href="/user/manage/storefront">{t('manage.storefront.ads')}</BreadcrumbItem>
                 <BreadcrumbItem>{object.id}</BreadcrumbItem>
             </Breadcrumb>
-            <h1 className="mb-5">{object.id}</h1>
-            <div className="2xl:w-1/2 mb-5">
-                <div className="toon p-5 mb-3"
+            <h1 className="mb-6">{object.id}</h1>
+            <div className="max-w-3xl mb-6">
+                <div className="toon sheet px-5 py-3 mb-3"
                      aria-label={t('manage.storefront.data')}>
                     <p className="secondary text-sm font-display">{t('manage.storefront.adD.id')}</p>
                     <p className="text-xl mb-3">{object.id}</p>

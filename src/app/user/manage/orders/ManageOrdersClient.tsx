@@ -5,7 +5,6 @@ import { Order } from '@/generated/prisma/browser'
 import Paginated from '@/app/lib/Paginated'
 import { useTranslationClient } from '@/app/i18n/client'
 import {
-    Badge,
     Breadcrumb,
     BreadcrumbItem,
     Button,
@@ -17,13 +16,14 @@ import {
     TableHeadCell,
     TableRow
 } from 'flowbite-react'
-import { HiCollection, HiHashtag } from 'react-icons/hi'
+import { HiCollection } from 'react-icons/hi'
 import If from '@/app/lib/If'
 import Link from 'next/link'
 import { getOrders } from '@/app/lib/order-manage-actions'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { useRouter } from 'next/navigation'
 import { formatDateTime } from '@/app/lib/format-date'
+import OrderStatusChips from '@/app/user/components/OrderStatusChips'
 
 export default function ManageOrdersClient({ init }: { init: Paginated<Order> }) {
     const { t } = useTranslationClient('user')
@@ -78,11 +78,10 @@ export default function ManageOrdersClient({ init }: { init: Paginated<Order> })
                     {page.items.map(order =>
                         <TableRow className="tr" key={order.id}>
                             <TableCell className="flex items-center th">
-                                <Badge className="mr-3" icon={HiHashtag} color="warning"/>
-                                {order.id}
+                                <span className="font-toon text-lg">#{order.id}</span>
                             </TableCell>
                             <TableCell>
-                                {t(`orders.${order.status}`)}
+                                <OrderStatusChips order={order}/>
                             </TableCell>
                             <TableCell>
                                 ¥{order.totalPrice}
@@ -101,7 +100,7 @@ export default function ManageOrdersClient({ init }: { init: Paginated<Order> })
             </Table>
             <div className="flex overflow-x-auto sm:justify-center">
                 <If condition={page.pages > 0}>
-                    <Pagination currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}
+                    <Pagination previousLabel={t('pagination.previous')} nextLabel={t('pagination.next')} currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}
                                 totalPages={page.pages}/>
                 </If>
             </div>

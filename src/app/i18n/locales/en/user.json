@@ -24,7 +24,14 @@
     "manageOrders": "Orders",
     "logOut": "Log Out",
     "beta": "Beta",
-    "betaDetails": "Project Whale is in beta. Contact Lin with any issues."
+    "betaDetails": "Project Whale is in beta. Contact Lin with any issues.",
+    "queue": "Waiting Orders",
+    "staffArea": "Staff area",
+    "myArea": "My account",
+    "sectionMine": "Mine",
+    "sectionStore": "Store",
+    "break": "Take a break",
+    "breakHint": "A quick round with the beluga"
   },
   "a11y": {
     "page": "Page {{page}} of {{pages}}. Page navigation on bottom of page.",
@@ -80,6 +87,21 @@
       "title": "Others",
       "logOut": "Log Out",
       "credits": "Project Whale is developed with a collaboration between WebArtistry and The Whale Café. Thank you to all contributors."
+    },
+    "greeting": {
+      "morning": "Good morning, ",
+      "afternoon": "Good afternoon, ",
+      "evening": "Good evening, ",
+      "staff": "Thanks for today. Everything about the store is below — take a break when it's quiet.",
+      "customer": "Your balance, points and notifications are all here."
+    },
+    "store": {
+      "title": "Today at the store",
+      "waitingOrders": "Waiting orders",
+      "waitingCups": "{{count}} cups in total",
+      "remaining": "Cups left today",
+      "hours": "Opening hours",
+      "queue": "Open the order queue"
     }
   },
   "orders": {
@@ -195,6 +217,11 @@
         "balance-recharge-minimum": "The minimum amount users can recharge, in CN¥.",
         "allow-pay-later": "When this setting is turned on, users can order without paying immediately. Existing orders are not affected.",
         "allow-delivery": "When this setting is turned on, users can order delivery."
+      },
+      "groups": {
+        "hours": "Opening hours",
+        "limits": "Cup limits",
+        "payment": "Balance and payment"
       }
     },
     "users": {
@@ -222,7 +249,10 @@
         "message": "Please enter the new points value.",
         "placeholder": "Points...",
         "minimum": "Must be at least 0."
-      }
+      },
+      "noResults": "No users with that name.",
+      "blockedChip": "Blocked",
+      "adminHint": "Can open the staff area to manage orders, the storefront and settings."
     },
     "stats": {
       "title": "Statistics",
@@ -278,7 +308,9 @@
       "notPaid": "Not Paid",
       "refunded": "Refunded",
       "paymentMethod": "Orders by Payment Method",
-      "paymentStatus": "Orders by Payment Status"
+      "paymentStatus": "Orders by Payment Status",
+      "today": "Today",
+      "clear": "Clear"
     },
     "storefront": {
       "title": "Storefront",
@@ -351,7 +383,11 @@
         "shortDescriptionError": "Enter a valid short description.",
         "basePriceError": "Enter a price of at least 0 with at most two decimals.",
         "salePercentError": "Enter a multiplier above 0 and at most 1, e.g. 0.8 for 20% off.",
-        "remainingItemsError": "Enter a valid remaining inventory count."
+        "remainingItemsError": "Enter a valid remaining inventory count.",
+        "preview": "Menu preview",
+        "previewOff": "{{percent}}% off",
+        "previewNoSale": "Full price",
+        "previewCustomerPays": "Customer pays per cup"
       },
       "tagD": {
         "create": "New Tag",
@@ -409,6 +445,16 @@
         "error": "Try again",
         "done": "Upload completed",
         "alt": "Uploaded image"
+      },
+      "createCategory": "New category",
+      "couponUses": "{{count}} uses left",
+      "couponUsedUp": "Used up",
+      "hints": {
+        "categories": "Sections of the menu. Drag the handle to reorder; open one to manage its products.",
+        "optionTypes": "Choices such as size, temperature or sweetness. Link them to products so customers can pick.",
+        "couponCodes": "Codes customers enter at checkout. Used-up coupons are greyed out.",
+        "tags": "Small labels on product cards, such as New or Popular.",
+        "ads": "Banners on the home page carousel. Tapping one opens its link."
       }
     }
   },
@@ -474,6 +520,44 @@
     "officialLimit": "Official Live Limit: {{count}} cups",
     "remainingLive": "Remaining Live Cups: {{count}}",
     "preOrderUsage": "Pre-Orders Used: {{used}} / {{limit}}",
-    "remainingPreOrder": "Pre-Orders Remaining: {{count}} (until {{time}})"
+    "remainingPreOrder": "Pre-Orders Remaining: {{count}} (until {{time}})",
+    "cups": "{{count}} cups",
+    "remainingShort": "Cups left today",
+    "emptyHint": "New orders show up here automatically every 10 seconds.",
+    "breakLink": "Take a break while it's quiet"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "break": {
+    "title": "Take a break",
+    "subtitle": "A quick round with the beluga when there are no orders. New orders come first!",
+    "score": "{{score}} pts",
+    "lives": "{{count}} lives left",
+    "best": "Best {{score}}",
+    "canvas": "Beluga catching coffee beans",
+    "readyTitle": "Beluga's Bean Catch",
+    "rules": "Move the beluga left and right to catch beans and cups. Alarm clocks mean the manager is checking in — avoid them!",
+    "start": "Start",
+    "paused": "Paused",
+    "resume": "Resume",
+    "over": "Caught!",
+    "again": "Play again",
+    "newBest": "New best!",
+    "ouch": "Manager!",
+    "howTo": "How to play",
+    "bean": "Coffee bean: +1",
+    "cup": "Coffee cup: +5",
+    "clock": "Alarm clock: the manager! Lose a life",
+    "controls": "Use ← → or A D to move, Space to start, P to pause, B for the boss key. On phones, drag across the play area.",
+    "pause": "Pause",
+    "boss": "Boss key",
+    "bossLines": [
+      "Manager: what are we doing on shift?",
+      "Are today's beans ground yet?",
+      "Turn the alarm off next time.",
+      "The beluga asks for one more chance!"
+    ]
   }
 }

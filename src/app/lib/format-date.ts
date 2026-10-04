@@ -27,3 +27,10 @@ export function formatDateTime(date: Date): string {
 export function formatDate(date: Date): string {
     return dateFormat.format(date)
 }
+
+const hourFormat = new Intl.DateTimeFormat('en-US', { timeZone: STORE_TIME_ZONE, hour: 'numeric', hourCycle: 'h23' })
+
+/** The hour of day (0-23) in the store's time zone, the same on the server and in the browser. */
+export function getStoreHour(date: Date): number {
+    return parseInt(hourFormat.format(date), 10)
+}

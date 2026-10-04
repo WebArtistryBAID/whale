@@ -57,9 +57,9 @@ export default function TagViewClient({ object, items }: { object: Tag, items: I
                 <BreadcrumbItem href="/user/manage/storefront">{t('manage.storefront.tags')}</BreadcrumbItem>
                 <BreadcrumbItem>{object.name}</BreadcrumbItem>
             </Breadcrumb>
-            <h1 className="mb-5">{object.name}</h1>
-            <div className="2xl:w-1/2 mb-5">
-                <div className="toon p-5 mb-3"
+            <h1 className="mb-6">{object.name}</h1>
+            <div className="max-w-3xl mb-6">
+                <div className="toon sheet px-5 py-3 mb-3"
                      aria-label={t('manage.storefront.data')}>
                     <p className="secondary text-sm font-display">{t('manage.storefront.tagD.id')}</p>
                     <p className="text-xl mb-3">{object.id}</p>
@@ -75,7 +75,7 @@ export default function TagViewClient({ object, items }: { object: Tag, items: I
 
             <If condition={items.length > 0}>
                 <div aria-label={t('manage.storefront.tagD.items')} className="mb-5">
-                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.tagD.items')}</p>
+                    <h2 className="mb-3">{t('manage.storefront.tagD.items')}</h2>
                     <Table>
                         <TableHead>
                             <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>

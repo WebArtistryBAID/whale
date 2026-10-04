@@ -115,24 +115,113 @@ const customTheme: CustomFlowbiteTheme = {
     },
     tabs: {
         tablist: {
+            variant: {
+                underline: 'flex-wrap gap-2 pb-1'
+            },
             tabitem: {
-                base: 'flex items-center justify-center rounded-t-lg p-4 text-sm font-medium first:ml-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                base: 'flex items-center justify-center px-4 py-2 text-sm first:ml-0 focus:outline-none focus-visible:ring-4 focus-visible:ring-butter/50 disabled:cursor-not-allowed disabled:opacity-50',
                 variant: {
                     underline: {
-                        base: 'rounded-t-lg',
+                        base: 'rounded-full border-toon',
                         active: {
-                            on: 'active rounded-t-lg border-b-[3px] border-ink text-ink',
-                            off: 'border-b-[3px] border-transparent text-ink/60 hover:border-ink/30 hover:text-ink'
+                            on: 'active border-ink bg-butter text-[#4a2511] shadow-toon-sm font-toon',
+                            off: 'border-ink/25 bg-paper text-ink/70 hover:border-ink hover:text-ink'
                         }
                     }
                 }
             }
         }
     },
+    table: {
+        root: {
+            base: 'w-full text-left text-sm text-ink',
+            shadow: 'hidden',
+            wrapper: 'relative toon overflow-x-auto'
+        },
+        head: {
+            base: 'group/head text-xs text-ink',
+            cell: {
+                base: 'bg-butter/50 px-5 py-3 font-toon text-sm font-normal border-b-2 border-ink whitespace-nowrap'
+            }
+        },
+        body: {
+            base: 'group/body',
+            cell: {
+                base: 'px-5 py-3.5'
+            }
+        },
+        row: {
+            base: 'group/row border-b-2 border-dashed border-ink/15 last:border-b-0',
+            hovered: 'hover:bg-butter/20',
+            striped: 'odd:bg-paper even:bg-cream/60'
+        }
+    },
+    breadcrumb: {
+        root: {
+            base: '',
+            list: 'flex flex-wrap items-center gap-y-1'
+        },
+        item: {
+            base: 'group flex items-center',
+            chevron: 'mx-1.5 h-3.5 w-3.5 text-ink/40 group-first:hidden',
+            href: {
+                off: 'flex items-center text-sm text-ink/60',
+                on: 'flex items-center text-sm text-ink/60 underline decoration-butter decoration-2 underline-offset-4 hover:text-ink hover:decoration-tomato'
+            },
+            icon: 'mr-1.5 h-4 w-4'
+        }
+    },
+    select: {
+        field: {
+            select: {
+                base: 'block w-full border-toon disabled:cursor-not-allowed disabled:opacity-50',
+                withAddon: {
+                    off: 'rounded-xl'
+                },
+                colors: {
+                    gray: 'border-ink/40 bg-paper text-ink focus:border-ink focus:ring-butter/50'
+                }
+            }
+        }
+    },
+    textarea: {
+        base: 'block w-full rounded-xl border-toon text-sm disabled:cursor-not-allowed disabled:opacity-50',
+        colors: {
+            gray: 'border-ink/40 bg-paper text-ink placeholder-ink/40 focus:border-ink focus:ring-butter/50',
+            failure: 'border-tomato bg-paper text-ink placeholder-ink/40 focus:border-tomato focus:ring-tomato/30'
+        }
+    },
+    checkbox: {
+        root: {
+            base: 'h-5 w-5 rounded-md border-2 border-ink bg-paper focus:ring-2',
+            color: {
+                default: 'text-butter focus:ring-butter/50'
+            }
+        }
+    },
+    label: {
+        root: {
+            base: 'text-sm font-toon',
+            colors: {
+                default: 'text-ink'
+            }
+        }
+    },
     pagination: {
         pages: {
+            base: 'mt-2 inline-flex items-center gap-1.5',
+            previous: {
+                base: 'h-10 rounded-full border-toon border-ink bg-paper px-4 font-toon text-ink shadow-toon-sm enabled:hover:bg-cream disabled:opacity-40 disabled:shadow-none',
+                icon: 'h-5 w-5'
+            },
+            next: {
+                base: 'h-10 rounded-full border-toon border-ink bg-paper px-4 font-toon text-ink shadow-toon-sm enabled:hover:bg-cream disabled:opacity-40 disabled:shadow-none',
+                icon: 'h-5 w-5'
+            },
             selector: {
-                active: 'bg-butter text-[#4a2511] font-bold'
+                base: 'h-10 w-10 rounded-full border-2 border-ink/25 bg-paper text-ink enabled:hover:border-ink',
+                active: 'border-toon border-ink bg-butter text-[#4a2511] font-bold',
+                disabled: 'cursor-not-allowed opacity-50'
             }
         }
     }

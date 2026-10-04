@@ -13,15 +13,34 @@ import { formatDate } from '@/app/lib/format-date'
 // ApexCharts reads `window` when it is imported, so it can only load in the browser.
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
-function Block({ title, hideTitle, center, children }: {
+// Chart colours from the café palette (docs/DESIGN.md). ApexCharts reads its defaults from window.Apex.
+if (typeof window !== 'undefined') {
+    (window as unknown as { Apex: object }).Apex = {
+        colors: [ '#ffc845', '#9ed8f0', '#8bd7a6', '#e8603c', '#ffb3b3', '#f2c894' ],
+        chart: { toolbar: { show: false } },
+        grid: { borderColor: 'rgba(74, 37, 17, 0.15)', strokeDashArray: 4 },
+        stroke: { width: 3 }
+    }
+}
+
+const blockTones = {
+    paper: '',
+    butter: 'bg-butter/45',
+    whale: 'bg-whale/45',
+    mint: 'bg-mint/45',
+    blush: 'bg-blush/45'
+}
+
+function Block({ title, hideTitle, center, tone = 'paper', children }: {
     title: string,
     hideTitle: boolean,
     center: boolean,
+    tone?: keyof typeof blockTones,
     children: ReactNode
 }) {
-    return <div aria-label={title} className="toon p-5">
+    return <div aria-label={title} className={`toon p-5 min-w-0 overflow-hidden ${blockTones[tone]}`}>
         <h3 style={{ display: hideTitle ? 'none' : 'block' }}
-            className="text-sm secondary font-normal mb-2">{title}</h3>
+            className="text-base mb-2">{title}</h3>
         <div className={center ? 'flex flex-col justify-center items-center w-full' : 'w-full'}>
             {children}
         </div>
@@ -49,7 +68,7 @@ function theme() {
 }
 
 export default function ManageStatsClient({ stats }: { stats: StatsAggregates }) {
-    const { t } = useTranslationClient('user')
+    const { t, i18n } = useTranslationClient('user')
     const current = new Date()
     current.setHours(0, 0, 0, 0)
     const [ start, setStart ] = useState(current)
@@ -112,7 +131,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                 interpolation: { escapeValue: false }
             })}</p>
 
-            <Datepicker aria-label={t('manage.stats.date')} value={start} onChange={e => {
+            <Datepicker aria-label={t('manage.stats.date')} language={i18n.resolvedLanguage ?? 'en'}
+                        labelTodayButton={t('manage.stats.today')} labelClearButton={t('manage.stats.clear')} value={start} onChange={e => {
                 if (e != null) {
                     setStart(e)
                 }
@@ -131,8 +151,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
             </div>
             : <>
                 <div aria-label={t('manage.stats.basic')} className="mb-8 grid gap-3 grid-cols-1 lg:grid-cols-4">
-                    <Block title={t('manage.stats.totalRevenue')}>
-                        <p className="text-2xl mb-1">¥{data.totalRevenue}</p>
+                    <Block tone="butter" title={t('manage.stats.totalRevenue')}>
+                        <p className="font-toon text-4xl mb-1">¥{data.totalRevenue}</p>
                         <If condition={data.lastTotalRevenue != null}>
                             <If condition={Decimal(data.lastTotalRevenue ?? 0).gt(data.totalRevenue)}>
                                 <Badge color="failure" className="inline-flex" icon={HiArrowDown}>
@@ -148,8 +168,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             </If>
                         </If>
                     </Block>
-                    <Block title={t('manage.stats.paidRevenue')}>
-                        <p className="text-2xl mb-1">¥{data.paidRevenue}</p>
+                    <Block tone="mint" title={t('manage.stats.paidRevenue')}>
+                        <p className="font-toon text-4xl mb-1">¥{data.paidRevenue}</p>
                         <If condition={data.lastPaidRevenue != null}>
                             <If condition={Decimal(data.lastPaidRevenue ?? 0).gt(data.paidRevenue)}>
                                 <Badge color="failure" className="inline-flex" icon={HiArrowDown}>
@@ -165,8 +185,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             </If>
                         </If>
                     </Block>
-                    <Block title={t('manage.stats.totalOrders')}>
-                        <p className="text-2xl mb-1">{data.totalOrders}</p>
+                    <Block tone="whale" title={t('manage.stats.totalOrders')}>
+                        <p className="font-toon text-4xl mb-1">{data.totalOrders}</p>
                         <If condition={data.lastTotalOrders != null}>
                             <If condition={(data.lastTotalOrders ?? 0) > data.totalOrders}>
                                 <Badge color="failure" className="inline-flex" icon={HiArrowDown}>
@@ -182,8 +202,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             </If>
                         </If>
                     </Block>
-                    <Block title={t('manage.stats.totalCups')}>
-                        <p className="text-2xl mb-1">{data.totalCups}</p>
+                    <Block tone="blush" title={t('manage.stats.totalCups')}>
+                        <p className="font-toon text-4xl mb-1">{data.totalCups}</p>
                         <If condition={data.lastTotalCups != null}>
                             <If condition={(data.lastTotalCups ?? 0) > data.totalCups}>
                                 <Badge color="failure" className="inline-flex" icon={HiArrowDown}>
@@ -209,10 +229,10 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                             <h3 className="mb-1">{data.mentionedItems[item.id]}</h3>
                             <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                                 <Block title={t('manage.stats.totalRevenue')}>
-                                    <p className="text-2xl">¥{item.revenue}</p>
+                                    <p className="font-toon text-3xl">¥{item.revenue}</p>
                                 </Block>
                                 <Block title={t('manage.stats.totalCups')}>
-                                    <p className="text-2xl">{item.cups}</p>
+                                    <p className="font-toon text-3xl">{item.cups}</p>
                                 </Block>
                                 <Block title={t('manage.stats.revenueByGender')} center aria-hidden>
                                     <ReactApexChart width={380} type="pie" options={{
@@ -306,10 +326,10 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
                     <h2 className="mb-3">{t('manage.stats.perOrder')}</h2>
                     <div className="grid gap-3 grid-cols-1 lg:grid-cols-2">
                         <Block title={t('manage.stats.averageRevenue')}>
-                            <p className="text-2xl">¥{Decimal(data.averageOrderValue).toFixed(2)}</p>
+                            <p className="font-toon text-3xl">¥{Decimal(data.averageOrderValue).toFixed(2)}</p>
                         </Block>
                         <Block title={t('manage.stats.averageCups')}>
-                            <p className="text-2xl">{data.averageOrderCups.toFixed(2)}</p>
+                            <p className="font-toon text-3xl">{data.averageOrderCups.toFixed(2)}</p>
                         </Block>
                         <Block title={t('manage.stats.averageRevenuePerDay')} center aria-hidden>
                             <ReactApexChart options={{

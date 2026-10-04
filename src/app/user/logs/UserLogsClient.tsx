@@ -126,7 +126,7 @@ export default function UserLogsClient({ init }: { init: Paginated<HydratedUserA
             </Table>
             <div className="flex overflow-x-auto sm:justify-center">
                 <If condition={page.pages > 0}>
-                    <Pagination currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}
+                    <Pagination previousLabel={t('pagination.previous')} nextLabel={t('pagination.next')} currentPage={currentPage + 1} onPageChange={p => setCurrentPage(p - 1)}
                                 totalPages={page.pages}/>
                 </If>
             </div>
