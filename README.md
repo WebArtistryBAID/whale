@@ -2,6 +2,35 @@
 
 The ordering management platform of The Whale Café. Built with Next.js.
 
+## Screenshots
+
+The UI is a cartoon sticker style built around the café's beluga mascot. See [docs/DESIGN.md](docs/DESIGN.md)
+for the design rules.
+
+### Before and after
+
+| Page | Comparison |
+|------|------------|
+| Home (desktop) | ![Home, desktop](docs/screenshots/compare-home-desktop.png) |
+| Menu (desktop) | ![Menu, desktop](docs/screenshots/compare-order-desktop.png) |
+| Item details (desktop) | ![Item details, desktop](docs/screenshots/compare-item-overlay-desktop.png) |
+| Checkout (desktop) | ![Checkout, desktop](docs/screenshots/compare-checkout-desktop.png) |
+| User dashboard | ![User dashboard](docs/screenshots/compare-dashboard-desktop.png) |
+
+| Home (mobile) | Menu (mobile) |
+|---------------|---------------|
+| ![Home, mobile](docs/screenshots/compare-home-mobile.png) | ![Menu, mobile](docs/screenshots/compare-order-mobile.png) |
+
+### Current pages
+
+| Tray (desktop) | Order ticket | Waiting orders (staff) |
+|----------------|--------------|------------------------|
+| ![Tray](docs/screenshots/cart-desktop.png) | ![Order ticket](docs/screenshots/order-details-desktop.png) | ![Waiting orders](docs/screenshots/today-desktop.png) |
+
+| Item details (mobile) | Tray (mobile) | Checkout (mobile) |
+|-----------------------|---------------|-------------------|
+| ![Item details, mobile](docs/screenshots/item-overlay-mobile.png) | ![Tray, mobile](docs/screenshots/cart-mobile.png) | ![Checkout, mobile](docs/screenshots/checkout-mobile.png) |
+
 ## Get Started
 
 To run in production:
