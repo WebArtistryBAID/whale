@@ -75,7 +75,7 @@ After that, always use `npm run db:migrate` to apply new migrations.
 | `JWT_SECRET`                     | The JWT secret key to use. You can generate one with `openssl rand -hex 32`.                                    |
 | `HOST`                           | The location where this service is hosted. No trailing slashes.                                                 |
 | `UPLOAD_PATH`                    | The directory where uploaded files are stored. In development, this is `public/uploads`.                        |
-| `UPLOAD_SERVE_PATH`              | The path where uploaded files are served. In development, this is `uploads`.                                    |
+| `UPLOAD_SERVE_PATH`              | The path where uploaded files are served. In development, this is `uploads`. In production, serve `UPLOAD_PATH` at this path with your web server (e.g. nginx): `next start` only serves files that were in `public/` at build time, so new uploads would return 404. |
 | `BOTTOM_TEXT`                    | In case you need this.                                                                                          |
 | `ONELOGIN_HOST`                  | The location where [OneLogin](https://github.com/WebArtistryBAID/baid-onelogin) is hosted. No trailing slashes. |
 | `ONELOGIN_CLIENT_ID`             | OneLogin client ID. `basic`, `phone`, and `sms` scopes are required.                                            |

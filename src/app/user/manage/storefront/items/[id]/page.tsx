@@ -1,7 +1,9 @@
 import { getCategory, getItemType } from '@/app/lib/ui-manage-actions'
 import ItemViewClient from '@/app/user/manage/storefront/items/[id]/ItemViewClient'
+import { requireAdminPage } from '@/app/lib/admin-page'
 
 export default async function OptionItemViewBase({ params }: { params: Promise<{ id: string }> }) {
+    await requireAdminPage()
     const id = (await params).id
     const object = await getItemType(parseInt(id))
     if (object == null) {

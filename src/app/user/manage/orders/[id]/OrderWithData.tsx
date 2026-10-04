@@ -11,6 +11,7 @@ import UIOrderedItem from '@/app/user/manage/orders/[id]/UIOrderedItem'
 import { useState } from 'react'
 import { useTranslationClient } from '@/app/i18n/client'
 import { isValidPickUpTime } from '@/app/lib/pick-up-times'
+import { formatDateTime } from '@/app/lib/format-date'
 
 export default function OrderWithData({ order, forceUpdate, close }: {
     order: HydratedOrder,
@@ -66,7 +67,7 @@ export default function OrderWithData({ order, forceUpdate, close }: {
                 </If>
 
                 <p className="secondary text-sm font-display">{t('today.createdAt')}</p>
-                <p className="text-xl mb-3">{order.createdAt.toLocaleString()}</p>
+                <p className="text-xl mb-3">{formatDateTime(order.createdAt)}</p>
 
                 <p className="secondary text-sm font-display">{t('today.price')}</p>
                 <p className="text-xl mb-3">¥{order.totalPrice}</p>

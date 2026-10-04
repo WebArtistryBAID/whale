@@ -23,6 +23,7 @@ import Link from 'next/link'
 import { getOrders } from '@/app/lib/order-manage-actions'
 import { useShoppingCart } from '@/app/lib/shopping-cart'
 import { useRouter } from 'next/navigation'
+import { formatDateTime } from '@/app/lib/format-date'
 
 export default function ManageOrdersClient({ init }: { init: Paginated<Order> }) {
     const { t } = useTranslationClient('user')
@@ -87,7 +88,7 @@ export default function ManageOrdersClient({ init }: { init: Paginated<Order> })
                                 ¥{order.totalPrice}
                             </TableCell>
                             <TableCell>
-                                {order.createdAt.toLocaleString()}
+                                {formatDateTime(order.createdAt)}
                             </TableCell>
                             <TableCell>
                                 <Link href={`/user/manage/orders/${order.id}`}>

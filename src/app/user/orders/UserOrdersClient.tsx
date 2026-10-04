@@ -21,6 +21,7 @@ import {
 import { HiHashtag, HiUser } from 'react-icons/hi'
 import If from '@/app/lib/If'
 import Link from 'next/link'
+import { formatDateTime } from '@/app/lib/format-date'
 
 export default function UserOrdersClient({ init }: { init: Paginated<Order> }) {
     const { t } = useTranslationClient('user')
@@ -77,7 +78,7 @@ export default function UserOrdersClient({ init }: { init: Paginated<Order> }) {
                                 ¥{order.totalPrice}
                             </TableCell>
                             <TableCell>
-                                {order.createdAt.toLocaleString()}
+                                {formatDateTime(order.createdAt)}
                             </TableCell>
                             <TableCell>
                                 <Link href={`/order/details/${order.id}`}>

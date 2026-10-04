@@ -30,6 +30,7 @@ import Paginated from '@/app/lib/Paginated'
 import Link from 'next/link'
 import Decimal from 'decimal.js'
 import { getUserOrders, setUserPoints } from '@/app/lib/order-manage-actions'
+import { formatDateTime } from '@/app/lib/format-date'
 
 export default function ManageUserClient({ user, init }: { user: User, init: Paginated<Order> }) {
     const { t } = useTranslationClient('user')
@@ -168,7 +169,7 @@ export default function ManageUserClient({ user, init }: { user: User, init: Pag
                                         ¥{order.totalPrice}
                                     </TableCell>
                                     <TableCell>
-                                        {order.createdAt.toLocaleString()}
+                                        {formatDateTime(order.createdAt)}
                                     </TableCell>
                                     <TableCell>
                                         <Link href={`/user/manage/orders/${order.id}`}>

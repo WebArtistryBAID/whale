@@ -7,6 +7,7 @@ import { Breadcrumb, BreadcrumbItem, Button, TextInput, ToggleSwitch } from 'flo
 import { HiCollection } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
+import { formatDateKey, formatLegacyDateKey } from '@/app/lib/ordering-schedule'
 
 export default function ManageSettingsClient({ initValues }: { initValues: { [key: string]: string } }) {
     const { t } = useTranslationClient('user')
@@ -20,16 +21,19 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
             return
         }
         setLoading(true)
-        for (const key in tmpValues) {
-            if (values[key] !== tmpValues[key]) {
-                await setConfigValue(key, tmpValues[key])
+        try {
+            for (const key in tmpValues) {
+                if (values[key] !== tmpValues[key]) {
+                    await setConfigValue(key, tmpValues[key])
+                }
             }
+        } finally {
+            const newV = await getConfigValues()
+            setValues(newV)
+            setTmpValues(newV)
+            setHasErrors([])
+            setLoading(false)
         }
-        const newV = await getConfigValues()
-        setValues(newV)
-        setTmpValues(newV)
-        setHasErrors([])
-        setLoading(false)
     }
 
     function setBooleanValue(key: string, value: boolean) {
@@ -132,10 +136,10 @@ export default function ManageSettingsClient({ initValues }: { initValues: { [ke
         <div className="flex flex-col gap-3">
             <div className="2xl:w-1/2" aria-label={t(`manage.settings.types.override`)}>
                 <ToggleSwitch
-                    checked={tmpValues['availability-override-date'] === `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`}
+                    checked={[ formatDateKey(date), formatLegacyDateKey(date) ].includes(tmpValues['availability-override-date'])}
                     onChange={v => {
                         if (!v) {
-                            setValue('availability-override-date', '')
+                            setValue('availability-override-date', '0000-00-00')
                         }
                     }}
                     label={t(`manage.settings.types.override`)} color="yellow"/>

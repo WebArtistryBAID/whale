@@ -7,7 +7,11 @@ import { getStats, StatsAggregates } from '@/app/lib/stats-actions'
 import { ReactNode, useEffect, useState } from 'react'
 import If from '@/app/lib/If'
 import Decimal from 'decimal.js'
-import ReactApexChart from 'react-apexcharts'
+import dynamic from 'next/dynamic'
+import { formatDate } from '@/app/lib/format-date'
+
+// ApexCharts reads `window` when it is imported, so it can only load in the browser.
+const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 function Block({ title, hideTitle, center, children }: {
     title: string,
@@ -37,8 +41,10 @@ function daysInMonths(year: number): number[] {
 }
 
 function theme() {
+    // Charts only render in the browser, but their options are also built while prerendering on the server
+    const dark = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
     return {
-        mode: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : undefined
+        mode: dark ? 'dark' : undefined
     }
 }
 
@@ -101,8 +107,8 @@ export default function ManageStatsClient({ stats }: { stats: StatsAggregates })
         <h1 className="mb-3">{t('manage.stats.title')}</h1>
         <div className="mb-5" aria-label={t('manage.stats.viewOptions')}>
             <p className="mb-3">{t('manage.stats.showing', {
-                start: actualStartDate.toLocaleDateString(),
-                end: actualEndDate.toLocaleDateString(),
+                start: formatDate(actualStartDate),
+                end: formatDate(actualEndDate),
                 interpolation: { escapeValue: false }
             })}</p>
 

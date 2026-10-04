@@ -18,6 +18,7 @@ import {
 import { HiUser } from 'react-icons/hi'
 import If from '@/app/lib/If'
 import { UserAuditLogType } from '@/generated/prisma/browser'
+import { formatDateTime } from '@/app/lib/format-date'
 
 export default function UserLogsClient({ init }: { init: Paginated<HydratedUserAuditLog> }) {
     const { t } = useTranslationClient('user')
@@ -114,7 +115,7 @@ export default function UserLogsClient({ init }: { init: Paginated<HydratedUserA
                                 {log.id}
                             </TableCell>
                             <TableCell>
-                                {log.time.toLocaleString()}
+                                {formatDateTime(log.time)}
                             </TableCell>
                             <TableCell>
                                 {t(`logs.types.${log.type}`, messageData)}
