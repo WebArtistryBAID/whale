@@ -16,6 +16,8 @@ for the design rules.
 | Item details (desktop) | ![Item details, desktop](docs/screenshots/compare-item-overlay-desktop.png) |
 | Checkout (desktop) | ![Checkout, desktop](docs/screenshots/compare-checkout-desktop.png) |
 | User dashboard | ![User dashboard](docs/screenshots/compare-dashboard-desktop.png) |
+| Waiting orders (staff) | ![Waiting orders](docs/screenshots/compare-today-desktop.png) |
+| Orders (staff) | ![Orders](docs/screenshots/compare-manage-orders-desktop.png) |
 
 | Home (mobile) | Menu (mobile) |
 |---------------|---------------|
@@ -23,13 +25,35 @@ for the design rules.
 
 ### Current pages
 
-| Tray (desktop) | Order ticket | Waiting orders (staff) |
-|----------------|--------------|------------------------|
-| ![Tray](docs/screenshots/cart-desktop.png) | ![Order ticket](docs/screenshots/order-details-desktop.png) | ![Waiting orders](docs/screenshots/today-desktop.png) |
+| Tray (desktop) | Order ticket |
+|----------------|--------------|
+| ![Tray](docs/screenshots/cart-desktop.png) | ![Order ticket](docs/screenshots/order-details-desktop.png) |
 
 | Item details (mobile) | Tray (mobile) | Checkout (mobile) |
 |-----------------------|---------------|-------------------|
 | ![Item details, mobile](docs/screenshots/item-overlay-mobile.png) | ![Tray, mobile](docs/screenshots/cart-mobile.png) | ![Checkout, mobile](docs/screenshots/checkout-mobile.png) |
+
+### Staff area
+
+| Storefront | Product editor with menu preview |
+|------------|----------------------------------|
+| ![Storefront](docs/screenshots/admin-storefront-desktop.png) | ![Product editor](docs/screenshots/admin-item-editor-desktop.png) |
+
+| Settings | Statistics |
+|----------|------------|
+| ![Settings](docs/screenshots/admin-settings-desktop.png) | ![Statistics](docs/screenshots/admin-stats-desktop.png) |
+
+| Users | User details |
+|-------|--------------|
+| ![Users](docs/screenshots/admin-users-desktop.png) | ![User details](docs/screenshots/admin-user-desktop.png) |
+
+| Product details | Break game (摸鱼一下) |
+|-----------------|-----------------------|
+| ![Product details](docs/screenshots/admin-item-desktop.png) | ![Break game](docs/screenshots/admin-break-desktop.png) |
+
+| Dashboard (mobile) | Waiting orders (mobile) | Break game (mobile) |
+|--------------------|-------------------------|---------------------|
+| ![Dashboard, mobile](docs/screenshots/admin-dashboard-mobile.png) | ![Waiting orders, mobile](docs/screenshots/admin-today-mobile.png) | ![Break game, mobile](docs/screenshots/admin-break-play-mobile.png) |
 
 ## Get Started
 
