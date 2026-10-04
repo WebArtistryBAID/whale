@@ -7,53 +7,85 @@ The ordering management platform of The Whale Café. Built with Next.js.
 The UI is a cartoon sticker style built around the café's beluga mascot. See [docs/DESIGN.md](docs/DESIGN.md)
 for the design rules.
 
-### Before and after
+### Desktop
 
-| Page | Comparison |
-|------|------------|
-| Home (desktop) | ![Home, desktop](docs/screenshots/compare-home-desktop.png) |
-| Menu (desktop) | ![Menu, desktop](docs/screenshots/compare-order-desktop.png) |
-| Item details (desktop) | ![Item details, desktop](docs/screenshots/compare-item-overlay-desktop.png) |
-| Checkout (desktop) | ![Checkout, desktop](docs/screenshots/compare-checkout-desktop.png) |
-| User dashboard | ![User dashboard](docs/screenshots/compare-dashboard-desktop.png) |
-| Waiting orders (staff) | ![Waiting orders](docs/screenshots/compare-today-desktop.png) |
-| Orders (staff) | ![Orders](docs/screenshots/compare-manage-orders-desktop.png) |
+#### Ordering
 
-| Home (mobile) | Menu (mobile) |
-|---------------|---------------|
-| ![Home, mobile](docs/screenshots/compare-home-mobile.png) | ![Menu, mobile](docs/screenshots/compare-order-mobile.png) |
+| Home | Menu |
+|------|------|
+| ![Home](docs/screenshots/desktop/home.png) | ![Menu](docs/screenshots/desktop/menu.png) |
 
-### Current pages
+| Item details | Tray |
+|--------------|------|
+| ![Item details](docs/screenshots/desktop/item-details.png) | ![Tray](docs/screenshots/desktop/tray.png) |
 
-| Tray (desktop) | Order ticket |
-|----------------|--------------|
-| ![Tray](docs/screenshots/cart-desktop.png) | ![Order ticket](docs/screenshots/order-details-desktop.png) |
+| Checkout | Order ticket |
+|----------|--------------|
+| ![Checkout](docs/screenshots/desktop/checkout.png) | ![Order ticket](docs/screenshots/desktop/order-ticket.png) |
 
-| Item details (mobile) | Tray (mobile) | Checkout (mobile) |
-|-----------------------|---------------|-------------------|
-| ![Item details, mobile](docs/screenshots/item-overlay-mobile.png) | ![Tray, mobile](docs/screenshots/cart-mobile.png) | ![Checkout, mobile](docs/screenshots/checkout-mobile.png) |
+#### Staff area
 
-### Staff area
+| Dashboard | Waiting orders |
+|-----------|----------------|
+| ![Dashboard](docs/screenshots/desktop/staff-dashboard.png) | ![Waiting orders](docs/screenshots/desktop/staff-queue.png) |
 
-| Storefront | Product editor with menu preview |
-|------------|----------------------------------|
-| ![Storefront](docs/screenshots/admin-storefront-desktop.png) | ![Product editor](docs/screenshots/admin-item-editor-desktop.png) |
+| Orders | Order details |
+|--------|---------------|
+| ![Orders](docs/screenshots/desktop/staff-orders.png) | ![Order details](docs/screenshots/desktop/staff-order-detail.png) |
 
-| Settings | Statistics |
-|----------|------------|
-| ![Settings](docs/screenshots/admin-settings-desktop.png) | ![Statistics](docs/screenshots/admin-stats-desktop.png) |
+| Storefront | Product editor |
+|------------|----------------|
+| ![Storefront](docs/screenshots/desktop/staff-storefront.png) | ![Product editor](docs/screenshots/desktop/staff-product-editor.png) |
 
-| Users | User details |
-|-------|--------------|
-| ![Users](docs/screenshots/admin-users-desktop.png) | ![User details](docs/screenshots/admin-user-desktop.png) |
+| Product details | Users |
+|-----------------|-------|
+| ![Product details](docs/screenshots/desktop/staff-product-detail.png) | ![Users](docs/screenshots/desktop/staff-users.png) |
 
-| Product details | Break game (摸鱼一下) |
-|-----------------|-----------------------|
-| ![Product details](docs/screenshots/admin-item-desktop.png) | ![Break game](docs/screenshots/admin-break-desktop.png) |
+| User details | Settings |
+|--------------|----------|
+| ![User details](docs/screenshots/desktop/staff-user-detail.png) | ![Settings](docs/screenshots/desktop/staff-settings.png) |
 
-| Dashboard (mobile) | Waiting orders (mobile) | Break game (mobile) |
-|--------------------|-------------------------|---------------------|
-| ![Dashboard, mobile](docs/screenshots/admin-dashboard-mobile.png) | ![Waiting orders, mobile](docs/screenshots/admin-today-mobile.png) | ![Break game, mobile](docs/screenshots/admin-break-play-mobile.png) |
+| Statistics | Activity log |
+|------------|--------------|
+| ![Statistics](docs/screenshots/desktop/staff-stats.png) | ![Activity log](docs/screenshots/desktop/staff-logs.png) |
+
+| Break game |
+|------------|
+| ![Break game](docs/screenshots/desktop/staff-break-game.png) |
+
+### Mobile
+
+#### Ordering
+
+| Home | Menu | Item details |
+|------|------|--------------|
+| ![Home](docs/screenshots/mobile/home.png) | ![Menu](docs/screenshots/mobile/menu.png) | ![Item details](docs/screenshots/mobile/item-details.png) |
+
+| Tray | Checkout | Order ticket |
+|------|----------|--------------|
+| ![Tray](docs/screenshots/mobile/tray.png) | ![Checkout](docs/screenshots/mobile/checkout.png) | ![Order ticket](docs/screenshots/mobile/order-ticket.png) |
+
+#### Staff area
+
+| Dashboard | Waiting orders | Orders |
+|-----------|----------------|--------|
+| ![Dashboard](docs/screenshots/mobile/staff-dashboard.png) | ![Waiting orders](docs/screenshots/mobile/staff-queue.png) | ![Orders](docs/screenshots/mobile/staff-orders.png) |
+
+| Order details | Storefront | Product editor |
+|---------------|------------|----------------|
+| ![Order details](docs/screenshots/mobile/staff-order-detail.png) | ![Storefront](docs/screenshots/mobile/staff-storefront.png) | ![Product editor](docs/screenshots/mobile/staff-product-editor.png) |
+
+| Product details | Users | User details |
+|-----------------|-------|--------------|
+| ![Product details](docs/screenshots/mobile/staff-product-detail.png) | ![Users](docs/screenshots/mobile/staff-users.png) | ![User details](docs/screenshots/mobile/staff-user-detail.png) |
+
+| Settings | Statistics | Activity log |
+|----------|------------|--------------|
+| ![Settings](docs/screenshots/mobile/staff-settings.png) | ![Statistics](docs/screenshots/mobile/staff-stats.png) | ![Activity log](docs/screenshots/mobile/staff-logs.png) |
+
+| Break game | Break game (playing) |
+|------------|----------------------|
+| ![Break game](docs/screenshots/mobile/staff-break-game.png) | ![Break game (playing)](docs/screenshots/mobile/staff-break-game-play.png) |
 
 ## Get Started
 
