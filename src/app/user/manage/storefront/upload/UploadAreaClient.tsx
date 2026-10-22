@@ -2,55 +2,86 @@
 
 import { useTranslationClient } from '@/app/i18n/client'
 import { HiUpload } from 'react-icons/hi'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import If from '@/app/lib/If'
 
-export default function UploadAreaClient({ uploadPrefix, onDone }: {
-    uploadPrefix: string,
+export default function UploadAreaClient({ uploadPrefix, onDone, initialPath = '', disabled = false, onBusyChange }: {
+    uploadPrefix: string
     onDone: (path: string) => void
+    initialPath?: string
+    disabled?: boolean
+    onBusyChange?: (busy: boolean) => void
 }) {
     const { t } = useTranslationClient('user')
     const inputRef = useRef<HTMLInputElement>(null)
-    const [ loading, setLoading ] = useState(false)
-    const [ progress, setProgress ] = useState(0)
-    const [ error, setError ] = useState(false)
-    const [ done, setDone ] = useState(false)
-    const [ path, setPath ] = useState('')
+    const requestRef = useRef<XMLHttpRequest | null>(null)
+    const callbacks = useRef({ onDone, onBusyChange })
+    callbacks.current = { onDone, onBusyChange }
+    const [loading, setLoading] = useState(false)
+    const [progress, setProgress] = useState(0)
+    const [error, setError] = useState(false)
+    const [done, setDone] = useState(!!initialPath)
+    const [path, setPath] = useState(initialPath)
 
-    async function upload(file: File) {
+    useEffect(() => () => {
+        const request = requestRef.current
+        requestRef.current = null
+        request?.abort()
+    }, [])
+
+    function openPicker() {
+        if (!disabled && !requestRef.current) inputRef.current?.click()
+    }
+
+    function upload(file: File) {
+        if (disabled || requestRef.current) return
+        if (!file.type.startsWith('image/') || file.size === 0 || file.size > 10 * 1024 * 1024) {
+            setError(true)
+            setDone(false)
+            return
+        }
         setLoading(true)
         setDone(false)
         setError(false)
         setProgress(0)
+        callbacks.current.onBusyChange?.(true)
         const formData = new FormData()
         formData.append('file', file)
-
-        const xhr = new XMLHttpRequest() // Using this makes me feel ancient
-        xhr.open('POST', '/user/manage/storefront/upload', true)
-        xhr.upload.onprogress = (e: ProgressEvent) => {
-            if (e.lengthComputable) {
-                setProgress(Math.round((e.loaded / e.total) * 100))
-            }
-        }
-        xhr.onload = () => {
+        const xhr = new XMLHttpRequest()
+        requestRef.current = xhr
+        const finish = (uploadedPath?: string) => {
+            if (requestRef.current !== xhr) return
+            requestRef.current = null
             setLoading(false)
             setProgress(0)
-            if (xhr.status === 200) {
+            callbacks.current.onBusyChange?.(false)
+            if (uploadedPath) {
                 setDone(true)
-                setPath(JSON.parse(xhr.responseText).path)
-                onDone(JSON.parse(xhr.responseText).path)
+                setPath(uploadedPath)
+                callbacks.current.onDone(uploadedPath)
             } else {
                 setError(true)
             }
         }
-        xhr.onerror = () => {
-            setError(true)
+        xhr.open('POST', '/user/manage/storefront/upload', true)
+        xhr.timeout = 60000
+        xhr.upload.onprogress = event => {
+            if (requestRef.current === xhr && event.lengthComputable) setProgress(Math.round(event.loaded / event.total * 100))
         }
-        xhr.send(formData)
+        xhr.onload = () => {
+            try {
+                const response = JSON.parse(xhr.responseText)
+                finish(xhr.status === 200 && typeof response.path === 'string' && /^[a-f0-9]{40,64}\.webp$/.test(response.path) ? response.path : undefined)
+            } catch { finish() }
+        }
+        xhr.onerror = () => finish()
+        xhr.ontimeout = () => finish()
+        xhr.onabort = () => finish()
+        try { xhr.send(formData) } catch { finish() }
     }
 
     return <div aria-label={t('manage.storefront.upload.label')}
-                onClick={() => inputRef.current?.click()}
+                onClick={openPicker}
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => {
                     e.preventDefault()
@@ -61,16 +92,17 @@ export default function UploadAreaClient({ uploadPrefix, onDone }: {
                 className="bg-yellow-50 hover:bg-yellow-100 hover:dark:bg-yellow-700 dark:bg-yellow-800
         rounded-3xl flex flex-col justify-center items-center text-center p-5
         transition-colors duration-100">
-        <input type="file" disabled={loading} className="hidden" ref={inputRef} onChange={e => {
+        <input type="file" accept="image/*" disabled={loading || disabled} className="hidden" ref={inputRef} onClick={event => event.stopPropagation()} onChange={e => {
             if (e.currentTarget.files != null && e.currentTarget.files.length > 0) {
-                void upload(e.currentTarget.files[0])
+                upload(e.currentTarget.files[0])
             }
+            e.currentTarget.value = ''
         }}/>
         <HiUpload className="text-yellow-400 dark:text-yellow-300 text-4xl mb-3"/>
         <p className="text-xl font-bold" aria-hidden>{t('manage.storefront.upload.label')}</p>
-        <button aria-live="polite" disabled={loading} className="text-sm" onClick={() => inputRef.current?.click()}>
+        <button type="button" aria-live="polite" disabled={loading || disabled} className="text-sm" onClick={event => { event.stopPropagation(); openPicker() }}>
             <If condition={loading}>
-                <span className="sr-only">{t('manage.upload.uploadProgress')}</span>
+                <span className="sr-only">{t('manage.storefront.upload.uploadProgress')}</span>
                 {progress}%
             </If>
             <If condition={!loading}>

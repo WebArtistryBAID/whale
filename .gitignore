@@ -42,7 +42,7 @@ yarn-error.log*
 next-env.d.ts
 
 public/uploads
-prisma/migrations
+/src/generated
 
 .idea
 *.im;

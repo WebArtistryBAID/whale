@@ -3,9 +3,16 @@
 import { requireUserPermission } from '@/app/login/login-actions'
 import { prisma } from '@/app/lib/prisma'
 
-void initialize()
+let initialization: Promise<void> | null = null
 
-async function initialize() {
+async function initialize(): Promise<void> {
+    if (initialization == null) {
+        initialization = initializeDefaults().catch(error => { initialization = null; throw error })
+    }
+    return initialization
+}
+
+async function initializeDefaults(): Promise<void> {
     const defaults: { [key: string]: string } = {
         initialized: new Date().getTime().toString(),
         'enable-scheduled-availability': 'true',
@@ -26,15 +33,7 @@ async function initialize() {
     }
 
     for (const [ key, value ] of Object.entries(defaults)) {
-        const existing = await prisma.settingsItem.findUnique({
-            where: {
-                key
-            }
-        })
-        if (existing != null) {
-            continue
-        }
-        await setConfigValueInternal(key, value)
+        await prisma.settingsItem.upsert({ where: { key }, create: { key, value }, update: {} })
     }
 }
 
@@ -70,6 +69,7 @@ export async function getConfigValueAsNumber(key: string): Promise<number> {
 export async function setConfigValue(key: string, value: string | null): Promise<void> {
     await requireUserPermission('admin.manage')
     await setConfigValueInternal(key, value)
+    initialization = null
 }
 
 async function setConfigValueInternal(key: string, value: string | null): Promise<void> {

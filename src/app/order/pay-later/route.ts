@@ -1,12 +1,12 @@
 import { NotificationType, PaymentMethod, PaymentStatus } from '@/generated/prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-import { sendNotification } from '@/app/lib/notification-actions'
+import { sendNotification } from '@/app/lib/notification-service'
 import { prisma } from '@/app/lib/prisma'
 
 // Send notifications to Pay Later order customers
 export async function GET(request: NextRequest): Promise<NextResponse> {
-    if (request.nextUrl.searchParams.get('key') !== process.env.CRON_KEY) {
-        return NextResponse.json({ success: false })
+    if (!process.env.CRON_KEY || request.nextUrl.searchParams.get('key') !== process.env.CRON_KEY) {
+        return NextResponse.json({ success: false }, { status: 401 })
     }
     const orders = await prisma.order.findMany({
         where: {

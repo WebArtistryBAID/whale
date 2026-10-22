@@ -1,5 +1,6 @@
 'use client'
 
+import { OptionItem } from '@/generated/prisma/browser'
 import { HydratedItemType } from '@/app/lib/ui-data-actions'
 import { useTranslationClient } from '@/app/i18n/client'
 import { HiMinus, HiPlus, HiX } from 'react-icons/hi'
@@ -32,17 +33,19 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
     const ref = useRef<HTMLDivElement>(null)
     const shoppingCart = useShoppingCart()
     const soldOut = isItemSoldOut(item)
+    const hasCompleteSelection = item.options.every(type => type.items.some(option => option.id === selectedOptions[type.id.toString()] && !option.soldOut))
     const availableInventory = getAvailableInventory(item)
     const alreadyInCart = getRequestedAmountForItem(shoppingCart.items, item.id)
     const availableToAdd = availableInventory == null ? null : Math.max(availableInventory - alreadyInCart, 0)
 
     useEffect(() => {
         // Select all default options
-        const options = Object()
+        const options: { [key: string]: number } = {}
 
         for (const optionType of item.options) {
-            const defaultOption = optionType.items.find(o => o.default)
-            options[optionType.id.toString()] = defaultOption?.id ?? optionType.items[0].id
+            const defaultOption = optionType.items.find(o => o.default && !o.soldOut)
+            const selected = defaultOption?.id ?? optionType.items.find(option => !option.soldOut)?.id
+            if (selected != null) options[optionType.id.toString()] = selected
         }
 
         setSelectedOptions(options)
@@ -64,7 +67,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
         return {
             item: item,
             amount: amount,
-            options: item.options.map(option => option.items.find(o => o.id === selectedOptions[option.id.toString()])!)
+            options: item.options.map(option => option.items.find(o => o.id === selectedOptions[option.id.toString()])).filter((option): option is OptionItem => option != null)
         }
     }
 
@@ -142,7 +145,7 @@ export default function UIItemDetailsOverlay({ item, uploadPrefix, close }: {
                     </If>
                 </Button>
             </div>
-            <Button pill color="warning" disabled={soldOut || availableToAdd === 0} onClick={() => {
+            <Button pill color="warning" disabled={soldOut || !hasCompleteSelection || availableToAdd === 0} onClick={() => {
                 if (soldOut || availableToAdd === 0) {
                     return
                 }

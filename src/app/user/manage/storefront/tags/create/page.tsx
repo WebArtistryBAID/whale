@@ -1,3 +1,4 @@
+import { editorRecord } from '@/app/user/manage/storefront/editor/record'
 import { getTag } from '@/app/lib/ui-manage-actions'
 import TagCreateClient from '@/app/user/manage/storefront/tags/create/TagCreateClient'
 
@@ -6,7 +7,7 @@ export default async function TagCreateBase({ searchParams }: {
 }) {
     const p = await searchParams
     if (p?.id != null) {
-        return <TagCreateClient editMode existing={await getTag(parseInt(p.id as string))}/>
+        return <TagCreateClient key={String(p?.id)} editMode existing={await editorRecord(p?.id, getTag)}/>
     }
     return <TagCreateClient/>
 }

@@ -1,52 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma, UserAuditLogType } from '@/generated/prisma/client'
 import Decimal from 'decimal.js'
-import signData from '@/app/lib/wx-pay-sign'
+import { limitedFormData } from '@/app/lib/security'
 import { prisma } from '@/app/lib/prisma'
+import { readPaymentNotification } from '@/app/lib/payment-notification'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-    const body = await request.formData()
-    if (signData({
-        code: body.get('code'),
-        orderNo: body.get('orderNo'),
-        outTradeNo: body.get('outTradeNo'),
-        payNo: body.get('payNo'),
-        money: body.get('money'),
-        mchId: body.get('mchId')
-    }) !== body.get('sign')) {
-        return new NextResponse('FAILURE')
+    let body: FormData
+    try { body = await limitedFormData(request, 16384) } catch { return new NextResponse('FAILURE', { status: 400 }) }
+    const payment = readPaymentNotification(body, 'BALANCE')
+    if (!payment) return new NextResponse('FAILURE', { status: 400 })
+    try {
+        const success = await prisma.$transaction(async tx => {
+            const transaction = await tx.userAuditLog.findUnique({ where: { id: payment.id } })
+            if (!transaction || transaction.type !== UserAuditLogType.balanceTransaction || transaction.userId == null || transaction.time.getTime() !== payment.timestamp || !payment.amount.eq(transaction.values[0])) return false
+            if (transaction.values[1] !== 'await') return transaction.values[1] === payment.payNo
+            const claimed = await tx.userAuditLog.updateMany({
+                where: { id: transaction.id, type: UserAuditLogType.balanceTransaction, values: { equals: transaction.values } },
+                data: { values: [transaction.values[0], payment.payNo] }
+            })
+            if (claimed.count !== 1) return false
+            const user = await tx.user.findUniqueOrThrow({ where: { id: transaction.userId } })
+            const balance = Decimal(user.balance).add(payment.amount).toFixed(2)
+            await tx.user.update({ where: { id: user.id }, data: { balance } })
+            return true
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+        return new NextResponse(success ? 'SUCCESS' : 'FAILURE', { status: success ? 200 : 400 })
+    } catch {
+        return new NextResponse('FAILURE', { status: 500 })
     }
-
-    const id = parseInt((body.get('outTradeNo')! as string).split('-BALANCE')[0])
-    const trans = await prisma.userAuditLog.findUnique({
-        where: {
-            id
-        },
-        include: {
-            user: true
-        }
-    })
-    if (trans == null || trans.time.getTime().toString() !== (body.get('outTradeNo')! as string).split('-BALANCE')[1]) {
-        return new NextResponse('FAILURE')
-    }
-    if (trans.values[1] !== 'await') {
-        return new NextResponse('SUCCESS')
-    }
-    await prisma.userAuditLog.update({
-        where: {
-            id: trans.id
-        },
-        data: {
-            values: [ trans.values[0], body.get('payNo')! as string ]
-        }
-    })
-
-    await prisma.user.update({
-        where: {
-            id: trans.userId!
-        },
-        data: {
-            balance: Decimal(trans.user!.balance).add(trans.values[0]).toString()
-        }
-    })
-    return new NextResponse('SUCCESS')
 }

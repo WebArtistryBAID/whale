@@ -5,7 +5,7 @@ import { HiCollection } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useStorefrontMutation } from '@/app/user/manage/storefront/editor/useStorefrontMutation'
 import { deleteAd } from '@/app/lib/ui-manage-actions'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import { Ad } from '@/generated/prisma/browser'
@@ -13,11 +13,10 @@ import { Ad } from '@/generated/prisma/browser'
 export default function AdViewClient({ object, uploadPrefix }: { object: Ad, uploadPrefix: string }) {
     const { t } = useTranslationClient('user')
     const [ deleteModal, setDeleteModal ] = useState(false)
-    const [ loading, setLoading ] = useState(false)
-    const router = useRouter()
+    const { loading, run } = useStorefrontMutation('delete')
 
     return <>
-        <Modal show={deleteModal} onClose={() => setDeleteModal(false)}>
+        <Modal show={deleteModal} onClose={() => { if (!loading) setDeleteModal(false) }}>
             <ModalHeader>{t('manage.storefront.deleteModal.title')}</ModalHeader>
             <ModalBody>
                 <p>
@@ -29,13 +28,14 @@ export default function AdViewClient({ object, uploadPrefix }: { object: Ad, upl
                 <Button pill color="failure"
                         disabled={loading}
                         onClick={async () => {
-                            setLoading(true)
-                            await deleteAd(object.id)
-                            setLoading(false)
-                            setDeleteModal(false)
-                            router.replace('/user/manage/storefront')
+                            await run(async () => {
+                                await deleteAd(object.id)
+                                setDeleteModal(false)
+
+                                return "/user/manage/storefront"
+                            })
                         }}>{t('confirm')}</Button>
-                <Button pill color="gray" onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
+                <Button pill color="gray" disabled={loading} onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
             </ModalFooter>
         </Modal>
 
@@ -68,7 +68,7 @@ export default function AdViewClient({ object, uploadPrefix }: { object: Ad, upl
             </div>
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
-                <Link href={`/user/manage/storefront/ads/create?id=${object.id}`}>
+                <Link replace href={`/user/manage/storefront/ads/create?id=${object.id}`}>
                     <Button pill color="warning"
                             className="inline-block">
                         {t('manage.storefront.edit')}

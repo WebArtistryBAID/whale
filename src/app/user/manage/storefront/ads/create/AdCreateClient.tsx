@@ -1,44 +1,46 @@
 'use client'
 
 import { useTranslationClient } from '@/app/i18n/client'
-import { Breadcrumb, BreadcrumbItem, Button, Label, TextInput } from 'flowbite-react'
+import { Breadcrumb, BreadcrumbItem, Button, } from 'flowbite-react'
 import { HiCollection } from 'react-icons/hi'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRef, useState } from 'react'
+import { useStorefrontMutation } from '@/app/user/manage/storefront/editor/useStorefrontMutation'
 import { upsertAd } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
+import { EditorTextField } from '@/app/user/manage/storefront/editor/EditorFields'
 import { Ad } from '@/generated/prisma/browser'
 import UploadAreaClient from '@/app/user/manage/storefront/upload/UploadAreaClient'
 
-export default function AdCreateClient({ editMode, existing, uploadPrefix }: {
-    editMode: boolean,
-    existing: Ad | null,
+export default function AdCreateClient({ editMode = false, existing = null, uploadPrefix }: {
+    editMode?: boolean,
+    existing?: Ad | null,
     uploadPrefix: string
 }) {
     const { t } = useTranslationClient('user')
-    const [ loading, setLoading ] = useState(false)
-    const router = useRouter()
+    const { loading, run } = useStorefrontMutation('save')
 
     const [ name, setName ] = useState(existing?.name ?? '')
     const [ image, setImage ] = useState(existing?.image ?? '')
+    const [uploadBusy, setUploadBusy] = useState(false)
+    const uploading = useRef(false)
     const [ url, setURL ] = useState(existing?.url ?? '')
     const [ nameError, setNameError ] = useState(false)
     const [ imageError, setImageError ] = useState(false)
     const [ urlError, setURLError ] = useState(false)
 
     async function submit() {
-        if (loading) {
+        if (loading || uploading.current) {
             return
         }
         setNameError(false)
         setImageError(false)
         setURLError(false)
-        if (name.length < 1 || name.length > 256) {
+        if (name.trim().length < 1 || name.length > 256) {
             setNameError(true)
             return
         }
         try {
-            new URL(url)
+            if (!['http:', 'https:'].includes(new URL(url).protocol)) throw new Error('Invalid link')
         } catch {
             setURLError(true)
             return
@@ -48,17 +50,17 @@ export default function AdCreateClient({ editMode, existing, uploadPrefix }: {
             return
         }
 
-        setLoading(true)
-        const result = await upsertAd(
-            existing?.id,
-            {
-                name,
-                image,
-                url
-            }
-        )
-        router.push(`/user/manage/storefront/ads/${result.id}`)
-        setLoading(false)
+        await run(async () => {
+            const result = await upsertAd(
+                existing?.id,
+                {
+                    name,
+                    image,
+                    url
+                }
+            )
+            return `/user/manage/storefront/ads/${result.id}`
+        })
     }
 
     return <div className="container">
@@ -75,38 +77,20 @@ export default function AdCreateClient({ editMode, existing, uploadPrefix }: {
         </Breadcrumb>
         <h1 className="mb-5">{editMode ? t('manage.storefront.adD.edit') : t('manage.storefront.adD.create')}</h1>
 
-        <div className="2xl:w-1/2 flex flex-col gap-4">
-            <div className="w-full">
-                <div className="mb-2">
-                    <Label htmlFor="name" value={t('manage.storefront.adD.name')}/>
-                </div>
-                <TextInput id="name" type="text" required placeholder={t('manage.storefront.adD.name') + '...'}
-                           color={nameError ? 'failure' : undefined}
-                           value={name} onChange={e => setName(e.currentTarget.value)}
-                           helperText={nameError ? t('manage.storefront.adD.nameError') : null}/>
-            </div>
-            <div className="w-full">
-                <div className="mb-2">
-                    <Label htmlFor="url" value={t('manage.storefront.adD.url')}/>
-                </div>
-                <TextInput id="url" type="text" required placeholder={t('manage.storefront.adD.url') + '...'}
-                           color={urlError ? 'failure' : undefined}
-                           value={url} onChange={e => setURL(e.currentTarget.value)}
-                           helperText={urlError ? t('manage.storefront.adD.urlError') : null}/>
-            </div>
+        <form className="2xl:w-1/2 flex flex-col gap-4" noValidate onSubmit={event => { event.preventDefault(); void submit() }}>
+            <EditorTextField id="name" label={t('manage.storefront.adD.name')} value={name}
+                             onChange={setName} error={nameError ? t('manage.storefront.adD.nameError') : null} disabled={loading}/>
+            <EditorTextField id="url" label={t('manage.storefront.adD.url')} value={url}
+                             onChange={setURL} error={urlError ? t('manage.storefront.adD.urlError') : null} disabled={loading}/>
             <div className="w-full" aria-label={t('manage.storefront.adD.image')}>
-                <UploadAreaClient uploadPrefix={uploadPrefix} onDone={path => setImage(path)}/>
+                <UploadAreaClient uploadPrefix={uploadPrefix} initialPath={image} disabled={loading}
+                                  onBusyChange={busy => { uploading.current = busy; setUploadBusy(busy) }} onDone={path => setImage(path)}/>
                 <If condition={imageError}>
                     <p className="text-red-500 mt-2 text-sm">{t('manage.storefront.adD.imageError')}</p>
                 </If>
             </div>
-            <Button color="warning" pill disabled={loading} className="w-full" onClick={submit}
+            <Button color="warning" pill disabled={loading || uploadBusy} className="w-full" type="submit"
                     fullSized>{t('confirm')}</Button>
-        </div>
+        </form>
     </div>
-}
-
-AdCreateClient.defaultProps = {
-    editMode: false,
-    existing: null
 }

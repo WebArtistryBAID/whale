@@ -20,18 +20,17 @@ import { HiCollection } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useStorefrontMutation } from '@/app/user/manage/storefront/editor/useStorefrontMutation'
 import { deleteTag } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
 
 export default function TagViewClient({ object, items }: { object: Tag, items: ItemType[] }) {
     const { t } = useTranslationClient('user')
     const [ deleteModal, setDeleteModal ] = useState(false)
-    const [ loading, setLoading ] = useState(false)
-    const router = useRouter()
+    const { loading, run } = useStorefrontMutation('delete')
 
     return <>
-        <Modal show={deleteModal} onClose={() => setDeleteModal(false)}>
+        <Modal show={deleteModal} onClose={() => { if (!loading) setDeleteModal(false) }}>
             <ModalHeader>{t('manage.storefront.deleteModal.title')}</ModalHeader>
             <ModalBody>
                 <p>{t('manage.storefront.tagD.deleteMessage')}</p>
@@ -40,13 +39,14 @@ export default function TagViewClient({ object, items }: { object: Tag, items: I
                 <Button pill color="failure"
                         disabled={loading}
                         onClick={async () => {
-                            setLoading(true)
-                            await deleteTag(object.id)
-                            setLoading(false)
-                            setDeleteModal(false)
-                            router.replace('/user/manage/storefront')
+                            await run(async () => {
+                                await deleteTag(object.id)
+                                setDeleteModal(false)
+
+                                return "/user/manage/storefront"
+                            })
                         }}>{t('confirm')}</Button>
-                <Button pill color="gray" onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
+                <Button pill color="gray" disabled={loading} onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
             </ModalFooter>
         </Modal>
 
@@ -101,7 +101,7 @@ export default function TagViewClient({ object, items }: { object: Tag, items: I
             </If>
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
-                <Link href={`/user/manage/storefront/tags/create?id=${object.id}`}>
+                <Link replace href={`/user/manage/storefront/tags/create?id=${object.id}`}>
                     <Button pill color="warning" className="inline-block">
                         {t('manage.storefront.edit')}
                     </Button>

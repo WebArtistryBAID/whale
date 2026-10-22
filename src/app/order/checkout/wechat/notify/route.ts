@@ -1,95 +1,43 @@
-import { PaymentStatus, UserAuditLogType } from '@/generated/prisma/client'
+import { PaymentMethod, PaymentStatus, Prisma, UserAuditLogType } from '@/generated/prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-import { getOrder } from '@/app/lib/ordering-actions'
 import Decimal from 'decimal.js'
-import signData from '@/app/lib/wx-pay-sign'
+import { limitedFormData } from '@/app/lib/security'
 import { prisma } from '@/app/lib/prisma'
+import { readPaymentNotification } from '@/app/lib/payment-notification'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-    const body = await request.formData()
-    if (signData({
-        code: body.get('code'),
-        orderNo: body.get('orderNo'),
-        outTradeNo: body.get('outTradeNo'),
-        payNo: body.get('payNo'),
-        money: body.get('money'),
-        mchId: body.get('mchId')
-    }) !== body.get('sign')) {
-        return new NextResponse('FAILURE')
-    }
-    const id = parseInt((body.get('outTradeNo')! as string).split('-ORDER')[0])
-    const order = await getOrder(id)
-    if (order == null || order.createdAt.getTime().toString() !== (body.get('outTradeNo')! as string).split('-ORDER')[1]) {
-        return new NextResponse('FAILURE')
-    }
-    if (order.paymentStatus === PaymentStatus.paid) {
-        return new NextResponse('SUCCESS')
-    }
-    await prisma.order.update({
-        where: {
-            id: order.id
-        },
-        data: {
-            paymentStatus: PaymentStatus.paid,
-            wxPayId: body.get('payNo')! as string
-        }
-    })
-
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.orderPaymentSuccess,
-            user: order.userId == null ? undefined : {
-                connect: {
-                    id: order.userId
-                }
-            },
-            order: {
-                connect: {
-                    id: order.id
-                }
-            },
-            values: [ 'wxpay', order.totalPrice ]
-        }
-    })
-
-    // Add points upon payment
-    if (order.userId != null) {
-        const user = await prisma.user.findUnique({
-            where: {
-                id: order.userId
+    let body: FormData
+    try { body = await limitedFormData(request, 16384) } catch { return new NextResponse('FAILURE', { status: 400 }) }
+    const payment = readPaymentNotification(body, 'ORDER')
+    if (!payment) return new NextResponse('FAILURE', { status: 400 })
+    try {
+        const success = await prisma.$transaction(async tx => {
+            const order = await tx.order.findUnique({ where: { id: payment.id } })
+            if (!order || order.createdAt.getTime() !== payment.timestamp || !payment.amount.eq(order.totalPrice)) return false
+            if (order.paymentStatus === PaymentStatus.paid) return order.wxPayId === payment.payNo
+            if (order.paymentStatus !== PaymentStatus.notPaid) return false
+            const claimed = await tx.order.updateMany({
+                where: { id: order.id, paymentStatus: PaymentStatus.notPaid },
+                data: { paymentStatus: PaymentStatus.paid, paymentMethod: PaymentMethod.wxPay, wxPayId: payment.payNo }
+            })
+            if (claimed.count !== 1) return false
+            await tx.userAuditLog.create({ data: {
+                type: UserAuditLogType.orderPaymentSuccess, userId: order.userId, orderId: order.id,
+                values: ['wxpay', order.totalPrice]
+            } })
+            if (order.userId != null) {
+                const user = await tx.user.findUniqueOrThrow({ where: { id: order.userId } })
+                const points = Decimal(user.points).add(order.totalPriceRaw).toString()
+                await tx.user.update({ where: { id: user.id }, data: { points } })
+                await tx.userAuditLog.create({ data: {
+                    type: UserAuditLogType.pointsUpdated, userId: user.id, orderId: order.id,
+                    values: [order.totalPriceRaw, points]
+                } })
             }
-        })
-
-        if (user == null) {
-            return new NextResponse('SUCCESS')
-        }
-
-        await prisma.user.update({
-            where: {
-                id: order.userId
-            },
-            data: {
-                points: Decimal(user.points).add(order.totalPriceRaw).toString()
-            }
-        })
-
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.pointsUpdated,
-                user: {
-                    connect: {
-                        id: user.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ order.totalPriceRaw, Decimal(user.points).add(order.totalPriceRaw).toString() ]
-            }
-        })
+            return true
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+        return new NextResponse(success ? 'SUCCESS' : 'FAILURE', { status: success ? 200 : 400 })
+    } catch {
+        return new NextResponse('FAILURE', { status: 500 })
     }
-
-    return new NextResponse('SUCCESS')
 }

@@ -83,8 +83,6 @@
     "orderDetails": "订单详情",
     "loadingText": "请点击按钮，验证您不是机器人。",
     "loadingContinue": "继续",
-    "stripePollText": "正在处理您的订单中，请稍候。",
-    "stripeInfo": "Stripe 支持一系列国际付款方式，包括储蓄/信用卡、支付宝、Apple Pay、Google Pay、Link 等。",
     "total": "总价",
     "wait": "预计等待时间",
     "waitTime_one": "{{count}} 分钟",
@@ -97,9 +95,7 @@
       "midday": "12:00 - 14:00",
       "evening": "17:00 - 19:00"
     },
-    "stripeFees": "Stripe 付款手续费",
     "wxPay": "微信支付",
-    "stripe": "Stripe",
     "balance": "余额",
     "cash": "现金",
     "payLater": "先喝后付",

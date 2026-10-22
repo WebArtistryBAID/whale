@@ -83,8 +83,6 @@
     "orderDetails": "Order Details",
     "loadingText": "Please tap on the button to verify that you are not a bot.",
     "loadingContinue": "Continue",
-    "stripePollText": "Please wait while we process your order...",
-    "stripeInfo": "Stripe provides a variety of international payment methods, including debit/credit card, Alipay, Apple Pay, Google Pay, Link, and others.",
     "total": "Total",
     "wait": "Estimated Wait Time",
     "waitTime_one": "{{count}} minute",
@@ -97,9 +95,7 @@
       "midday": "12:00 - 14:00",
       "evening": "17:00 - 19:00"
     },
-    "stripeFees": "Stripe Fees",
     "wxPay": "Weixin Pay",
-    "stripe": "Stripe",
     "balance": "Balance",
     "cash": "Cash",
     "payLater": "Pay Later",

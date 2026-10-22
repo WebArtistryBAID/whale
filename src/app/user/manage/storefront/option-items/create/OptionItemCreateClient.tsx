@@ -1,23 +1,24 @@
 'use client'
 
 import { useTranslationClient } from '@/app/i18n/client'
-import { Breadcrumb, BreadcrumbItem, Button, Label, Select, TextInput, ToggleSwitch } from 'flowbite-react'
+import { Breadcrumb, BreadcrumbItem, Button, Label, Select, ToggleSwitch } from 'flowbite-react'
 import { HiCollection } from 'react-icons/hi'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useStorefrontMutation } from '@/app/user/manage/storefront/editor/useStorefrontMutation'
 import { upsertOptionItem } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
+import { EditorTextField } from '@/app/user/manage/storefront/editor/EditorFields'
+import { money } from '@/app/lib/security'
 import { OptionItem, OptionType } from '@/generated/prisma/browser'
 
-export default function OptionItemCreateClient({ editMode, existing, currentType, availableTypes }: {
-    editMode: boolean,
-    existing: OptionItem | null,
+export default function OptionItemCreateClient({ editMode = false, existing = null, currentType, availableTypes }: {
+    editMode?: boolean,
+    existing?: OptionItem | null,
     currentType: number,
     availableTypes: OptionType[]
 }) {
     const { t } = useTranslationClient('user')
-    const [ loading, setLoading ] = useState(false)
-    const router = useRouter()
+    const { loading, run } = useStorefrontMutation('save')
 
     const [ name, setName ] = useState(existing?.name ?? '')
     const [ type, setType ] = useState(existing?.typeId ?? currentType)
@@ -35,7 +36,7 @@ export default function OptionItemCreateClient({ editMode, existing, currentType
         setNameError(false)
         setPriceChangeError(false)
         setTypeError(false)
-        if (name.length < 1 || name.length > 48) {
+        if (name.trim().length < 1 || name.length > 48) {
             setNameError(true)
             return
         }
@@ -43,25 +44,25 @@ export default function OptionItemCreateClient({ editMode, existing, currentType
             setTypeError(true)
             return
         }
-        if (isNaN(parseFloat(priceChange))) {
+        if (!money(priceChange.replace(/^-/, ''))) {
             setPriceChangeError(true)
             return
         }
-        setLoading(true)
-        const result = await upsertOptionItem(existing?.id,
-            {
-                name,
-                type: {
-                    connect: {
-                        id: type
-                    }
-                },
-                priceChange: priceChange,
-                soldOut,
-                default: isDefault
-            })
-        router.push(`/user/manage/storefront/option-items/${result.id}`)
-        setLoading(false)
+        await run(async () => {
+            const result = await upsertOptionItem(existing?.id,
+                {
+                    name,
+                    type: {
+                        connect: {
+                            id: type
+                        }
+                    },
+                    priceChange: priceChange,
+                    soldOut,
+                    default: isDefault
+                })
+            return `/user/manage/storefront/option-items/${result.id}`
+        })
     }
 
     return <div className="container">
@@ -82,51 +83,29 @@ export default function OptionItemCreateClient({ editMode, existing, currentType
         </Breadcrumb>
         <h1 className="mb-5">{editMode ? t('manage.storefront.optionItemD.edit') : t('manage.storefront.optionItemD.create')}</h1>
 
-        <div className="2xl:w-1/2 flex flex-col gap-4">
+        <form className="2xl:w-1/2 flex flex-col gap-4" noValidate onSubmit={event => { event.preventDefault(); void submit() }}>
+            <EditorTextField id="name" label={t('manage.storefront.optionItemD.name')} value={name}
+                             onChange={setName} error={nameError ? t('manage.storefront.optionItemD.nameError') : null} disabled={loading}/>
             <div className="w-full">
-                <div className="mb-2">
-                    <Label htmlFor="name" value={t('manage.storefront.optionItemD.name')}/>
-                </div>
-                <TextInput id="name" type="text" required placeholder={t('manage.storefront.optionItemD.name') + '...'}
-                           color={nameError ? 'failure' : undefined}
-                           value={name} onChange={e => setName(e.currentTarget.value)}
-                           helperText={nameError ? t('manage.storefront.optionItemD.nameError') : null}/>
-            </div>
-            <div className="w-full">
-                <div className="mb-2">
-                    <Label htmlFor="type" value={t('manage.storefront.optionItemD.type')}/>
-                </div>
-                <Select id="type" required color={typeError ? 'failure' : undefined}
-                        value={type} onChange={e => setType(parseInt(e.currentTarget.value))}
+                <div className="mb-2"><Label htmlFor="type" value={t('manage.storefront.optionItemD.type')}/></div>
+                <Select id="type" disabled={loading} required color={typeError ? 'failure' : undefined} value={type}
+                        onChange={event => setType(Number(event.currentTarget.value))}
                         helperText={typeError ? t('manage.storefront.optionItemD.typeError') : null}>
-                    {availableTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    {availableTypes.map(optionType => <option key={optionType.id} value={optionType.id}>{optionType.name}</option>)}
                 </Select>
             </div>
+            <EditorTextField id="priceChange" label={t('manage.storefront.optionItemD.priceChange')} value={priceChange}
+                             onChange={setPriceChange} error={priceChangeError ? t('manage.storefront.optionItemD.priceChangeError') : null} disabled={loading}/>
             <div className="w-full">
-                <div className="mb-2">
-                    <Label htmlFor="priceChange" value={t('manage.storefront.optionItemD.priceChange')}/>
-                </div>
-                <TextInput id="priceChange" type="text" required
-                           placeholder={t('manage.storefront.optionItemD.priceChange') + '...'}
-                           color={priceChangeError ? 'failure' : undefined}
-                           value={priceChange} onChange={e => setPriceChange(e.currentTarget.value)}
-                           helperText={priceChangeError ? t('manage.storefront.optionItemD.priceChangeError') : null}/>
-            </div>
-            <div className="w-full">
-                <ToggleSwitch checked={soldOut} label={t('manage.storefront.optionItemD.soldOut')}
+                <ToggleSwitch disabled={loading} checked={soldOut} label={t('manage.storefront.optionItemD.soldOut')}
                               onChange={setSoldOut} color="yellow"/>
             </div>
             <div className="w-full">
-                <ToggleSwitch checked={isDefault} label={t('manage.storefront.optionItemD.default')}
+                <ToggleSwitch disabled={loading} checked={isDefault} label={t('manage.storefront.optionItemD.default')}
                               onChange={setDefault} color="yellow"/>
             </div>
-            <Button color="warning" pill disabled={loading} className="w-full" onClick={submit}
+            <Button color="warning" pill disabled={loading} className="w-full" type="submit"
                     fullSized>{t('confirm')}</Button>
-        </div>
+        </form>
     </div>
-}
-
-OptionItemCreateClient.defaultProps = {
-    editMode: false,
-    existing: null
 }

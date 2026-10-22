@@ -2,13 +2,12 @@
 
 import { User, UserAuditLogType } from '@/generated/prisma/client'
 import { me } from '@/app/login/login'
-import { decodeJwt } from 'jose'
+import { localRedirect } from '@/app/lib/security'
 import Paginated from '@/app/lib/Paginated'
 import { prisma } from '@/app/lib/prisma'
 
 export async function getLoginTarget(redirect: string): Promise<string> {
-    // We are really abusing state here... But it works.
-    return `${process.env.ONELOGIN_HOST}/oauth2/authorize?client_id=${process.env.ONELOGIN_CLIENT_ID}&redirect_uri=${process.env.HOST}/login/authorize&scope=basic+phone+sms&response_type=code&state=${redirect}`
+    return `/login/start?redirect=${encodeURIComponent(localRedirect(redirect))}`
 }
 
 export async function requireUser(): Promise<User> {
@@ -28,9 +27,9 @@ export async function requireUserPermission(permission: string): Promise<User> {
 }
 
 export async function getMyUser(): Promise<User | null> {
-    return prisma.user.findUnique({
-        where: { id: await me() ?? -1 }
-    })
+    const id = await me()
+    if (id == null) return null
+    return prisma.user.findUnique({ where: { id, blocked: false } })
 }
 
 export async function getUser(id: number): Promise<User | null> {
@@ -121,48 +120,7 @@ export async function getUsers(page: number, keyword: string): Promise<Paginated
     }
 }
 
-export async function getAccessToken(): Promise<string | null> {
-    const user = await prisma.user.findUnique({
-        where: {
-            id: await me() ?? -1
-        },
-        include: {
-            oaTokens: true
-        }
-    })
-    if (!user) {
-        return null
-    }
-    const access = user.oaTokens!.accessToken
-    const refresh = user.oaTokens!.refreshToken
-    // Check if token has expired, if so refresh
-    const decoded = decodeJwt(access)
-    if (decoded.exp! * 1000 < Date.now()) {
-        const response = await fetch(`${process.env.ONELOGIN_HOST}/oauth2/token`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Basic ${Buffer.from(`${process.env.ONELOGIN_CLIENT_ID}:${process.env.ONELOGIN_CLIENT_SECRET}`).toString('base64')}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-                grant_type: 'refresh_token',
-                refresh_token: refresh
-            }).toString()
-        })
-        const json = await response.json()
-        if ('error' in json) {
-            return null
-        }
-        await prisma.oATokens.update({
-            where: {
-                userId: user.id
-            },
-            data: {
-                accessToken: json['access_token'],
-                refreshToken: json['refresh_token']
-            }
-        })
-        return json['access_token']
-    }
-    return access
+export async function logOut(): Promise<void> {
+    const { cookies } = await import('next/headers')
+    ;(await cookies()).delete('access_token')
 }

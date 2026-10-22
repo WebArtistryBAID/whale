@@ -17,9 +17,10 @@ import { useTranslationClient } from '@/app/i18n/client'
 import If from '@/app/lib/If'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useCookies } from 'react-cookie'
+import { logOut } from '@/app/login/login-actions'
 import { getConfigValue } from '@/app/lib/settings-actions'
 import Decimal from 'decimal.js'
+import { money } from '@/app/lib/security'
 import { beginTransaction } from '@/app/lib/balance-actions'
 import { toggleInboxNotification, toggleSMSNotification } from '@/app/lib/notification-actions'
 
@@ -31,7 +32,7 @@ export default function UserDashboardClient({ user }: { user: User }) {
     const [ rechargeMin, setRechargeMin ] = useState(Decimal(-1))
     const [ rechargeModal, setRechargeModal ] = useState(false)
     const [ toRecharge, setToRecharge ] = useState('')
-    const removeCookie = useCookies()[2]
+    const rechargeAmount = money(toRecharge, false)
 
     useEffect(() => {
         (async () => {
@@ -50,16 +51,16 @@ export default function UserDashboardClient({ user }: { user: User }) {
                            onChange={e => setToRecharge(e.currentTarget.value)}
                            aria-valuemin={rechargeMin.toNumber()}
                            aria-valuemax={balanceMax.minus(user.balance).toNumber()}/>
-                <If condition={toRecharge !== '' && Decimal(toRecharge).lt(rechargeMin)}>
+                <If condition={rechargeAmount != null && rechargeAmount.lt(rechargeMin)}>
                     <p className="text-red-500 mt-3">{t('dashboard.rechargeModal.minimum', { value: rechargeMin })}</p>
                 </If>
-                <If condition={toRecharge !== '' && Decimal(toRecharge).gt(balanceMax.minus(user.balance))}>
+                <If condition={rechargeAmount != null && rechargeAmount.gt(balanceMax.minus(user.balance))}>
                     <p className="text-red-500 mt-1">{t('dashboard.rechargeModal.maximum', { value: balanceMax.minus(user.balance).toString() })}</p>
                 </If>
             </ModalBody>
             <ModalFooter>
                 <Button pill color="warning"
-                        disabled={toRecharge === '' || loading || Decimal(toRecharge).lt(rechargeMin) || Decimal(toRecharge).gt(balanceMax.minus(user.balance))}
+                        disabled={rechargeAmount == null || loading || rechargeAmount.lt(rechargeMin) || rechargeAmount.gt(balanceMax.minus(user.balance))}
                         onClick={async () => {
                             setLoading(true)
                             const trans = await beginTransaction(toRecharge)
@@ -181,8 +182,8 @@ export default function UserDashboardClient({ user }: { user: User }) {
                 <div aria-label={t('dashboard.others.title')} className="mb-8">
                     <h2 className="text-sm font-normal mb-3">{t('dashboard.others.title')}</h2>
                     <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5">
-                        <Button pill color="warning" className="mb-3" onClick={() => {
-                            removeCookie('access_token', { path: '/' })
+                        <Button pill color="warning" className="mb-3" onClick={async () => {
+                            await logOut()
                             router.replace('/')
                         }}>{t('dashboard.others.logOut')}</Button>
                         <p className="text-sm secondary">{t('dashboard.others.credits')}</p>

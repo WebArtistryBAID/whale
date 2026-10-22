@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { jwtVerify } from 'jose'
-import { getLoginTarget } from '@/app/login/login-actions'
+import { verifySession } from '@/app/login/session'
 
 const protectedRoutes = [
     '/login',
@@ -25,12 +24,10 @@ export default async function authMiddleware(req: NextRequest): Promise<NextResp
     }
     const cookie = (await cookies()).get('access_token')?.value
     if (cookie == null) {
-        return NextResponse.redirect(new URL(await getLoginTarget(req.nextUrl.pathname + req.nextUrl.search), req.nextUrl))
+        return NextResponse.redirect(new URL(`/login/start?redirect=${encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search)}`, req.nextUrl))
     }
-    try {
-        await jwtVerify(cookie, new TextEncoder().encode(process.env.JWT_SECRET!))
-    } catch {
-        return NextResponse.redirect(new URL(await getLoginTarget(req.nextUrl.pathname + req.nextUrl.search), req.nextUrl))
+    if (await verifySession(cookie) == null) {
+        return NextResponse.redirect(new URL(`/login/start?redirect=${encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search)}`, req.nextUrl))
     }
 
     return null

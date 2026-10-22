@@ -7,22 +7,16 @@ import {
     Modal,
     ModalBody,
     ModalFooter,
-    ModalHeader,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeadCell,
-    TableRow
+    ModalHeader
 } from 'flowbite-react'
 import { HiCollection } from 'react-icons/hi'
 import { useTranslationClient } from '@/app/i18n/client'
 import Link from 'next/link'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useStorefrontMutation } from '@/app/user/manage/storefront/editor/useStorefrontMutation'
 import { deleteItemType } from '@/app/lib/ui-manage-actions'
 import { HydratedItemType } from '@/app/lib/ui-data-actions'
-import If from '@/app/lib/If'
+import { DetailFields, RelatedRecordsTable } from '@/app/user/manage/storefront/editor/DetailFields'
 
 export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
     object: HydratedItemType,
@@ -31,11 +25,10 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
 }) {
     const { t } = useTranslationClient('user')
     const [ deleteModal, setDeleteModal ] = useState(false)
-    const [ loading, setLoading ] = useState(false)
-    const router = useRouter()
+    const { loading, run } = useStorefrontMutation('delete')
 
     return <>
-        <Modal show={deleteModal} onClose={() => setDeleteModal(false)}>
+        <Modal show={deleteModal} onClose={() => { if (!loading) setDeleteModal(false) }}>
             <ModalHeader>{t('manage.storefront.deleteModal.title')}</ModalHeader>
             <ModalBody>
                 <p>{t('manage.storefront.deleteModal.message')}</p>
@@ -44,13 +37,13 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
                 <Button pill color="failure"
                         disabled={loading}
                         onClick={async () => {
-                            setLoading(true)
-                            await deleteItemType(object.id)
-                            setLoading(false)
-                            setDeleteModal(false)
-                            router.push(`/user/manage/storefront/categories/${object.categoryId}`)
+                            await run(async () => {
+                                await deleteItemType(object.id)
+                                setDeleteModal(false)
+                                return `/user/manage/storefront/categories/${object.categoryId}`
+                            })
                         }}>{t('confirm')}</Button>
-                <Button pill color="gray" onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
+                <Button pill color="gray" disabled={loading} onClick={() => setDeleteModal(false)}>{t('cancel')}</Button>
             </ModalFooter>
         </Modal>
 
@@ -67,107 +60,30 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
             <div className="2xl:w-1/2 mb-5">
                 <div className="bg-amber-50 dark:bg-amber-900 rounded-3xl p-5 mb-3"
                      aria-label={t('manage.storefront.data')}>
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.id')}</p>
-                    <p className="text-xl mb-3">{object.id}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.name')}</p>
-                    <p className="text-xl mb-3">{object.name}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.category')}</p>
-                    <p className="text-xl mb-3">{categoryName}</p>
+                    <DetailFields fields={[
+                        { key: 'id', label: t('manage.storefront.itemD.id'), value: object.id },
+                        { key: 'name', label: t('manage.storefront.itemD.name'), value: object.name },
+                        { key: 'category', label: t('manage.storefront.itemD.category'), value: categoryName }
+                    ]}/>
 
                     <p className="secondary text-sm font-display mb-1">{t('manage.storefront.itemD.image')}</p>
                     <img src={uploadPrefix + object.image} width={500} height={500}
                          alt={t('manage.storefront.itemD.alt')}
                          className="w-full lg:max-w-sm object-cover mb-3 rounded-xl"/>
 
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.description')}</p>
-                    <p className="mb-3">{object.description}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.shortDescription')}</p>
-                    <p className="text-xl mb-3">{object.shortDescription}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.basePrice')}</p>
-                    <p className="text-xl mb-3">{object.basePrice}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.salePercent')}</p>
-                    <p className="text-xl mb-3">{object.salePercent}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.countsTowardLimit')}</p>
-                    <p className="text-xl mb-3">{object.countsTowardLimit ? t('yes') : t('no')}</p>
-
-                    <p className="secondary text-sm font-display">{t('manage.storefront.itemD.inventoryTrackingEnabled')}</p>
-                    <p className="text-xl mb-3">{object.inventoryTrackingEnabled ? t('yes') : t('no')}</p>
-
-                    <If condition={object.inventoryTrackingEnabled}>
-                        <>
-                            <p className="secondary text-sm font-display">{t('manage.storefront.itemD.remainingItems')}</p>
-                            <p className="text-xl">{object.remainingItems}</p>
-                        </>
-                    </If>
-
-                    <If condition={!object.inventoryTrackingEnabled}>
-                        <>
-                            <p className="secondary text-sm font-display">{t('manage.storefront.itemD.soldOut')}</p>
-                            <p className="text-xl">{object.soldOut ? t('yes') : t('no')}</p>
-                        </>
-                    </If>
+                    <DetailFields fields={[
+                        { key: 'description', label: t('manage.storefront.itemD.description'), value: object.description, valueClass: 'mb-3' },
+                        ...(['shortDescription', 'basePrice', 'salePercent'] as const).map(key => ({ key, label: t(`manage.storefront.itemD.${key}`), value: object[key] })),
+                        ...(['countsTowardLimit', 'inventoryTrackingEnabled'] as const).map(key => ({ key, label: t(`manage.storefront.itemD.${key}`), value: object[key] ? t('yes') : t('no') })),
+                        object.inventoryTrackingEnabled
+                            ? { key: 'remainingItems', label: t('manage.storefront.itemD.remainingItems'), value: object.remainingItems, valueClass: 'text-xl' }
+                            : { key: 'soldOut', label: t('manage.storefront.itemD.soldOut'), value: object.soldOut ? t('yes') : t('no'), valueClass: 'text-xl' }
+                    ]}/>
                 </div>
             </div>
 
-            <If condition={object.tags.length > 0}>
-                <div aria-label={t('manage.storefront.itemD.tags')} className="mb-5">
-                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.itemD.tags')}</p>
-                    <Table>
-                        <TableHead>
-                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                            <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
-                            <TableHeadCell><span
-                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                        </TableHead>
-                        <TableBody className="divide-y mb-3">
-                            {object.tags.map(item => <TableRow className="tr" key={item.id}>
-                                <TableCell className="th">{item.id}</TableCell>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>
-                                    <Link href={`/user/manage/storefront/tags/${item.id}`}>
-                                        <Button size="xs" pill color="warning" className="inline-block">
-                                            {t('manage.storefront.view')}
-                                        </Button>
-                                    </Link>
-                                </TableCell>
-                            </TableRow>)}
-                        </TableBody>
-                    </Table>
-                </div>
-            </If>
-
-            <If condition={object.options.length > 0}>
-                <div aria-label={t('manage.storefront.itemD.options')} className="mb-5">
-                    <p className="secondary text-sm font-display mb-3">{t('manage.storefront.itemD.options')}</p>
-                    <Table>
-                        <TableHead>
-                            <TableHeadCell>{t('manage.storefront.id')}</TableHeadCell>
-                            <TableHeadCell>{t('manage.storefront.name')}</TableHeadCell>
-                            <TableHeadCell><span
-                                className="sr-only">{t('manage.storefront.actions')}</span></TableHeadCell>
-                        </TableHead>
-                        <TableBody className="divide-y mb-3">
-                            {object.options.map(item => <TableRow className="tr" key={item.id}>
-                                <TableCell className="th">{item.id}</TableCell>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>
-                                    <Link href={`/user/manage/storefront/option-types/${item.id}`}>
-                                        <Button size="xs" pill color="warning" className="inline-block">
-                                            {t('manage.storefront.view')}
-                                        </Button>
-                                    </Link>
-                                </TableCell>
-                            </TableRow>)}
-                        </TableBody>
-                    </Table>
-                </div>
-            </If>
+            <RelatedRecordsTable label={t('manage.storefront.itemD.tags')} records={object.tags} section="tags"/>
+            <RelatedRecordsTable label={t('manage.storefront.itemD.options')} records={object.options} section="option-types"/>
 
             <div aria-label={t('manage.storefront.actions')} className="flex gap-3">
                 <Link href={`/user/manage/storefront/categories/${object.categoryId}`}>
@@ -177,7 +93,7 @@ export default function ItemViewClient({ object, categoryName, uploadPrefix }: {
                     </Button>
                 </Link>
 
-                <Link href={`/user/manage/storefront/items/create?id=${object.id}&category=${object.categoryId}`}>
+                <Link replace href={`/user/manage/storefront/items/create?id=${object.id}&category=${object.categoryId}`}>
                     <Button pill color="warning"
                             className="inline-block">
                         {t('manage.storefront.edit')}

@@ -5,6 +5,7 @@ import NextTopLoader from 'nextjs-toploader'
 import { CustomFlowbiteTheme, Flowbite, ThemeModeScript } from 'flowbite-react'
 import Toaster from '@/app/core-components/Toaster'
 import CookiesBoundary from '@/app/lib/CookiesBoundary'
+import StoreHydration from '@/app/core-components/StoreHydration'
 
 export const metadata: Metadata = {
     title: 'The Whale Café',
@@ -58,6 +59,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <link rel="icon" href="/assets/logo.png" sizes="any"/>
         </head>
         <body className="antialiased">
+        <StoreHydration/>
         <NextTopLoader showSpinner={false} color="#ff6900"/>
         <Flowbite theme={{ theme: customTheme }}>
             {children}

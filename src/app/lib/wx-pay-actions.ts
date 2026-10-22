@@ -52,6 +52,7 @@ export async function getPaymentQRCode(id: number): Promise<string | null> {
 }
 
 export async function getWeChatOAuthRedirect(id: number): Promise<string | null> {
+    await requireUnpaidOrder(id)
     if (process.env.WX_PAY_MCH_ID == null || process.env.WX_PAY_MCH_ID === '') {
         return 'https://example.com' // Development
     }

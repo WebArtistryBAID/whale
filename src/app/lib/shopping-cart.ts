@@ -14,6 +14,7 @@ export interface OrderedItemTemplate {
 
 export interface ShoppingCartState {
     items: OrderedItemTemplate[]
+    hasHydrated: boolean
     onSiteOrderMode: boolean
     setOnSiteOrderMode: (mode: boolean) => void
     addItem: (item: OrderedItemTemplate) => void
@@ -38,13 +39,14 @@ export function calculatePrice(item: OrderedItemTemplate): Decimal {
         price = price.add(Decimal(option.priceChange))
     }
     price = price.mul(Decimal(item.item.salePercent))
-    return price.mul(item.amount)
+    return price.mul(item.amount).toDecimalPlaces(2, Decimal.ROUND_HALF_UP)
 }
 
 export const useShoppingCart = create<ShoppingCartState>()(
     persist(
         (set, get) => ({
             items: [] as OrderedItemTemplate[],
+            hasHydrated: false,
             onSiteOrderMode: false,
             setOnSiteOrderMode: (mode: boolean) => set({ onSiteOrderMode: mode }),
             addItem: (item: OrderedItemTemplate) => set(state => ({ items: [ ...state.items, item ] })),
@@ -55,6 +57,8 @@ export const useShoppingCart = create<ShoppingCartState>()(
         }),
         {
             name: 'shopping-cart-storage',
+            skipHydration: true,
+            partialize: state => ({ items: state.items, onSiteOrderMode: state.onSiteOrderMode }),
             storage: createJSONStorage(() => sessionStorage)
         }
     )
@@ -84,6 +88,7 @@ export const useStoredOrder = create<StoredOrderState>()(
         }),
         {
             name: 'order-local-storage',
+            skipHydration: true,
             storage: createJSONStorage(() => localStorage)
         }
     )

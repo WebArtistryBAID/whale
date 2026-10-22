@@ -1,62 +1,34 @@
 import { cookies } from 'next/headers'
-import { decodeJwt, jwtVerify } from 'jose'
 import { redirect } from 'next/navigation'
+import { verifySession } from '@/app/login/session'
+import { prisma } from '@/app/lib/prisma'
 
 export function redirectToLogin(): string {
-    return `${process.env.ONELOGIN_HOST}/oauth2/authorize?client_id=${process.env.ONELOGIN_CLIENT_ID}&redirect_uri=${process.env.HOST}/login/authorize&scope=basic+phone&response_type=code`
-}
-
-export async function isLoggedIn(): Promise<boolean> {
-    const cook = await cookies()
-    if (!cook.has('access_token')) {
-        return false
-    }
-    const token = cook.get('access_token')!.value!
-    try {
-        await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET!))
-    } catch {
-        return false
-    }
-    return decodeJwt(token).type === 'internal'
+    return '/login/start'
 }
 
 export async function me(): Promise<number | null> {
-    const cook = await cookies()
-    if (!cook.has('access_token')) {
-        return null
-    }
-    const token = cook.get('access_token')!.value!
-    try {
-        await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET!))
-    } catch {
-        return null
-    }
-    return decodeJwt(token).id as number
+    return verifySession((await cookies()).get('access_token')?.value)
+}
+
+export async function isLoggedIn(): Promise<boolean> {
+    const id = await me()
+    if (id == null) return false
+    const user = await prisma.user.findUnique({ where: { id } })
+    return user != null && !user.blocked
 }
 
 export async function isLoggedInWithPermission(permission: string): Promise<boolean> {
-    const cook = await cookies()
-    if (!cook.has('access_token')) {
-        return false
-    }
-    const token = cook.get('access_token')!.value!
-    try {
-        await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET!))
-    } catch {
-        return false
-    }
-    const decoded = decodeJwt(token)
-    return decoded.type === 'internal' && (decoded.permissions as string[]).includes(permission)
+    const id = await me()
+    if (id == null) return false
+    const user = await prisma.user.findUnique({ where: { id } })
+    return user != null && !user.blocked && user.permissions.includes(permission)
 }
 
 export async function requireLogin(): Promise<void> {
-    if (!await isLoggedIn()) {
-        redirect(redirectToLogin())
-    }
+    if (!await isLoggedIn()) redirect(redirectToLogin())
 }
 
 export async function requirePermission(permission: string): Promise<void> {
-    if (!await isLoggedInWithPermission(permission)) {
-        throw new Error('Unauthorized')
-    }
+    if (!await isLoggedInWithPermission(permission)) throw new Error('Unauthorized')
 }

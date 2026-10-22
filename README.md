@@ -17,6 +17,17 @@ To run in development:
 * Copy `.env.example` to `.env` and fill the environment variables.
 * Run `npm run dev`.
 
+## Database Setup
+
+The initial migration is tracked in `prisma/migrations`. After installing dependencies, generate the client and apply migrations to the configured database:
+
+```sh
+npx prisma generate
+npx prisma migrate deploy
+```
+
+The generated client in `src/generated` is ignored by Git. The initial migration preserves the current schema, including historical payment fields.
+
 ## Environment Variables
 
 | Name                             | Description                                                                                                     |
@@ -32,9 +43,6 @@ To run in development:
 | `ONELOGIN_CLIENT_SECRET`         | OneLogin client secret.                                                                                         |
 | `WX_PAY_MCH_ID`                  | Weixin Pay merchant ID.                                                                                         |
 | `WX_PAY_MCH_KEY`                 | Weixin Pay signature key.                                                                                       |
-| `STRIPE_KEY`                     | Stripe key.                                                                                                     |
-| `STRIPE_PRODUCT`                 | Stripe product ID.                                                                                              |
-| `STRIPE_WEBHOOK_ENDPOINT_SECRET` | Stripe webhook endpoint secret.                                                                                 |
 | `CRON_KEY`                       | Cron task verification key.                                                                                     |
 | `WAITING_ORDERS_API_KEY`         | API key required to access the waiting orders JSON endpoint.                                                    |
 
@@ -64,15 +72,6 @@ curl \
 
 The response is a JSON array of hydrated waiting orders in reverse chronological order. Each order includes its
 `items`, `itemType`, `appliedOptions`, and `user`, matching the data used by the waiting orders page.
-
-## Stripe Webhook
-
-A Stripe webhook must be created at `/order/checkout/stripe/fulfill`.
-
-The following events must be listened to:
-
-* `checkout.session.completed`
-* `checkout.session.async_payment_succeeded`
 
 ## Settings
 

@@ -18,8 +18,10 @@ import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 import Decimal from 'decimal.js'
 import { getConfigValueAsBoolean, getConfigValueAsNumber, getConfigValues } from '@/app/lib/settings-actions'
 import { prisma } from '@/app/lib/prisma'
+import { canAccessOrder, grantGuestOrder } from '@/app/lib/order-access'
+import { positiveId, money } from '@/app/lib/security'
 import { countsTowardLimit, getAvailableInventory, isItemSoldOut } from '@/app/lib/item-availability'
-import { DEFAULT_PICK_UP_TIME, isValidPickUpTime, PickUpTimeOption } from '@/app/lib/pick-up-times'
+import { isValidPickUpTime, PickUpTimeOption } from '@/app/lib/pick-up-times'
 
 export interface HydratedOrderedItem {
     id: number
@@ -46,9 +48,6 @@ export interface HydratedOrder {
     userId: number | null
     paymentStatus: PaymentStatus
     paymentMethod: PaymentMethod
-    stripeSession: string | null
-    stripePaymentIntent: string | null
-    stripeCustomerId: string | null
     wxPayId: string | null
 }
 
@@ -333,7 +332,6 @@ async function getOrderingConfiguration(): Promise<OrderingConfiguration> {
 }
 
 type OrderableItemRecord = Pick<ItemType, 'id' | 'name' | 'soldOut' | 'countsTowardLimit' | 'inventoryTrackingEnabled' | 'remainingItems'>
-type OrderableOptionRecord = Pick<OptionItem, 'id' | 'typeId' | 'soldOut'>
 type TransactionClient = Prisma.TransactionClient
 
 function getRequestedItemAmounts(items: OrderedItemTemplate[]): Map<number, number> {
@@ -591,23 +589,17 @@ export async function hasAvailableItemsOutsideLimit(): Promise<boolean> {
 }
 
 export async function setOrderCheckoutOptions(id: number, paymentMethod: PaymentMethod, pickUpTime: PickUpTimeOption | null): Promise<boolean> {
-    const order = await prisma.order.findUnique({
-        where: {
-            id,
-            paymentStatus: PaymentStatus.notPaid
-        }
+    if (![PaymentMethod.wxPay, PaymentMethod.balance].some(method => method === paymentMethod) || !positiveId(id)) return false
+    const order = await prisma.order.findUnique({ where: { id } })
+    if (!order || !await canAccessOrder(order, true) || order.paymentStatus !== PaymentStatus.notPaid) return false
+    if (order.type === OrderType.pickUp && !isValidPickUpTime(pickUpTime)) return false
+    const result = await prisma.order.updateMany({
+        where: { id, paymentStatus: PaymentStatus.notPaid },
+        // The payment method is recorded when payment succeeds. This preserves shared payment links and deferred payments.
+        data: { pickUpTime: order.type === OrderType.pickUp ? pickUpTime : null }
     })
-    if (order == null) {
-        return false
-    }
-    await prisma.order.update({
-        where: { id },
-        data: {
-            paymentMethod,
-            pickUpTime: order.type === OrderType.pickUp ? (pickUpTime ?? DEFAULT_PICK_UP_TIME) : null
-        }
-    })
-    return true
+    if (result.count === 1 && order.paymentMethod === PaymentMethod.payForMe) await grantGuestOrder(id)
+    return result.count === 1
 }
 
 export async function requireUnpaidOrder(order: number): Promise<HydratedOrder> {
@@ -659,20 +651,19 @@ function calculatePrice(item: OrderedItemTemplate): Decimal {
 }
 
 export async function getOrder(id: number): Promise<HydratedOrder | null> {
-    return prisma.order.findUnique({
-        where: {
-            id
-        },
-        include: {
-            items: {
-                include: {
-                    itemType: true,
-                    appliedOptions: true
-                }
-            },
-            user: true
+    if (!positiveId(id)) return null
+    const order = await prisma.order.findUnique({
+        where: { id },
+        select: {
+            id: true, totalPrice: true, totalPriceRaw: true, status: true, createdAt: true, updatedAt: true,
+            type: true, pickUpTime: true, deliveryRoom: true, userId: true, paymentStatus: true,
+            paymentMethod: true, wxPayId: true, user: true,
+            items: { include: { itemType: true, appliedOptions: true } }
         }
     })
+    if (!order || !await canAccessOrder(order, true)) return null
+    if (!await canAccessOrder(order)) order.user = null
+    return order
 }
 
 export async function canPayWithBalance(totalPrice: string): Promise<boolean> {
@@ -680,7 +671,8 @@ export async function canPayWithBalance(totalPrice: string): Promise<boolean> {
     if (me == null) {
         return false
     }
-    return Decimal(me.balance).gte(totalPrice)
+    const amount = money(totalPrice)
+    return amount != null && Decimal(me.balance).gte(amount)
 }
 
 export async function canPayWithPayLater(): Promise<boolean> {
@@ -715,87 +707,44 @@ export async function payLaterBalance(id: number): Promise<boolean> {
 }
 
 export async function payOrderWithBalance(id: number): Promise<boolean> {
-    const me = await getMyUser()
-    if (me == null) {
-        return false
-    }
-    const order = await prisma.order.findUnique({
-        where: {
-            id,
-            paymentStatus: PaymentStatus.notPaid
-        }
-    })
-    if (order == null) {
-        return false
-    }
-    if (order.paymentStatus !== PaymentStatus.notPaid) {
-        return true
-    }
-    if (Decimal(me.balance).lt(order.totalPrice)) {
-        return false
-    }
-    await prisma.user.update({
-        where: {
-            id: me.id
-        },
-        data: {
-            balance: Decimal(me.balance).minus(order.totalPrice).toString()
-        }
-    })
-
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.balanceUsed,
-            user: {
-                connect: {
-                    id: me.id
-                }
-            },
-            order: {
-                connect: {
-                    id: order.id
-                }
-            },
-            values: [ order.totalPrice, Decimal(me.balance).minus(order.totalPrice).toString() ]
-        }
-    })
-
-    await prisma.order.update({
-        where: {
-            id
-        },
-        data: {
-            paymentStatus: PaymentStatus.paid,
-            paymentMethod: PaymentMethod.balance
-        }
-    })
-
-    await prisma.user.update({
-        where: {
-            id: me.id
-        },
-        data: {
-            points: Decimal(me.points).add(order.totalPriceRaw).toString()
-        }
-    })
-
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.pointsUpdated,
-            user: {
-                connect: {
-                    id: me.id
-                }
-            },
-            order: {
-                connect: {
-                    id: order.id
-                }
-            },
-            values: [ order.totalPriceRaw, Decimal(me.points).add(order.totalPriceRaw).toString() ]
-        }
-    })
-    return true
+    const user = await getMyUser()
+    if (!user || !positiveId(id)) return false
+    const candidate = await prisma.order.findUnique({ where: { id } })
+    if (!candidate || !await canAccessOrder(candidate, true)) return false
+    try {
+        return await prisma.$transaction(async tx => {
+            const order = await tx.order.findUnique({ where: { id } })
+            const payer = await tx.user.findUnique({ where: { id: user.id, blocked: false } })
+            if (!order || !payer || order.paymentStatus !== PaymentStatus.notPaid) return false
+            const amount = money(order.totalPrice)
+            if (!amount || Decimal(payer.balance).lt(amount)) return false
+            const claimed = await tx.order.updateMany({
+                where: { id, paymentStatus: PaymentStatus.notPaid },
+                data: { paymentStatus: PaymentStatus.paid, paymentMethod: PaymentMethod.balance }
+            })
+            if (claimed.count !== 1) return false
+            const balance = Decimal(payer.balance).minus(amount).toFixed(2)
+            await tx.user.update({ where: { id: payer.id }, data: { balance } })
+            await tx.userAuditLog.create({ data: {
+                type: UserAuditLogType.balanceUsed, userId: payer.id, orderId: id,
+                values: [order.totalPrice, balance]
+            } })
+            if (order.userId != null) {
+                const recipient = await tx.user.findUniqueOrThrow({ where: { id: order.userId } })
+                const points = Decimal(recipient.points).add(order.totalPriceRaw).toString()
+                await tx.user.update({ where: { id: recipient.id }, data: { points } })
+                await tx.userAuditLog.create({ data: {
+                    type: UserAuditLogType.pointsUpdated, userId: recipient.id, orderId: id,
+                    values: [order.totalPriceRaw, points]
+                } })
+            }
+            await tx.userAuditLog.create({ data: {
+                type: UserAuditLogType.orderPaymentSuccess, userId: payer.id, orderId: id,
+                values: ['balance', order.totalPrice]
+            } })
+            return true
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+    } catch { return false }
 }
 
 export async function isStoreOpen(): Promise<boolean> {
@@ -813,375 +762,114 @@ export async function createOrder(items: OrderedItemTemplate[],
                                   deliveryRoom: string | null,
                                   paymentMethod: PaymentMethod,
                                   pickUpTime: PickUpTimeOption | null): Promise<HydratedOrder | null> {
-    const me = await getMyUser()
+    if (!Array.isArray(items) || items.length < 1 || items.length > 100 || !Object.values(PaymentMethod).includes(paymentMethod) || paymentMethod === PaymentMethod.stripe) return null
+    if (items.some(item => !item || !positiveId(item.item?.id) || !Number.isSafeInteger(item.amount) || item.amount <= 0 || !Array.isArray(item.options) || item.options.length > 50 || item.options.some(option => !positiveId(option?.id)))) return null
+    if (typeof onSiteOrderMode !== 'boolean' || (coupon != null && (typeof coupon !== 'string' || coupon.length > 100))) return null
+    if (deliveryRoom != null && (typeof deliveryRoom !== 'string' || deliveryRoom.trim().length < 3 || deliveryRoom.length > 200)) return null
+    if (deliveryRoom == null ? !isValidPickUpTime(pickUpTime) : pickUpTime != null) return null
+    const user = await getMyUser()
+    if (onSiteOrderMode && !user?.permissions.includes('admin.manage')) return null
+    if (paymentMethod === PaymentMethod.cash && !onSiteOrderMode) return null
+    if (onSiteOrderMode && [PaymentMethod.balance, PaymentMethod.payLater, PaymentMethod.payForMe].some(method => method === paymentMethod)) return null
+    if ([PaymentMethod.balance, PaymentMethod.payLater].some(method => method === paymentMethod) && !user) return null
+    if (!user && !process.env.JWT_SECRET) return null
     const normalizedCoupon = coupon == null ? null : normalizeCouponCode(coupon)
-
-    if (items.length < 1) {
-        return null
-    }
-
-    // SANITY CHECKS - These should be enforced by the frontend as well
-    // On site order mode require administrative permissions
-    if (onSiteOrderMode && (me == null || !me.permissions.includes('admin.manage'))) {
-        return null
-    }
-
-    // Ensure we didn't go over maximum cups per order
-    const totalAmount = items.reduce((acc, item) => acc + item.amount, 0)
-    if (totalAmount < 0 || totalAmount > await getConfigValueAsNumber('maximum-cups-per-order')) {
-        return null
-    }
-
-    if (!(await getConfigValueAsBoolean('allow-delivery')) && deliveryRoom != null && deliveryRoom != '') {
-        return null
-    }
-
-    if (!(await getConfigValueAsBoolean('allow-pay-later')) && paymentMethod === PaymentMethod.payLater) {
-        return null
-    }
-
-    const availability = await getOrderingAvailability()
-    if (availability.unavailableReason === 'store-closed') {
-        return null
-    }
-
-    if (deliveryRoom == null && !isValidPickUpTime(pickUpTime)) {
-        return null
-    }
-
-    if (deliveryRoom != null && pickUpTime != null) {
-        return null
-    }
-
-    const itemIds = Array.from(new Set(items.map(item => item.item.id)))
-    const optionIds = Array.from(new Set(items.flatMap(item => item.options.map(option => option.id))))
-    const [ itemMap, currentOptions ] = await Promise.all([
-        getOrderableItems(itemIds),
-        optionIds.length < 1 ? Promise.resolve([] as OrderableOptionRecord[]) : prisma.optionItem.findMany({
-            where: {
-                id: {
-                    in: optionIds
-                }
-            },
-            select: {
-                id: true,
-                typeId: true,
-                soldOut: true
-            }
-        })
-    ])
-    const currentOptionMap = new Map(currentOptions.map(option => [ option.id, option ]))
-    const cartValidation = buildCartValidation(items, itemMap)
-    if (cartValidation.issues.length > 0) {
-        return null
-    }
-    if (cartValidation.countedAmount > getRemainingLimitForAvailability(availability)) {
-        return null
-    }
-
-    // Ensure items and options aren't sold out
-    for (const item of items) {
-        if (!itemMap.has(item.item.id)) {
-            return null
-        }
-        for (const option of item.options) {
-            const currentOption = currentOptionMap.get(option.id)
-            if (currentOption == null || currentOption.soldOut) {
-                return null
-            }
-        }
-    }
-
-    // Calculate total price
-    let usedCoupon = false
-    const totalPriceNoCoupon = items.reduce((acc, item) => acc.add(calculatePrice(item)), new Decimal(0))
-    let totalPrice = totalPriceNoCoupon
-    if (normalizedCoupon != null && normalizedCoupon.length > 0) {
-        const couponCode = await couponQuickValidate(normalizedCoupon)
-        if (couponCode == null) {
-            return null
-        }
-        totalPrice = totalPrice.minus(Decimal.min(totalPrice, Decimal(couponCode.value)))
-    }
-
-    // Cash payment is only available with on-site
-    if (paymentMethod === PaymentMethod.cash && !onSiteOrderMode) {
-        return null
-    }
-
-    // Balance payment is only available with user and when balance is sufficient
-    if (paymentMethod === PaymentMethod.balance) {
-        if (me == null) {
-            return null
-        }
-        if (Decimal(me.balance).lt(totalPrice)) {
-            return null
-        }
-    }
-
-    // Delivery room must be over 3 characters
-    if (deliveryRoom != null && deliveryRoom.length < 3) {
-        return null
-    }
-
-    // No using pay later if you're not logged in or have unpaid orders before
-    if (paymentMethod === PaymentMethod.payLater) {
-        if (me == null) {
-            return null
-        }
-        if (await prisma.order.count({
-            where: {
-                userId: me.id,
-                paymentStatus: PaymentStatus.notPaid
-            }
-        }) > 0) {
-            return null
-        }
-    }
-
-    // Pay later, balance, and pay for me aren't available with on-site
-    if ((paymentMethod === PaymentMethod.payLater || paymentMethod === PaymentMethod.balance || paymentMethod === PaymentMethod.payForMe) && onSiteOrderMode) {
-        return null
-    }
-
-    let order: HydratedOrder | null = null
     try {
-        order = await prisma.$transaction(async tx => {
-            const currentItemMap = await getOrderableItems(itemIds, tx)
-            const currentValidation = buildCartValidation(items, currentItemMap)
-            if (currentValidation.issues.length > 0) {
-                throw new Error('inventory-conflict')
-            }
-
-            const requestedAmounts = getRequestedItemAmounts(items)
-            for (const [ itemTypeId, requested ] of requestedAmounts.entries()) {
-                const currentItem = currentItemMap.get(itemTypeId)
-                if (currentItem == null) {
-                    throw new Error('missing-item')
-                }
-                if (!currentItem.inventoryTrackingEnabled) {
-                    continue
-                }
-                const updated = await tx.itemType.updateMany({
-                    where: {
-                        id: itemTypeId,
-                        inventoryTrackingEnabled: true,
-                        remainingItems: {
-                            gte: requested
-                        }
-                    },
-                    data: {
-                        remainingItems: {
-                            decrement: requested
-                        }
-                    }
+        const order = await prisma.$transaction(async tx => {
+            // Serialize order creation so availability limits cover concurrent checkouts.
+            await tx.$queryRaw`SELECT pg_advisory_xact_lock(78236401)`
+            const availability = await getOrderingAvailability()
+            if (availability.unavailableReason === 'store-closed') throw new Error('Store closed')
+            if (deliveryRoom != null && !await getConfigValueAsBoolean('allow-delivery')) throw new Error('Delivery disabled')
+            const amount = items.reduce((sum, item) => sum + item.amount, 0)
+            if (!Number.isSafeInteger(amount) || amount > await getConfigValueAsNumber('maximum-cups-per-order')) throw new Error('Invalid quantity')
+            const catalog = await tx.itemType.findMany({
+                where: { id: { in: items.map(item => item.item.id) } },
+                include: { options: { include: { items: true } } }
+            })
+            const canonicalItems = items.map(selection => {
+                const item = catalog.find(record => record.id === selection.item.id)
+                if (!item || selection.options.length !== item.options.length) throw new Error('Invalid item options')
+                const seen = new Set<number>()
+                const options = selection.options.map(selected => {
+                    const group = item.options.find(type => type.items.some(option => option.id === selected.id))
+                    const option = group?.items.find(option => option.id === selected.id)
+                    if (!group || !option || option.soldOut || seen.has(group.id)) throw new Error('Invalid option')
+                    seen.add(group.id)
+                    return option
                 })
-                if (updated.count !== 1) {
-                    throw new Error('inventory-conflict')
+                return { item, amount: selection.amount, options }
+            })
+            const itemMap = new Map(catalog.map(item => [item.id, item]))
+            const validation = buildCartValidation(canonicalItems, itemMap)
+            if (validation.issues.length || validation.countedAmount > getRemainingLimitForAvailability(availability)) throw new Error('Unavailable items')
+            const linePrices = canonicalItems.map(item => calculatePrice(item).toDecimalPlaces(2, Decimal.ROUND_HALF_UP))
+            if (linePrices.some(price => !price.isFinite() || price.lt(0))) throw new Error('Invalid price')
+            const totalPriceRaw = linePrices.reduce((sum, price) => sum.add(price), new Decimal(0))
+            let totalPrice = totalPriceRaw
+            if (normalizedCoupon) {
+                const code = await tx.couponCode.findUnique({ where: { id: normalizedCoupon } })
+                const discount = code && money(code.value)
+                if (!code || !discount || code.remainingUses < 1) throw new Error('Invalid coupon')
+                const claimed = await tx.couponCode.updateMany({
+                    where: { id: code.id, remainingUses: { gt: 0 } }, data: { remainingUses: { decrement: 1 } }
+                })
+                if (claimed.count !== 1) throw new Error('Coupon exhausted')
+                totalPrice = Decimal.max(0, totalPrice.minus(discount))
+            }
+            const owner = user && !onSiteOrderMode ? await tx.user.findUnique({ where: { id: user.id, blocked: false } }) : null
+            if (user && !onSiteOrderMode && !owner) throw new Error('Unauthorized')
+            if (paymentMethod === PaymentMethod.payLater) {
+                if (!owner || !await getConfigValueAsBoolean('allow-pay-later') || await tx.order.count({ where: { userId: owner.id, paymentStatus: PaymentStatus.notPaid } })) throw new Error('Deferred payment unavailable')
+            }
+            if (paymentMethod === PaymentMethod.balance && (!owner || Decimal(owner.balance).lt(totalPrice))) throw new Error('Insufficient balance')
+            for (const [id, requested] of getRequestedItemAmounts(canonicalItems)) {
+                const item = itemMap.get(id)!
+                if (item.inventoryTrackingEnabled) {
+                    const updated = await tx.itemType.updateMany({
+                        where: { id, remainingItems: { gte: requested }, inventoryTrackingEnabled: true },
+                        data: { remainingItems: { decrement: requested } }
+                    })
+                    if (updated.count !== 1) throw new Error('Inventory conflict')
                 }
             }
-
-            if (normalizedCoupon != null && normalizedCoupon.length > 0) {
-                const couponCode = await tx.couponCode.findFirst({
-                    where: {
-                        id: normalizedCoupon,
-                        remainingUses: {
-                            gt: 0
-                        }
-                    }
-                })
-                if (couponCode == null) {
-                    throw new Error('coupon-invalid')
-                }
-                await tx.couponCode.update({
-                    where: {
-                        id: couponCode.id
-                    },
-                    data: {
-                        remainingUses: {
-                            decrement: 1
-                        }
-                    }
-                })
-                usedCoupon = true
-            }
-
-            if (paymentMethod === PaymentMethod.balance && me != null) {
-                await tx.user.update({
-                    where: {
-                        id: me.id
-                    },
-                    data: {
-                        balance: Decimal(me.balance).minus(totalPrice).toString()
-                    }
-                })
-            }
-
-            return tx.order.create({
-                include: {
-                    items: {
-                        include: {
-                            itemType: true,
-                            appliedOptions: true
-                        }
-                    },
-                    user: true
-                },
+            const paid = totalPrice.eq(0) || paymentMethod === PaymentMethod.cash || paymentMethod === PaymentMethod.balance
+            const order = await tx.order.create({
+                include: { items: { include: { itemType: true, appliedOptions: true } }, user: true },
                 data: {
-                    items: {
-                        create: items.map(item => ({
-                            itemType: {
-                                connect: {
-                                    id: item.item.id
-                                }
-                            },
-                            appliedOptions: {
-                                connect: item.options.map(option => ({
-                                    id: option.id
-                                }))
-                            },
-                            amount: item.amount,
-                            countsTowardLimit: countsTowardLimit(currentItemMap.get(item.item.id)!),
-                            price: calculatePrice(item).toString()
-                        }))
-                    },
-                    totalPrice: totalPrice.toString(),
-                    totalPriceRaw: totalPriceNoCoupon.toString(),
-                    status: OrderStatus.waiting,
+                    items: { create: canonicalItems.map((item, index) => ({
+                        itemTypeId: item.item.id, appliedOptions: { connect: item.options.map(option => ({ id: option.id })) },
+                        amount: item.amount, countsTowardLimit: countsTowardLimit(item.item), price: linePrices[index].toFixed(2)
+                    })) },
+                    totalPrice: totalPrice.toFixed(2), totalPriceRaw: totalPriceRaw.toFixed(2), status: OrderStatus.waiting,
                     type: deliveryRoom == null ? OrderType.pickUp : OrderType.delivery,
-                    pickUpTime: deliveryRoom == null ? pickUpTime : null,
-                    deliveryRoom,
-                    user: (onSiteOrderMode || me == null) ? undefined : {
-                        connect: {
-                            id: me.id
-                        }
-                    },
-                    paymentStatus: (totalPrice.eq(0) || paymentMethod === PaymentMethod.cash || paymentMethod === PaymentMethod.balance) ? PaymentStatus.paid : PaymentStatus.notPaid,
-                    paymentMethod
+                    pickUpTime: deliveryRoom == null ? pickUpTime : null, deliveryRoom,
+                    userId: owner?.id, paymentStatus: paid ? PaymentStatus.paid : PaymentStatus.notPaid, paymentMethod
                 }
             })
-        })
-    } catch {
-        return null
-    }
-
-    if (order == null) {
-        return null
-    }
-
-    await prisma.userAuditLog.create({
-        data: {
-            type: UserAuditLogType.orderCreated,
-            user: me == null ? undefined : {
-                connect: {
-                    id: me.id
-                }
-            },
-            order: {
-                connect: {
-                    id: order.id
-                }
+            await tx.userAuditLog.create({ data: { type: UserAuditLogType.orderCreated, userId: user?.id, orderId: order.id } })
+            if (normalizedCoupon) await tx.userAuditLog.create({ data: {
+                type: UserAuditLogType.couponUsed, userId: user?.id, orderId: order.id, values: [normalizedCoupon]
+            } })
+            if (owner && paid) {
+                const points = Decimal(owner.points).add(totalPriceRaw).toString()
+                const balance = paymentMethod === PaymentMethod.balance ? Decimal(owner.balance).minus(totalPrice).toFixed(2) : owner.balance
+                await tx.user.update({ where: { id: owner.id }, data: { points, balance } })
+                await tx.userAuditLog.create({ data: {
+                    type: UserAuditLogType.pointsUpdated, userId: owner.id, orderId: order.id, values: [totalPriceRaw.toFixed(2), points]
+                } })
+                if (paymentMethod === PaymentMethod.balance) await tx.userAuditLog.create({ data: {
+                    type: UserAuditLogType.balanceUsed, userId: owner.id, orderId: order.id, values: [totalPrice.toFixed(2), balance]
+                } })
             }
-        }
-    })
-    if (usedCoupon) {
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.couponUsed,
-                user: me == null ? undefined : {
-                    connect: {
-                        id: me.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ normalizedCoupon! ]
-            }
-        })
-    }
-
-    // Add points to user
-    if (me != null && !onSiteOrderMode && order.paymentStatus === PaymentStatus.paid) {
-        await prisma.user.update({
-            where: {
-                id: me.id
-            },
-            data: {
-                points: Decimal(me.points).add(totalPriceNoCoupon).toString()
-            }
-        })
-
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.pointsUpdated,
-                user: {
-                    connect: {
-                        id: me.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ totalPriceNoCoupon.toString(), Decimal(me.points).add(totalPriceNoCoupon).toString() ]
-            }
-        })
-    }
-
-    if (order.paymentMethod === PaymentMethod.cash) {
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.orderPaymentSuccess,
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ 'cash', totalPrice.toString() ]
-            }
-        })
-    }
-
-    if (me != null && order.paymentMethod === PaymentMethod.balance) {
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.balanceUsed,
-                user: {
-                    connect: {
-                        id: me.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ totalPrice.toString(), Decimal(me.balance).minus(totalPrice).toString() ]
-            }
-        })
-        await prisma.userAuditLog.create({
-            data: {
-                type: UserAuditLogType.orderPaymentSuccess,
-                user: {
-                    connect: {
-                        id: me.id
-                    }
-                },
-                order: {
-                    connect: {
-                        id: order.id
-                    }
-                },
-                values: [ 'balance', totalPrice.toString() ]
-            }
-        })
-    }
-
-    return order
+            if (paid) await tx.userAuditLog.create({ data: {
+                type: UserAuditLogType.orderPaymentSuccess, userId: owner?.id, orderId: order.id, values: [paymentMethod, totalPrice.toFixed(2)]
+            } })
+            return order
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 15000 })
+        if (order.userId == null) await grantGuestOrder(order.id)
+        return order
+    } catch { return null }
 }
 
 export async function getEstimatedWaitTime(): Promise<EstimatedWaitTimeResponse> {
@@ -1260,55 +948,21 @@ export async function getEstimatedWaitTimeFor(order: number): Promise<EstimatedW
 }
 
 export async function cancelUnpaidOrder(id: number): Promise<OrderedItemTemplate[]> {
+    if (!positiveId(id)) return []
     const order = await prisma.order.findUnique({
-        where: {
-            id,
-            paymentStatus: PaymentStatus.notPaid
-        },
-        include: {
-            items: {
-                include: {
-                    itemType: true,
-                    appliedOptions: true
-                }
-            }
-        }
+        where: { id }, include: { items: { include: { itemType: true, appliedOptions: true } } }
     })
-    if (order == null) {
-        return []
-    }
-
-    const requestedAmounts = new Map<number, number>()
-    for (const item of order.items) {
-        if (!item.itemType.inventoryTrackingEnabled) {
-            continue
-        }
-        requestedAmounts.set(item.itemTypeId, (requestedAmounts.get(item.itemTypeId) ?? 0) + item.amount)
-    }
-
-    await prisma.$transaction(async tx => {
-        for (const [ itemTypeId, amount ] of requestedAmounts.entries()) {
-            await tx.itemType.update({
-                where: {
-                    id: itemTypeId
-                },
-                data: {
-                    remainingItems: {
-                        increment: amount
-                    }
-                }
-            })
-        }
-        await tx.order.delete({
-            where: {
-                id
+    if (!order || !await canAccessOrder(order) || order.paymentStatus !== PaymentStatus.notPaid) return []
+    try {
+        await prisma.$transaction(async tx => {
+            const removed = await tx.order.deleteMany({ where: { id, paymentStatus: PaymentStatus.notPaid } })
+            if (removed.count !== 1) throw new Error('Order already paid or cancelled')
+            for (const item of order.items) {
+                if (item.itemType.inventoryTrackingEnabled) await tx.itemType.update({
+                    where: { id: item.itemTypeId }, data: { remainingItems: { increment: item.amount } }
+                })
             }
-        })
-    })
-
-    return order.items.map(item => ({
-        item: item.itemType,
-        amount: item.amount,
-        options: item.appliedOptions
-    }))
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+        return order.items.map(item => ({ item: item.itemType, amount: item.amount, options: item.appliedOptions }))
+    } catch { return [] }
 }

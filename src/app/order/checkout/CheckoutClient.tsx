@@ -3,7 +3,7 @@
 import { useTranslationClient } from '@/app/i18n/client'
 import { useShoppingCart, useStoredOrder } from '@/app/lib/shopping-cart'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import UIOrderedItemTemplate from '@/app/order/UIOrderedItemTemplate'
 import { Trans } from 'react-i18next/TransWithoutContext'
 import If from '@/app/lib/If'
@@ -39,8 +39,6 @@ import { getMyUser } from '@/app/login/login-actions'
 import Link from 'next/link'
 import { HiMagnifyingGlass } from 'react-icons/hi2'
 import { getConfigValueAsBoolean } from '@/app/lib/settings-actions'
-import { getStripeRedirectURI } from '@/app/lib/stripe-actions'
-import { getStripeChargedTotal, getStripeFeeAmount } from '@/app/lib/pricing'
 import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 import {
     DEFAULT_PICK_UP_TIME,
@@ -93,8 +91,9 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     const shoppingCart = useShoppingCart()
     const storedOrder = useStoredOrder()
     const router = useRouter()
+    const checkedInitialCart = useRef(false)
     const mode: CheckoutMode = rechargeTransaction != null ? 'recharge' : (existingOrder != null ? 'order' : 'cart')
-    const [ paymentMethod, setPaymentMethod ] = useState<PaymentMethod>(existingOrder?.paymentStatus === PaymentStatus.notPaid && existingOrder.paymentMethod !== PaymentMethod.payLater ? existingOrder.paymentMethod : PaymentMethod.wxPay)
+    const [ paymentMethod, setPaymentMethod ] = useState<PaymentMethod>(existingOrder?.paymentMethod === PaymentMethod.balance ? PaymentMethod.balance : PaymentMethod.wxPay)
     const [ pickUpTime, setPickUpTime ] = useState<PickUpTimeOption>(existingOrder?.type === OrderType.pickUp && isValidPickUpTime(existingOrder.pickUpTime)
         ? existingOrder.pickUpTime
         : DEFAULT_PICK_UP_TIME)
@@ -119,11 +118,12 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
 
     useEffect(() => {
         router.prefetch('/order/checkout/wechat/pay')
-        if (mode === 'cart' && shoppingCart.items.length < 1) {
-            router.replace('/order')
+        if (mode === 'cart' && shoppingCart.hasHydrated && !checkedInitialCart.current) {
+            checkedInitialCart.current = true
+            if (shoppingCart.items.length < 1) router.replace('/order')
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ router, mode ])
+    }, [ router, mode, shoppingCart.hasHydrated, shoppingCart.items.length ])
 
     useEffect(() => {
         (async () => {
@@ -230,11 +230,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
     }
 
     function getDisplayedTotal(): Decimal {
-        const baseTotal = getBaseTotal()
-        if (paymentMethod === PaymentMethod.stripe && mode !== 'recharge') {
-            return getStripeChargedTotal(baseTotal)
-        }
-        return baseTotal
+        return getBaseTotal()
     }
 
     function getActualCouponValue(): Decimal {
@@ -276,11 +272,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 setRedirectTarget(`/order/details/${order.id}`)
                 router.replace(`/order/details/${order.id}`)
             } else {
-                if (paymentMethod === PaymentMethod.stripe) {
-                    const redirect = await getStripeRedirectURI(order.id)
-                    setRedirectTarget(redirect)
-                    location.href = redirect
-                } else if (paymentMethod === PaymentMethod.wxPay) {
+                if (paymentMethod === PaymentMethod.wxPay) {
                     setRedirectTarget(`/order/checkout/wechat/pay?id=${order.id}`)
                     router.replace(`/order/checkout/wechat/pay?id=${order.id}`)
                 }
@@ -291,7 +283,12 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
         }
 
         if (mode === 'order' && existingOrder != null) {
-            await setOrderCheckoutOptions(existingOrder.id, paymentMethod, existingOrder.type === OrderType.pickUp ? pickUpTime : null)
+            const updated = await setOrderCheckoutOptions(existingOrder.id, paymentMethod, existingOrder.type === OrderType.pickUp ? pickUpTime : null)
+            if (!updated) {
+                setOrderFailed(true)
+                setLoading(false)
+                return
+            }
 
             if (paymentMethod === PaymentMethod.balance) {
                 const success = await payOrderWithBalance(existingOrder.id)
@@ -305,11 +302,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                 setAwaitRedirect(true)
                 return
             }
-            if (paymentMethod === PaymentMethod.stripe) {
-                const redirect = await getStripeRedirectURI(existingOrder.id)
-                setRedirectTarget(redirect)
-                location.href = redirect
-            } else if (paymentMethod === PaymentMethod.wxPay) {
+            if (paymentMethod === PaymentMethod.wxPay) {
                 setRedirectTarget(`/order/checkout/wechat/pay?id=${existingOrder.id}`)
                 router.replace(`/order/checkout/wechat/pay?id=${existingOrder.id}`)
             }
@@ -319,11 +312,7 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
         }
 
         if (mode === 'recharge' && rechargeTransaction != null) {
-            if (paymentMethod === PaymentMethod.stripe) {
-                const redirect = await getStripeRedirectURI(rechargeTransaction.id, 'balance')
-                setRedirectTarget(redirect)
-                location.href = redirect
-            } else if (paymentMethod === PaymentMethod.wxPay) {
+            if (paymentMethod === PaymentMethod.wxPay) {
                 setRedirectTarget(`/order/checkout/wechat/pay?id=${rechargeTransaction.id}&type=balance`)
                 router.replace(`/order/checkout/wechat/pay?id=${rechargeTransaction.id}&type=balance`)
             }
@@ -427,10 +416,6 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                         <span className="sr-only"
                               aria-live="polite">{t('a11y.coupon', { price: getActualCouponValue() })}</span>
                     </If>
-                    <If condition={paymentMethod === PaymentMethod.stripe && mode !== 'recharge'}>
-                        <p className="text-sm mt-3">{t('checkout.stripeFees')}</p>
-                        <p className="text-lg">¥{getStripeFeeAmount(getBaseTotal()).toFixed(2)} (3.5%)</p>
-                    </If>
                 </div>
 
                 <p className="mb-1">{t('checkout.paymentMethod')}</p>
@@ -440,11 +425,6 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                                              selected={paymentMethod === PaymentMethod.wxPay}
                                              disabled={loading}
                                              select={() => setPaymentMethod(PaymentMethod.wxPay)}/>
-
-                        <PaymentMethodButton paymentMethod={PaymentMethod.stripe}
-                                             selected={paymentMethod === PaymentMethod.stripe}
-                                             disabled={loading}
-                                             select={() => setPaymentMethod(PaymentMethod.stripe)}/>
 
                         <If condition={mode === 'cart' && shoppingCart.onSiteOrderMode}>
                             <PaymentMethodButton paymentMethod={PaymentMethod.cash}
@@ -511,7 +491,6 @@ export default function CheckoutClient({ showPayLater, uploadPrefix, existingOrd
                         </If>
                     </div>
 
-                    <p className="secondary text-sm">{t('checkout.stripeInfo')}</p>
                 </div>
 
                 <If condition={mode !== 'recharge' && (mode === 'cart' ? !useDelivery : existingOrder?.type === OrderType.pickUp)}>

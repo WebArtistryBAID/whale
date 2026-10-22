@@ -4,19 +4,21 @@ import { useTranslationClient } from '@/app/i18n/client'
 import { Breadcrumb, BreadcrumbItem, Button, Label, TextInput } from 'flowbite-react'
 import { HiCollection } from 'react-icons/hi'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useStorefrontMutation } from '@/app/user/manage/storefront/editor/useStorefrontMutation'
 import { upsertCouponCode } from '@/app/lib/ui-manage-actions'
 import If from '@/app/lib/If'
+import { EditorTextField } from '@/app/user/manage/storefront/editor/EditorFields'
 import { CouponCode } from '@/generated/prisma/browser'
+import { money } from '@/app/lib/security'
+import { validInventory } from '@/app/lib/item-editor'
 import { normalizeCouponCode } from '@/app/lib/coupon-codes'
 
-export default function CouponCodeCreateClient({ editMode, existing }: {
-    editMode: boolean,
-    existing: CouponCode | null
+export default function CouponCodeCreateClient({ editMode = false, existing = null }: {
+    editMode?: boolean,
+    existing?: CouponCode | null
 }) {
     const { t } = useTranslationClient('user')
-    const [ loading, setLoading ] = useState(false)
-    const router = useRouter()
+    const { loading, run } = useStorefrontMutation('save')
 
     const [ id, setID ] = useState(existing?.id == null ? '' : normalizeCouponCode(existing.id))
     const [ value, setValue ] = useState(existing?.value ?? '')
@@ -36,24 +38,24 @@ export default function CouponCodeCreateClient({ editMode, existing }: {
             setIDError(true)
             return
         }
-        if (isNaN(parseFloat(value)) || parseFloat(value) < 0.01) {
+        if (!money(value, false)) {
             setValueError(true)
             return
         }
-        if (isNaN(parseInt(remainingUses)) || parseInt(remainingUses) < 1) {
+        if (!validInventory(remainingUses) || Number(remainingUses) < 1) {
             setRemainingUsesError(true)
             return
         }
-        setLoading(true)
-        const normalizedId = normalizeCouponCode(id)
-        await upsertCouponCode({
-            id: normalizedId,
-            value: value,
-            remainingUses: parseInt(remainingUses),
-            allowedUses: -1
+        await run(async () => {
+            const normalizedId = normalizeCouponCode(id)
+            await upsertCouponCode({
+                id: normalizedId,
+                value: value,
+                remainingUses: parseInt(remainingUses),
+                allowedUses: -1
+            })
+            return `/user/manage/storefront/coupons/${normalizedId}`
         })
-        router.push(`/user/manage/storefront/coupons/${normalizedId}`)
-        setLoading(false)
     }
 
     return <div className="container">
@@ -70,42 +72,22 @@ export default function CouponCodeCreateClient({ editMode, existing }: {
         </Breadcrumb>
         <h1 className="mb-5">{editMode ? t('manage.storefront.couponD.edit') : t('manage.storefront.couponD.create')}</h1>
 
-        <div className="2xl:w-1/2 flex flex-col gap-4">
+        <form className="2xl:w-1/2 flex flex-col gap-4" noValidate onSubmit={event => { event.preventDefault(); void submit() }}>
             <div className="w-full">
                 <div className="mb-2">
                     <Label htmlFor="id" value={t('manage.storefront.couponD.id')}/>
                 </div>
                 <TextInput id="id" type="text" required placeholder={t('manage.storefront.couponD.id') + '...'}
-                           color={idError ? 'failure' : undefined} disabled={editMode}
+                           color={idError ? 'failure' : undefined} disabled={editMode || loading}
                            value={id} onChange={e => setID(normalizeCouponCode(e.currentTarget.value))}
                            helperText={idError ? t('manage.storefront.couponD.idError') : null}/>
             </div>
-            <div className="w-full">
-                <div className="mb-2">
-                    <Label htmlFor="value" value={t('manage.storefront.couponD.value')}/>
-                </div>
-                <TextInput id="value" type="text" required placeholder={t('manage.storefront.couponD.value') + '...'}
-                           color={valueError ? 'failure' : undefined}
-                           value={value} onChange={e => setValue(e.currentTarget.value)}
-                           helperText={valueError ? t('manage.storefront.couponD.valueError') : null}/>
-            </div>
-            <div className="w-full">
-                <div className="mb-2">
-                    <Label htmlFor="remainingUses" value={t('manage.storefront.couponD.remainingUses')}/>
-                </div>
-                <TextInput id="remainingUses" type="text" required
-                           placeholder={t('manage.storefront.couponD.remainingUses') + '...'}
-                           color={remainingUsesError ? 'failure' : undefined}
-                           value={remainingUses} onChange={e => setRemainingUses(e.currentTarget.value)}
-                           helperText={remainingUsesError ? t('manage.storefront.couponD.remainingUsesError') : null}/>
-            </div>
-            <Button color="warning" pill disabled={loading} className="w-full" onClick={submit}
+            <EditorTextField id="value" label={t('manage.storefront.couponD.value')} value={value}
+                             onChange={setValue} error={valueError ? t('manage.storefront.couponD.valueError') : null} disabled={loading}/>
+            <EditorTextField id="remainingUses" label={t('manage.storefront.couponD.remainingUses')} value={remainingUses}
+                             onChange={setRemainingUses} error={remainingUsesError ? t('manage.storefront.couponD.remainingUsesError') : null} disabled={loading}/>
+            <Button color="warning" pill disabled={loading} className="w-full" type="submit"
                     fullSized>{t('confirm')}</Button>
-        </div>
+        </form>
     </div>
-}
-
-CouponCodeCreateClient.defaultProps = {
-    editMode: false,
-    existing: null
 }

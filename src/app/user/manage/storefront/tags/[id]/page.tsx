@@ -1,11 +1,13 @@
+import { recordId } from '@/app/lib/item-editor'
+import { notFound } from 'next/navigation'
 import { getTag, getTagAssociatedItems } from '@/app/lib/ui-manage-actions'
 import TagViewClient from '@/app/user/manage/storefront/tags/[id]/TagViewClient'
 
 export default async function TagViewBase({ params }: { params: Promise<{ id: string }> }) {
     const id = (await params).id
-    const object = await getTag(parseInt(id))
+    const object = await getTag((recordId(id) ?? notFound()))
     if (object == null) {
-        return <div>Error</div>
+        notFound()
     }
-    return <TagViewClient object={object} items={await getTagAssociatedItems(parseInt(id))}/>
+    return <TagViewClient key={object.id} object={object} items={await getTagAssociatedItems((recordId(id) ?? notFound()))}/>
 }

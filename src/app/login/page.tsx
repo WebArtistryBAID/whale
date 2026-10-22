@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { localRedirect } from '@/app/lib/security'
 
 export default async function LoginPage({ searchParams }: {
     searchParams?: Promise<{ [_: string]: string | string[] | undefined }>
@@ -8,5 +9,5 @@ export default async function LoginPage({ searchParams }: {
     if (p?.redirect == null) {
         redirect('/')
     }
-    redirect(p.redirect as string)
+    redirect(localRedirect(p.redirect))
 }

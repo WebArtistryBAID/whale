@@ -4,9 +4,9 @@ import { UserAuditLog, UserAuditLogType } from '@/generated/prisma/client'
 import { getMyUser } from '@/app/login/login-actions'
 import Decimal from 'decimal.js'
 import { getConfigValue } from '@/app/lib/settings-actions'
-import { me } from '@/app/login/login'
 import signData from '@/app/lib/wx-pay-sign'
 import { prisma } from '@/app/lib/prisma'
+import { money, positiveId } from '@/app/lib/security'
 
 const userAgent = 'Whale Cafe (Weixin Pay Client)'
 const orderBody = '白鲸咖啡馆余额充值 The Whale Café Balance Recharge'
@@ -16,9 +16,7 @@ function getTransactionNo(auditLog: UserAuditLog): string {
 }
 
 async function requireTransaction(id: number): Promise<UserAuditLog> {
-    const transaction = await prisma.userAuditLog.findUnique({
-        where: { id }
-    })
+    const transaction = await getMyTransaction(id)
     if (transaction == null) {
         throw new Error('Transaction not found')
     }
@@ -29,10 +27,14 @@ async function requireTransaction(id: number): Promise<UserAuditLog> {
 }
 
 export async function getMyTransaction(id: number): Promise<UserAuditLog | null> {
+    if (!positiveId(id)) return null
+    const user = await getMyUser()
+    if (!user) return null
     return prisma.userAuditLog.findFirst({
         where: {
             id,
-            userId: await me() ?? -1
+            userId: user.id,
+            type: UserAuditLogType.balanceTransaction
         }
     })
 }
@@ -44,7 +46,8 @@ export async function isTransactionFinished(id: number): Promise<boolean> {
 
 export async function beginTransaction(value: string): Promise<UserAuditLog | null> {
     const me = await getMyUser()
-    if (me == null) {
+    const amount = money(value, false)
+    if (me == null || amount == null) {
         return null
     }
     if (Decimal(me.balance).add(value).greaterThan(await getConfigValue('maximum-balance'))
@@ -93,6 +96,7 @@ export async function getPaymentQRCode(id: number): Promise<string | null> {
 }
 
 export async function getWeChatOAuthRedirect(id: number): Promise<string | null> {
+    await requireTransaction(id)
     if (process.env.WX_PAY_MCH_ID == null || process.env.WX_PAY_MCH_ID === '') {
         return 'https://example.com' // Development
     }
