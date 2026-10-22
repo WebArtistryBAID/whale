@@ -17,129 +17,121 @@ The ordering management platform for The Whale Café. Built with Next.js.
 
 </div>
 
-Whale manages online orders and café operations for The Whale Café at Beijing Academy. Customers can customize drinks
-and follow their order status, while staff manage the menu and fulfill orders through the administration pages.
+Project Whale is a customized ordering system for The Whale Café, a student-run coffee shop at BAID.
 
-Whale is maintained by [WebArtistry @BAID](https://github.com/WebArtistryBAID). Authentication
-uses [LinkBAID](https://github.com/WebArtistryBAID/baid-onelogin), and Weixin Pay is integrated through YunGouOS.
+Project Whale is maintained by [WebArtistry @BAID](https://github.com/WebArtistryBAID). Authentication
+uses [LinkBAID](https://github.com/WebArtistryBAID/baid-onelogin), and Weixin Pay is integrated through YunGouOS. It was
+originally developed by Lin Donglai.
 
 ## Overview
 
-* **Menu management.** Organize items into categories and associate tags. Configure prices or discounts for each item.
-  Option types group choices such as size or sweetness; individual options can change an item's price or be marked sold
-  out. Categories and items support drag reordering, as do choices within an option type.
-* **Inventory and availability.** Each item supports either a tracked stock count or a manual sold-out flag. Items can
-  also be exempt from the daily cup limit. Tracked stock is reserved when an order is created and restored when an
-  unpaid order is cancelled or expires.
-* **Ordering and fulfillment.** Customers build a cart and choose pickup or room delivery. Pickup offers morning,
-  midday, or evening. The server calculates prices from the current menu and validates the selected options before
-  accepting an order.
-* **Payments and balances.** Customers can pay through Weixin Pay or a prepaid account balance. Eligible signed-in users
-  can choose Pay Later when enabled. Staff can create on-site orders and record cash payments. Account balances can be
-  recharged through Weixin Pay.
-* **Store schedules.** Configure opening hours and preordering windows, with separate capacity limits. Staff can
-  override availability for a particular date.
-* **Staff dashboard.** View waiting orders and mark them complete. Staff can also process refunds for eligible paid
-  orders within 90 days of creation. A protected JSON endpoint exposes the waiting-order data for external displays.
-* **Customer accounts.** Signed-in customers can review their order history and balance. Points accrue when an order is
-  paid, based on its price before coupon deductions. Inbox and SMS preferences control supported notifications,
-  including pickup reminders and refund notices.
-* **Administration and reporting.** Manage account permissions and review audit logs. Sales reports include revenue and
-  order volume, with breakdowns by product or customer.
-* **Bilingual interface.** English and Simplified Chinese are supported throughout the customer and administration
-  pages. Uploaded images are converted to WebP.
-
-### How Ordering Works
-
-1. The customer selects menu items and chooses one option from each associated option type.
-2. At checkout, they choose pickup or delivery, then select a payment method. A coupon can reduce the order total to
-   zero.
-3. Whale checks the store's availability and capacity. It also verifies current stock and calculates the price using
-   database records.
-4. Creating the order reserves tracked stock and consumes the coupon use. The order starts with fulfillment status
-   `waiting` and payment status `notPaid` or `paid`.
-5. Balance payments and recorded cash payments are marked paid immediately, as are zero-total orders. Weixin payments
-   become paid after Whale verifies the payment notification. Pay Later orders remain unpaid while entering the
-   preparation queue.
-6. The waiting-order dashboard includes paid orders and unpaid Pay Later orders. Staff mark fulfillment status `done`
-   when preparation is complete, and customers can follow progress on their order page.
-
-Ordinary unpaid orders older than one hour are removed when the cleanup job runs. Pay Later orders remain available for
-settlement, and their reminder job runs separately. Both jobs require an external scheduler.
+* **Menu management.** Organize items into categories and add tags to them. Configure prices and discounts for each
+  item.
+  Add options such as size or temperature that may modify the price of each item. Reorder these items as you will. Add
+  images to each item. Exempt any item you want from the quotas.
+* **Ordering.** Customers build a cart and can choose pick-up or delivery. When choosing pick-up, the customer can
+  specify
+  a pick-up time: morning, afternoon, or evening. Customers do not need to log in to order.
+* **Automated payments.** Customers could pay with Weixin Pay, or sign up for an account to recharge and pay with their
+  balance.
+  All three forms of Weixin Pay (QR code, in-WeChat payment, redirect-to-WeChat payment) are supported. If enabled,
+  customers
+  can "Pay Later." They cannot order another cup with Pay Later before settling existing bills.
+* **Coupon codes.** Generate as many coupon codes as you like, which can reduce the amount of money customers pay for a
+  drink. Coupon codes are automatically consumed when customers use them.
+* **Customer accounts.** Customers can sign in with Seiue LMS or Feishu via LinkBAID. Signed-in customers can review
+  their order
+  history and balance. Customers also accrue points when they pay for an order.
+* **On-site ordering.** Turn on "on-site ordering mode" on staff devices. They can then help customers visiting
+  in-person order, either with cash or Weixin Pay.
+* **Staff dashboard.** A simple UI to view waiting orders and mark them complete. Easily refund orders and view their
+  payment status.
+* **Opening hours.** Manually open the store only. Or set a fixed time period everyday where live-ordering is available.
+  Or allow
+  ordering only during weekdays. Easily override opening hours for one specific day on the staff interface—they revert
+  on the next day.
+* **Quota management.** Set a fixed number of cups that the store can make in a day, and stop accepting further orders
+  when
+  it is reached.
+* **Pre-orders.** Set a "pre-order" period where the store does not make drinks but customers can still place orders.
+  Set a pre-order quota, separate from the live-ordering quota, that carries into the live-ordering quota if not
+  completely
+  consumed.
+* **Inventory management.** Each item can either have a tracked stock count, which is automatically reserved upon
+  payment. The stock count is restored if the order is cancelled or refunded. Or you can use a manual sold-out option
+  without automatic trackking.
+* **Advertisements.** Add promotion images, links, and text to the menu.
+* **Administration.** Audit logs for all website operations. Statistics reporting include analysis per gender, user,
+  categories, items, and more. Configurable reporting periods and predefined statistic breakdown.
+* **Bilingual interface.** English and Chinese are supported throughout the user interface.
 
 ## Development
 
 To run in development:
 
-1. Install Node.js 24 or later and npm.
-2. Copy `.env.example` to `.env`, then run `npm install`.
-3. Create a PostgreSQL database and set `DATABASE_URI` in `.env`.
-4. Set `HOST=http://localhost:3000`, `UPLOAD_PATH=public/uploads`, and `UPLOAD_SERVE_PATH=uploads`.
-5. Configure a local or approved LinkBAID application with `scope=basic+phone+sms`. Register `${HOST}/login/authorize`
-   as its OAuth callback, and fill the `ONELOGIN_*` variables.
-6. Generate `JWT_SECRET` with `openssl rand -hex 32`. Fill the remaining environment variables for the integrations you
-   plan to use.
-7. Apply the migrations and generate the client:
+1. Install Node.js and npm.
+2. Copy `.env.example` to `.env`.
+3. Run `npm install`.
+4. Set up a PostgreSQL database and set `DATABASE_URI` in `.env`.
+5. Set `HOST=http://localhost:3000`, `UPLOAD_PATH=public/uploads`, and `UPLOAD_SERVE_PATH=uploads`.
+6. Apply Prisma migrations and generate the client:
 
    ```sh
-   npx prisma migrate deploy
-   npx prisma generate
+   prisma migrate deploy
+   prisma generate
    ```
+7. Run a development server of [LinkBAID](https://github.com/WebArtistryBAID/baid-onelogin) to support authentication or
+   use the official LinkBAID server by informing your school point of contact. When you create a LinkBAID application,
+   you must enable the scopes `basic`, `phone`, and `sms`, and register `${HOST}/login/authorize` as an OAuth2 redirect
+   URI.
+8. Fill the remaining environment variables.
+9. Run `npm run dev` to start the development server.
 
-8. Run `npm run dev` and open [localhost:3000](http://localhost:3000).
-
-Sign in through LinkBAID to create your user record. Grant the first staff account the `admin.manage` permission
-directly in the database; that account can then manage permissions through `/user/manage/users`.
-
-Leaving the Weixin merchant configuration empty provides placeholder payment responses for development. Actual payments
-and balance recharges require the merchant configuration and reachable callback endpoints.
+In development mode, Weixin Pay will not work, because you will not be able to set up a valid merchant ID. Use "Pay
+Later" for debugging instead.
 
 ### Database Migrations
 
-The initial schema is tracked in `prisma/migrations`. The generated Prisma client belongs in `src/generated` and is
-ignored by Git.
-
-* After pulling existing migrations, run `npx prisma migrate deploy`, followed by `npx prisma generate`.
-* To change the schema locally, edit `prisma/schema.prisma` and run `npx prisma migrate dev --name describe_change`.
-  Regenerate the client with `npx prisma generate`, and commit the schema together with its migration files.
-* For production updates, run `npx prisma migrate deploy`, then `npx prisma generate`, before building and restarting
-  Whale.
+* After pulling someone else's migrations, run `prisma migrate deploy`, then `prisma generate`.
+* To create your own migration, edit `prisma/schema.prisma` and run `prisma migrate dev --name describe_change`. Commit
+  the schema and the entire `prisma/migrations/` directory together.
+* On production, run `prisma migrate deploy`, then `prisma generate` before building and restarting Project Whale.
+  **Monitor the messages carefully, do NOT reset the database!**
 
 ## Production
 
 To run in production:
 
-1. Install Node.js 24 or later and npm, then copy `.env.example` to `.env`.
-2. Configure PostgreSQL and set `DATABASE_URI`. Set `HOST` to the public HTTPS origin, such as
-   `https://cafe.example.com`.
-3. Configure the approved LinkBAID application and its OAuth callback. Generate separate random values for `JWT_SECRET`
-   and `CRON_KEY`.
-4. Set `UPLOAD_PATH` to a persistent, writable directory. Set `UPLOAD_SERVE_PATH` to the corresponding public URL
-   segment, such as `uploads`.
-5. Configure the YunGouOS Weixin merchant credentials. Keep the payment callback routes reachable at
-   `${HOST}/order/checkout/wechat/notify` and `${HOST}/balance/notify`.
-6. Install dependencies and prepare the application:
-
-   ```sh
-   npm ci
-   npx prisma migrate deploy
-   npx prisma generate
-   npm run build
-   ```
-
-7. Start Whale with a process manager, for example:
-
-   ```sh
-   pm2 start npm --name whale -- run start
-   pm2 save
-   pm2 startup
-   ```
-
-8. Configure HTTPS through a reverse proxy. `npm run start` serves Whale on port `52323`.
-9. Configure the scheduled jobs below. Sign in and grant the initial staff account `admin.manage` if this is a fresh
-   database.
-
-An example Nginx configuration for the application and uploaded images:
+1. Install Node.js and npm.
+2. Copy `.env.example` to `.env`.
+3. Run `npm install`.
+4. Set up a PostgreSQL database and set `DATABASE_URI` in `.env`.
+5. For a fresh database, run `prisma migrate deploy`.
+6. Run `prisma generate`.
+7. Gain access to the production LinkBAID server.
+    * **LinkBAID server**: You must create a LinkBAID application with the following scopes: `basic`, `phone`, and
+      `sms`. This app must be approved before continuing.
+8. Gain access to the YunGouOS Weixin Pay merchant account.
+    * You must have a domain name registered with a Chinese ISP and with ICP registration completed. You must also have
+      a server in mainland China that is tied to this domain name.
+    * You must run the website first by following the remaining steps before you can create a YunGouOS merchant account.
+    * Creating this account requires a Chinese citizen with a national ID and a Chinese bank account. You must choose
+      "渠道商户" for the account type.
+    * After creating the account, you must contact YunGouOS staff to complete a video verification before you can use
+      the account.
+    * After verification, you must contact YunGouOS staff again to enable H5 payments for the account.
+    * You must add the domain name you are running on to the H5 payment callback authorized domain list.
+    * Congratulations, after taking around 1-2 weeks on this you will finally be able to access Weixin Pay without
+      having a company registered.
+9. Set up a cron task that triggers the scheduled jobs below. The cron task must send GET requests with
+   `key=${CRON_KEY}`.
+10. Fill the remaining environmental variables.
+11. Run `npm run build` to build the production server.
+12. Using `pm2`, run `pm2 start npm --name whale -- run start` to start the production server. You can also use
+    `pm2 save` to save the process list and `pm2 startup` to configure it to start on boot.
+13. Whale runs on port 52323 by default.
+14. Create a reverse proxy with Nginx as appropriate such that Nginx handles HTTPS and serves static files. An example
+    Nginx configuration is shown below. HTTPS can usually be configured with Let's Encrypt.
 
 ```nginx
 server {
@@ -151,13 +143,14 @@ server {
     client_max_body_size 11M;
 
     location ^~ /uploads/ {
-        alias /srv/whale/uploads/;
+        alias /home/web/whale/uploads/;  # By setting up Nginx to serve files from /uploads/, we must set `UPLOAD_SERVE_PATH` to `/uploads` (users access uploaded files on `https://.../uploads/...`) and `UPLOAD_PATH` to `uploads` (uploaded files are saved to `/home/web/whale/uploads/`)
         autoindex off;
         add_header X-Content-Type-Options nosniff always;
+        try_files $uri =404;
     }
 
     location / {
-        proxy_pass http://127.0.0.1:52323;
+        proxy_pass http://localhost:52323;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -168,107 +161,41 @@ server {
 }
 ```
 
-For this configuration, set `UPLOAD_PATH=/srv/whale/uploads` and `UPLOAD_SERVE_PATH=uploads`. The upload endpoint
-accepts images up to 10 MiB; the proxy allowance also covers multipart overhead.
+15. Log in with LinkBAID.
+16. Configure your account in the database directly: add permission `admin.manage`.
+17. Completed! You can now add the products and configure store opening times.
 
-### Scheduled Jobs
-
-Configure an external scheduler to send GET requests with `key=${CRON_KEY}`. The suggested schedules are:
+### Cron Jobs
 
 | Endpoint           | Schedule         | Action                                                                           |
 |--------------------|------------------|----------------------------------------------------------------------------------|
 | `/order/prune`     | Every 30 minutes | Remove ordinary unpaid orders older than one hour and restore tracked inventory. |
 | `/balance/prune`   | Every 30 minutes | Remove unfinished balance recharge records older than one hour.                  |
-| `/order/pay-later` | Daily at 20:00   | Send reminders for eligible outstanding Pay Later orders.                        |
-
-For example, a scheduler can invoke:
-
-```sh
-curl -fsS "${HOST}/order/prune?key=${CRON_KEY}"
-```
-
-Configure the application server and scheduler to use the café's business timezone. Opening schedules and business-day
-calculations use the application server's local time.
+| `/order/pay-later` | Daily at 20:00   | Send reminders for outstanding Pay Later orders.                                 |
 
 ## Environment Variables
 
-| Name                     | Description                                                                                                             |
-|--------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| `DATABASE_URI`           | PostgreSQL connection URI. The database must exist before applying migrations.                                          |
-| `HOST`                   | Public application origin, with no trailing slash. Use `http://localhost:3000` in development.                          |
-| `UPLOAD_PATH`            | Writable directory for uploaded images. Use `public/uploads` in development or a persistent directory in production.    |
-| `UPLOAD_SERVE_PATH`      | Public URL segment for uploaded images, with no surrounding slashes. Use `uploads` for URLs beginning with `/uploads/`. |
-| `ONELOGIN_HOST`          | LinkBAID server origin, with no trailing slash.                                                                         |
-| `ONELOGIN_CLIENT_ID`     | LinkBAID application ID with approved access to `scope=basic+phone+sms`.                                                |
-| `ONELOGIN_CLIENT_SECRET` | LinkBAID application secret.                                                                                            |
-| `JWT_SECRET`             | Secret used to sign login sessions and guest order access. Generate with `openssl rand -hex 32`.                        |
-| `WX_PAY_MCH_ID`          | YunGouOS Weixin Pay merchant ID.                                                                                        |
-| `WX_PAY_MCH_KEY`         | Payment signing key for that merchant.                                                                                  |
-| `CRON_KEY`               | Secret required by the scheduled-job endpoints. Generate with `openssl rand -hex 32`.                                   |
-| `WAITING_ORDERS_API_KEY` | Secret required to access the waiting-orders JSON endpoint.                                                             |
-| `BOTTOM_TEXT`            | Optional text displayed in the footer's registration link.                                                              |
+| Name                     | Description                                                                                                                                      |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `DATABASE_URI`           | The database URI to use. PostgreSQL is required.                                                                                                 |
+| `HOST`                   | The absolute URI where Whale is hosted. No trailing slashes. For example, `http://localhost:3000` in development.                                |
+| `UPLOAD_PATH`            | The directory where uploaded files are stored. In development, use `public/uploads` to have the Next.js development server serve uploaded files. |
+| `UPLOAD_SERVE_PATH`      | The relative URI where uploaded files are served. In development, this is `uploads`.                                                             |
+| `ONELOGIN_HOST`          | The URI where LinkBAID is hosted. No trailing slashes.                                                                                           |
+| `ONELOGIN_CLIENT_ID`     | LinkBAID client ID.                                                                                                                              |
+| `ONELOGIN_CLIENT_SECRET` | LinkBAID client secret.                                                                                                                          |
+| `JWT_SECRET`             | The JWT secret key to use. You can generate one with `openssl rand -hex 32`.                                                                     |
+| `WX_PAY_MCH_ID`          | YunGouOS Weixin Pay merchant ID.                                                                                                                 |
+| `WX_PAY_MCH_KEY`         | YunGouOS Weixin Pay signing key.                                                                                                                 |
+| `CRON_KEY`               | Secret key required by cron-only API endpoints. Generate one with `openssl rand -hex 32`.                                                        |
+| `BOTTOM_TEXT`            | ICP registration number, if it is necessary to display.                                                                                          |
 
-## Settings
-
-Staff can edit these values at `/user/manage/settings`. The defaults below are created automatically when settings are
-first loaded.
-
-| Key                              | Default      | Description                                                       |
-|----------------------------------|--------------|-------------------------------------------------------------------|
-| `enable-scheduled-availability`  | `true`       | Apply the configured opening schedule.                            |
-| `weekdays-only`                  | `true`       | Limit scheduled business days to Monday through Friday.           |
-| `open-time`                      | `10:00`      | Opening time in the application server's timezone.                |
-| `close-time`                     | `15:00`      | Closing time in the application server's timezone.                |
-| `pre-order-start-time`           | `10:00`      | Beginning of the preorder window for a business day.              |
-| `store-open`                     | `true`       | Manual open/closed state when scheduled availability is disabled. |
-| `availability-override-date`     | `0000-00-00` | Date for a manual availability override, using `YYYY-MM-DD`.      |
-| `availability-override-value`    | `false`      | Open or closed state for the override date.                       |
-| `maximum-cups-per-order`         | `2`          | Maximum total item quantity in one order.                         |
-| `maximum-cups-per-day`           | `14`         | Capacity allocated to orders placed during the live window.       |
-| `maximum-pre-order-cups-per-day` | `0`          | Capacity allocated to preorders for a business day.               |
-| `maximum-balance`                | `500`        | Balance ceiling checked when starting a recharge, in yuan.        |
-| `balance-recharge-minimum`       | `20`         | Minimum recharge amount, in yuan.                                 |
-| `allow-delivery`                 | `true`       | Enable delivery to a room.                                        |
-| `allow-pay-later`                | `true`       | Enable Pay Later for eligible signed-in users.                    |
-
-Preordering requires a capacity greater than zero and a window before the target business day's opening time. If
-`pre-order-start-time` falls at or after `open-time`, the window begins on the previous business day; weekday scheduling
-can therefore extend a window across a weekend.
-
-Preorders consume their own capacity allocation. At opening, unused preorder capacity is added to that day's live
-capacity. Each business day has its own allocation, and products marked exempt contribute zero toward the daily limit.
-Unpaid orders also reserve daily capacity until they are deleted. A manual closure for the current date closes ordering,
-including preordering during that override.
-
-## Waiting Orders API
-
-`GET /api/waiting-orders` returns the same orders as the staff waiting-order dashboard: paid orders awaiting fulfillment
-and unpaid Pay Later orders awaiting fulfillment. Results are ordered by creation time, newest first.
-
-Provide `WAITING_ORDERS_API_KEY` through the `x-api-key` header or an `Authorization: Bearer` header:
-
-```sh
-curl -fsS \
-  -H "x-api-key: ${WAITING_ORDERS_API_KEY}" \
-  "${HOST}/api/waiting-orders"
-```
-
-The response is an array of orders. Each includes `items` and `user`; each ordered item includes its `itemType` and
-`appliedOptions`. The API key grants access to customer data in these records, so keep it within trusted staff displays
-or backend integrations.
 
 ## Contribution
 
-Contributions are welcome through pull requests. Run `npm run lint` and `npx tsc --noEmit` before submitting changes,
-and include migration files whenever the database schema changes.
+Contributions are welcome through pull requests!
 
 ## License
 
-Copyright © 2026 Team WebArtistry. Whale is licensed under
+Copyright © 2026 Team WebArtistry. Project Whale is licensed under
 the [GNU General Public License, version 3 or later](https://www.gnu.org/licenses/gpl-3.0.html).
-
-<br>
-
-<div align="center">
-  <img src="public/assets/logo.png" alt="" width="40">
-</div>
