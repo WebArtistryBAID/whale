@@ -19,7 +19,7 @@ import Decimal from 'decimal.js'
 import { getConfigValueAsBoolean, getConfigValueAsNumber, getConfigValues } from '@/app/lib/settings-actions'
 import { prisma } from '@/app/lib/prisma'
 import { canAccessOrder, grantGuestOrder } from '@/app/lib/order-access'
-import { positiveId, money } from '@/app/lib/security'
+import { money, positiveId } from '@/app/lib/security'
 import { countsTowardLimit, getAvailableInventory, isItemSoldOut } from '@/app/lib/item-availability'
 import { isValidPickUpTime, PickUpTimeOption } from '@/app/lib/pick-up-times'
 
@@ -777,7 +777,7 @@ export async function createOrder(items: OrderedItemTemplate[],
     try {
         const order = await prisma.$transaction(async tx => {
             // Serialize order creation so availability limits cover concurrent checkouts.
-            await tx.$queryRaw`SELECT pg_advisory_xact_lock(78236401)`
+            await tx.$executeRaw`SELECT pg_advisory_xact_lock(78236401)`
             const availability = await getOrderingAvailability()
             if (availability.unavailableReason === 'store-closed') throw new Error('Store closed')
             if (deliveryRoom != null && !await getConfigValueAsBoolean('allow-delivery')) throw new Error('Delivery disabled')
