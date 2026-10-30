@@ -595,7 +595,6 @@ export async function setOrderCheckoutOptions(id: number, paymentMethod: Payment
     if (order.type === OrderType.pickUp && !isValidPickUpTime(pickUpTime)) return false
     const result = await prisma.order.updateMany({
         where: { id, paymentStatus: PaymentStatus.notPaid },
-        // The payment method is recorded when payment succeeds. This preserves shared payment links and deferred payments.
         data: { pickUpTime: order.type === OrderType.pickUp ? pickUpTime : null }
     })
     if (result.count === 1 && order.paymentMethod === PaymentMethod.payForMe) await grantGuestOrder(id)
@@ -776,7 +775,7 @@ export async function createOrder(items: OrderedItemTemplate[],
     const normalizedCoupon = coupon == null ? null : normalizeCouponCode(coupon)
     try {
         const order = await prisma.$transaction(async tx => {
-            // Serialize order creation so availability limits cover concurrent checkouts.
+            // Don't want concurrent checkouts!
             await tx.$executeRaw`SELECT pg_advisory_xact_lock(78236401)`
             const availability = await getOrderingAvailability()
             if (availability.unavailableReason === 'store-closed') throw new Error('Store closed')

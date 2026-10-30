@@ -160,7 +160,7 @@ export async function refundOrder(id: number): Promise<boolean> {
         const order = await prisma.$transaction(async tx => {
             const order = await tx.order.findUnique({ where: { id }, include: { user: true, items: { include: { itemType: true, appliedOptions: true } } } })
             if (!order || order.paymentStatus !== PaymentStatus.paid || Date.now() - order.createdAt.getTime() > 90 * 86400000) return null
-            // Historical provider payments remain available for manual reconciliation.
+            // We don't have Stripe anymore!
             if (order.stripeSession || order.stripePaymentIntent) return null
             const balancePayment = order.paymentMethod === PaymentMethod.balance || (order.paymentMethod === PaymentMethod.payLater && !order.wxPayId)
             const onlinePayment = order.paymentMethod === PaymentMethod.wxPay || (order.paymentMethod === PaymentMethod.payLater && !!order.wxPayId)

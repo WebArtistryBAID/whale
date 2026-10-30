@@ -14,7 +14,6 @@ export function readPaymentNotification(body: FormData, kind: 'ORDER' | 'BALANCE
     const signature = body.get('sign')
     if (typeof signature !== 'string' || !/^[A-Fa-f0-9]{32}$/.test(signature) || body.getAll('sign').length !== 1) return null
     if (!timingSafeEqual(Buffer.from(signData(data), 'hex'), Buffer.from(signature, 'hex'))) return null
-    // YunGouOS documents code 1 as a successful payment, with money expressed in yuan.
     if (data.code !== '1' || data.mchId !== process.env.WX_PAY_MCH_ID || !money(data.money, false)) return null
     const match = new RegExp(`^([1-9]\\d*)-${kind}([1-9]\\d*)$`).exec(data.outTradeNo)
     if (!match || !Number.isSafeInteger(Number(match[1])) || !Number.isSafeInteger(Number(match[2]))) return null
